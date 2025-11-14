@@ -7,7 +7,7 @@ Et webbaseret værktøj til at nedbryde projekter, beregne tidsforbrug og visual
 
 
 ## Teknologier
-* Backend: Java 21, Spring Boot 3.5.6
+* Backend: Java 21, Spring Boot 3.5.7
 * Frontend: Thymeleaf, HTML, CSS
 * Database: MySQL 8.0
 * Build Tool: Maven
