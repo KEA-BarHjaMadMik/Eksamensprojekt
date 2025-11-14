@@ -39,4 +39,6 @@ Et webbaseret værktøj til at nedbryde projekter, beregne tidsforbrug og visual
 
 ## Test
 
+## Contributing
+[Se CONTRIBUTING.md](docs/CONTRIBUTING.md)
 
