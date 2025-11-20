@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Log ind</title>
+    <link th:href="@{/css/pico.min.css}" rel="stylesheet">
+    <link th:href="@{/css/main.css}" rel="stylesheet">
+</head>
+<body>
+<div th:replace="~{fragments/header :: header}">...</div>
+
+<main>
+    <div>
+        <h1>Velkommen tilbage</h1>
+    </div>
+
+    <form th:action="@{/login}" method="post">
+        <div th:if="${wrongCredentials}" class="error">🚫 Forkert E-mail eller password</div>
+
+        <div>
+            <label for="email">E-mail</label>
+            <input id="email" type="email" name="email" placeholder="Indtast din e-mail" autofocus required/>
+        </div>
+
+        <div>
+            <label for="pw">Password</label>
+            <input id="pw" type="password" name="pw" placeholder="Indtast dit password" required>
+        </div>
+
+        <button type="submit">Log ind</button>
+    </form>
+
+    <div>
+        <p>Har du ikke en konto? <a th:href="@{/register_user}">Opret en gratis konto</a></p>
+    </div>
+</main>
+
+<div th:replace="~{fragments/footer :: footer}">...</div>
+</body>
+</html>

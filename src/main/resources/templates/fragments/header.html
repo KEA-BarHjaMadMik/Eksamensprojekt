@@ -7,7 +7,14 @@
 <body>
 <div th:fragment="header">
     <header>
+        <div th:unless="${isLoggedIn}">
+            <a th:href="@{/login}">Log på</a>
+        </div>
 
+        <div th:if="${isLoggedIn}">
+            <p>Konto: <a th:href="@{/user_admin}"><span th:text="${userEmail}">User</span></a></p>
+            <a th:href="@{/logout}">Log ud</a>
+        </div>
     </header>
 </div>
 </body>

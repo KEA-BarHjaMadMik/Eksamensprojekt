@@ -1,7 +1,6 @@
 package com.example.eksamensprojekt.repository;
 
 import com.example.eksamensprojekt.model.User;
-import org.springframework.dao.DataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Repository;
@@ -41,11 +40,16 @@ public class UserRepository {
     }
 
     public boolean registerUser(User user) {
-        String sql = "INSERT INTO user_account (username, password, email) VALUES (?, ?, ?)";
+        String sql = "INSERT INTO user_account (email, password_hash, name, title, external) VALUES(?,?,?,?,?)";
 
-        // Execute the insert and get the number of affected rows
-        int rowsAffected = jdbcTemplate.update(sql, user.getUserID(), user.getPasswordHash(), user.getEmail());
-        // Return true only if exactly one row was inserted
+        int rowsAffected = jdbcTemplate.update(
+                sql,
+                user.getEmail(),
+                user.getPasswordHash(),
+                user.getName(),
+                user.getTitle(),
+                user.isExternal()
+        );
         return rowsAffected == 1;
     }
 
@@ -64,7 +68,7 @@ public class UserRepository {
     }
 
     public boolean changePassword(int userID, String passwordHash) {
-        String sql = "UPDATE user_account SET password = ? WHERE user_id = ?";
+        String sql = "UPDATE user_account SET password_hash = ? WHERE user_id = ?";
 
         int rowsAffected = jdbcTemplate.update(sql, passwordHash, userID);
         return rowsAffected == 1;

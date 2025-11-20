@@ -38,6 +38,7 @@ public class UserController {
         if (user != null) {
             // Login successful — store the username in the session
             session.setAttribute("userID", user.getUserID());
+            session.setAttribute("userEmail", user.getEmail());
             // redirect
             return "redirect:/";
         }

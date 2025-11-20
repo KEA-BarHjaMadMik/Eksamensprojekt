@@ -36,7 +36,9 @@ public class UserService {
     }
 
     public boolean registerUser(User user) {
-        user.setPasswordHash(PasswordUtil.hashPassword(user.getPasswordHash()));
+        String plainPassword = user.getPasswordHash();
+        String passwordHash = PasswordUtil.hashPassword(plainPassword);
+        user.setPasswordHash(passwordHash);
         return repository.registerUser(user);
     }
 
