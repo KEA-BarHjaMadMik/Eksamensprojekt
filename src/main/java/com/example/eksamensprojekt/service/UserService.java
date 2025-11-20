@@ -3,6 +3,7 @@ package com.example.eksamensprojekt.service;
 import com.example.eksamensprojekt.model.User;
 import com.example.eksamensprojekt.repository.UserRepository;
 import com.example.eksamensprojekt.utils.FormatUtil;
+import com.example.eksamensprojekt.utils.PasswordUtil;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -18,7 +19,7 @@ public class UserService {
         User user = repository.getUserByEmail(email);
 
         // Check if user exists and password matches
-        if (user != null && user.getPasswordHash().equals(pw)) {
+        if (user != null && PasswordUtil.checkPassword(pw, user.getPasswordHash())) {
             // Authentication successful — return the full User object
             return user;
         }
@@ -36,6 +37,7 @@ public class UserService {
     }
 
     public boolean registerUser(User user) {
+        user.setPasswordHash(PasswordUtil.hashPassword(user.getPasswordHash()));
         return repository.registerUser(user);
     }
 
@@ -44,7 +46,8 @@ public class UserService {
     }
 
     public boolean changePassword(int userID, String newPassword) {
-        return repository.changePassword(userID, newPassword);
+        String passwordHash = PasswordUtil.hashPassword(newPassword);
+        return repository.changePassword(userID, passwordHash);
     }
 
     public boolean deleteUser(int userID) {
