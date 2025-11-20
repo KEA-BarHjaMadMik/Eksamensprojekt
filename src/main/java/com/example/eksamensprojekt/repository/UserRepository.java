@@ -29,7 +29,7 @@ public class UserRepository {
 
         RowMapper<User> rowMapper = getUserRowMapper();
 
-        List<User> results = jdbcTemplate.query(sql, rowMapper, userID);
+        List<User> results = jdbcTemplate.query(sql, rowMapper,userID);
         return results.isEmpty() ? null : results.getFirst();
     }
 

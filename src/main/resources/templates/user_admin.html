@@ -26,6 +26,8 @@
             <div th:if="${updateFailure}">🚫 Noget gik galt. Prøv igen.</div>
 
             <form method="post" th:action="@{/update_user}" th:object="${user}">
+                <input type="hidden" th:field="*{userID}">
+
                 <div>
                     <label for="email">E-mail</label>
                     <input id="email" type="email" th:field="*{email}" required/>
@@ -43,7 +45,7 @@
 
                 <div>
                     <label for="title">Titel:</label>
-                    <input id="title" type="text" th:field="*{name}"/>
+                    <input id="title" type="text" th:field="*{title}"/>
 
                     <div th:if="${#fields.hasErrors('title')}" th:errors="*{title}"></div>
                 </div>
