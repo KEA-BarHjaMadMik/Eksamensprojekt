@@ -16,7 +16,7 @@ public class UserRepository {
     }
 
     public User getUserByEmail(String email) {
-        String sql = "SELECT * FROM user_account WHERE email = ?";
+        String sql = "SELECT user_id, email, password_hash, name, title, external FROM user_account WHERE email = ?";
 
         RowMapper<User> rowMapper = getUserRowMapper();
 
@@ -25,7 +25,7 @@ public class UserRepository {
     }
 
     public User getUserByUserID(int userID) {
-        String sql = "SELECT * FROM user_account WHERE user_id = ?";
+        String sql = "SELECT user_id, email, password_hash, name, title, external FROM user_account WHERE user_id = ?";
 
         RowMapper<User> rowMapper = getUserRowMapper();
 
