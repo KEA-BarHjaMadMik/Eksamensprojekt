@@ -2,7 +2,6 @@ package com.example.eksamensprojekt.service;
 
 import com.example.eksamensprojekt.model.User;
 import com.example.eksamensprojekt.repository.UserRepository;
-import com.example.eksamensprojekt.utils.FormatUtil;
 import com.example.eksamensprojekt.utils.PasswordUtil;
 import org.springframework.stereotype.Service;
 
