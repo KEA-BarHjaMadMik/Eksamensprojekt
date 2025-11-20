@@ -29,7 +29,7 @@ public class UserRepository {
 
         RowMapper<User> rowMapper = getUserRowMapper();
 
-        List<User> results = jdbcTemplate.query(sql, rowMapper,userID);
+        List<User> results = jdbcTemplate.query(sql, rowMapper, userID);
         return results.isEmpty() ? null : results.getFirst();
     }
 
@@ -39,10 +39,10 @@ public class UserRepository {
         return count != null && count > 0;
     }
 
-    public boolean registerUser(User user) {
+    public void registerUser(User user) {
         String sql = "INSERT INTO user_account (email, password_hash, name, title, external) VALUES(?,?,?,?,?)";
 
-        int rowsAffected = jdbcTemplate.update(
+        jdbcTemplate.update(
                 sql,
                 user.getEmail(),
                 user.getPasswordHash(),
@@ -50,13 +50,12 @@ public class UserRepository {
                 user.getTitle(),
                 user.isExternal()
         );
-        return rowsAffected == 1;
     }
 
-    public boolean updateUser(User updatedUser) {
+    public int updateUser(User updatedUser) {
         String sql = "UPDATE user_account SET email = ?, name = ?, title = ?, external = ? WHERE user_id = ?";
 
-        int rowsAffected = jdbcTemplate.update(
+        return jdbcTemplate.update(
                 sql,
                 updatedUser.getEmail(),
                 updatedUser.getName(),
@@ -64,21 +63,18 @@ public class UserRepository {
                 updatedUser.isExternal(),
                 updatedUser.getUserID()
         );
-        return rowsAffected == 1;
     }
 
-    public boolean changePassword(int userID, String passwordHash) {
+    public int changePassword(int userID, String passwordHash) {
         String sql = "UPDATE user_account SET password_hash = ? WHERE user_id = ?";
 
-        int rowsAffected = jdbcTemplate.update(sql, passwordHash, userID);
-        return rowsAffected == 1;
+        return jdbcTemplate.update(sql, passwordHash, userID);
     }
 
-    public boolean deleteUser(int userID) {
+    public int deleteUser(int userID) {
         String sql = "DELETE FROM user_account WHERE user_id = ?";
 
-        int rowsAffected = jdbcTemplate.update(sql, userID);
-        return rowsAffected == 1;
+        return jdbcTemplate.update(sql, userID);
     }
 
     private RowMapper<User> getUserRowMapper() {

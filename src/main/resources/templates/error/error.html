@@ -1,0 +1,16 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title th:text="${status + ' - ' + error}">Error</title>
+    <link th:href="@{/css/pico.min.css}" rel="stylesheet">
+    <link th:href="@{/css/main.css}" rel="stylesheet">
+</head>
+<body>
+<div>
+    <h1 th:text="${status + ' – ' + error}">Error</h1>
+    <p th:text="${message}">Something went wrong.</p>
+    <a th:href="@{/}">Back</a>
+</div>
+</body>
+</html>

@@ -1,0 +1,16 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>500 - Server Error</title>
+    <link th:href="@{/css/pico.min.css}" rel="stylesheet">
+    <link th:href="@{/css/main.css}" rel="stylesheet">
+</head>
+<body>
+<div>
+    <h1>500 – Internal Server Error</h1>
+    <p th:text="${message}">An unexpected error occurred. Please try again later.</p>
+    <a th:href="@{/}">Back to front page</a>
+</div>
+</body>
+</html>

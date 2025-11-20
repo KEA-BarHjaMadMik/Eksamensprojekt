@@ -96,13 +96,9 @@ public class UserController {
             return "user_registration_form";
         }
 
-        // Proceed with saving the username
-        if (service.registerUser(newUser)) {
-            return "redirect:/login";
-        } else {
-            model.addAttribute("registrationFailure", true);
-            return "user_registration_form";
-        }
+        // Proceed with saving the user
+        service.registerUser(newUser);
+        return "redirect:/login";
     }
 
     @GetMapping("/user_admin")
