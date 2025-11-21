@@ -9,7 +9,6 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
-import java.util.List;
 
 @Controller
 @RequestMapping("projects")
@@ -21,7 +20,7 @@ public class ProjectController {
     }
 
     @GetMapping("/project/{projectID}")
-    public String showProject(@PathVariable("projectID") int projectID, HttpSession session, Model model){
+    public String showProject(@PathVariable("projectID") int projectID, HttpSession session, Model model) {
         if (!SessionUtil.isLoggedIn(session)) return "redirect:/login";
 
         Project project = service.getProject(projectID);
@@ -54,12 +53,9 @@ public class ProjectController {
         } else {
             return "redirect:/" + newProject.getProjectId();
         }
-
     }
 
-
     //Helper methods
-
     private int setProjectOwner(HttpSession session){
         return (int) session.getAttribute("userID");
     }

@@ -1,6 +1,7 @@
 package com.example.eksamensprojekt.service;
 
 import com.example.eksamensprojekt.exceptions.ProjectNotFoundException;
+import com.example.eksamensprojekt.exceptions.DatabaseOperationException;
 import com.example.eksamensprojekt.model.Project;
 import com.example.eksamensprojekt.model.Task;
 import com.example.eksamensprojekt.repository.ProjectRepository;
@@ -20,11 +21,11 @@ public class ProjectService {
         this.repository = repository;
     }
 
-    public void createProject(Project project){
+    public void createProject(Project project) {
         try {
 
             repository.createProject(project);
-        } catch (DataAccessException e){
+        } catch (DataAccessException e) {
             throw new DatabaseOperationException("Failed to create new project", e);
         }
     }

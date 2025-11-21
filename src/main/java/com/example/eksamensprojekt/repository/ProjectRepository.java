@@ -3,14 +3,8 @@ package com.example.eksamensprojekt.repository;
 import com.example.eksamensprojekt.model.Project;
 import com.example.eksamensprojekt.model.Task;
 import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.jdbc.support.GeneratedKeyHolder;
-import org.springframework.jdbc.support.KeyHolder;
+import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Repository;
-
-import java.sql.Date;
-import java.sql.PreparedStatement;
-import java.sql.Types;
-
 import java.util.ArrayList;
 import java.util.List;
 
@@ -22,7 +16,7 @@ public class ProjectRepository {
         this.jdbcTemplate = jdbcTemplate;
     }
 
-    public void createProject(Project project){
+    public void createProject(Project project) {
         String sql = "INSERT INTO project (owner_id, parent_project_id, title, description, start_date, end_date) VALUES (?,?,?,?,?,?)";
 
         jdbcTemplate.update(
