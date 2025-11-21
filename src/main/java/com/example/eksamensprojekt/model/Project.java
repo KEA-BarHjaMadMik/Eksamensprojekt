@@ -5,6 +5,7 @@ import java.util.List;
 
 public class Project {
     private int projectId;
+    private int ownerID;
     private int parentProjectId;
     private String title;
     private String description;
@@ -15,8 +16,8 @@ public class Project {
 
     public Project(){}
 
-
     public Project(int projectId,
+                   int ownerID,
                    int parentProjectId,
                    String title,
                    String description,
@@ -32,6 +33,7 @@ public class Project {
         this.endDate = endDate;
         this.subProjects = subProjects;
         this.tasks = tasks;
+        this.ownerID = ownerID;
     }
 
     public int getProjectId() {
@@ -40,6 +42,14 @@ public class Project {
 
     public void setProjectId(int projectId) {
         this.projectId = projectId;
+    }
+
+    public int getOwnerID() {
+        return ownerID;
+    }
+
+    public void setOwnerID(int ownerID) {
+        this.ownerID = ownerID;
     }
 
     public int getParentProjectId() {
@@ -97,4 +107,5 @@ public class Project {
     public void setDescription(String description) {
         this.description = description;
     }
+
 }
