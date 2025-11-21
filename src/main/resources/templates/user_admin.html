@@ -3,13 +3,15 @@
 <head>
     <meta charset="UTF-8">
     <title>Title</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="color-scheme" content="light dark">
     <link th:href="@{/css/pico.min.css}" rel="stylesheet">
     <link th:href="@{/css/main.css}" rel="stylesheet">
 </head>
 <body>
 <div th:replace="~{fragments/header :: header}">...</div>
 
-<main>
+<main class="container-fluid">
     <div>
         <div>
             <h1>Kontoindstillinger</h1>
@@ -68,7 +70,7 @@
                 <h2>🔒 Sikkerhed</h2>
                 <p>Administrer din kontosikkerhed</p>
             </div>
-            <a th:href="@{/change_password}">Skift password</a>
+            <a role="button" th:href="@{/change_password}">Skift password</a>
         </section>
 
         <!-- Danger Zone -->
