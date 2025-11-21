@@ -10,11 +10,21 @@ public class User {
 
     @Email(message = "Ugyldig e-mailadresse")
     @NotBlank(message = "E-mail må ikke være tom")
+    @Size(max = 254, message = "E-mail kan ikke være mere end 254 tegn")
     private String email;
 
+    @NotBlank(message = "Password må ikke være tom")
+    @Size(max = 255)
     private String passwordHash;
+
+
+    @NotBlank(message = "Navn må ikke være tom")
+    @Size(max = 100, message = "Navn kan ikke være mere end 100 tegn")
     private String name;
+
+    @Size(max = 100, message = "Navn kan ikke være mere end 100 tegn")
     private String title;
+
     private boolean external;
 
 
