@@ -78,7 +78,7 @@ public class ProjectRepository {
                     COALESCE(SUM(te.hours_worked), 0) AS actual_hours,
                     ts.status_name
                 FROM task t
-                JOIN time_entry te ON t.task_id = te.task_id
+                LEFT JOIN time_entry te ON t.task_id = te.task_id
                 JOIN task_status ts ON t.status_id = ts.status_id
                 WHERE t.project_id = ? AND t.parent_task_id IS NULL
                 GROUP BY t.task_id
@@ -101,7 +101,7 @@ public class ProjectRepository {
                     COALESCE(SUM(te.hours_worked), 0) AS actual_hours,
                     ts.status_name
                 FROM task t
-                JOIN time_entry te ON t.task_id = te.task_id
+                LEFT JOIN time_entry te ON t.task_id = te.task_id
                 JOIN task_status ts ON t.status_id = ts.status_id
                 WHERE t.parent_task_id = ?
                 GROUP BY t.task_id
