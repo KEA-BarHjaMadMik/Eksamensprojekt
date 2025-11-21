@@ -20,35 +20,32 @@ public class ProjectController {
         this.service = service;
     }
 
-    /*@GetMapping()
-    public String getProjects(HttpSession session, Model model){
-        if (!SessionUtil.isLoggedIn(session)) return "redirect:/login";
-
-        int ownerID = (int) session.getAttribute("userID");
-        List<Project> projects = service.getProjects(ownerID);
-
-        return "project_list";
-    }*/
-
     @GetMapping("/create")
     public String createProject(HttpSession session,
-                                @Valid @ModelAttribute Project project,
+                                @Valid @ModelAttribute Project newProject,
                                 BindingResult bindingResult,
                                 Model model) {
 
         if (!SessionUtil.isLoggedIn(session)) return "redirect:/login";
 
         boolean fieldsHaveErrors = bindingResult.hasErrors();
-
-        project.setOwnerID(setProjectOwner(session));
+        newProject.setOwnerID(setProjectOwner(session));
 
         //if validation failed, return to form
-        if (bindingResult.hasErrors()){
+        if (fieldsHaveErrors){
+            model.addAttribute("project", newProject);
             return "project_registration_form";
         }
 
-        service.createProject(project);
-        return "redirect:/projects/" + project.getProjectId();
+        service.createProject(newProject);
+        int parentID = newProject.getParentProjectId();
+
+        if (parentID != 0){
+            return "redirect:/" + parentID + "/" + newProject.getProjectId();
+        } else {
+            return "redirect:/" + newProject.getProjectId();
+        }
+
     }
 
 

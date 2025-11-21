@@ -12,7 +12,16 @@
 <div th:replace="~{fragments/header :: header}">...</div>
 
 <main class="container-fluid">
+    <div>
+        <div>
+            <div>
+                <h1>Nyt projekt</h1>
+            </div>
+            <form method="post" th:action="@{/create}" th:object="${newProject}">
 
+            </form>
+        </div>
+    </div>
 </main>
 
 <div th:replace="~{fragments/footer :: footer}">...</div>
