@@ -20,6 +20,7 @@ CREATE TABLE user_account
 CREATE TABLE project
 (
     project_id        INT          NOT NULL AUTO_INCREMENT,
+    owner_id          INT          NOT NULL,
     parent_project_id INT          NULL,
     title             VARCHAR(100) NOT NULL,
     description       TEXT         NOT NULL,
