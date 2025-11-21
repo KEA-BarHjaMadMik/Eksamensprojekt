@@ -47,7 +47,7 @@ public class ProjectController {
             return "project_registration_form";
         }
 
-        service.createProjectAndReturnID(project);
+        service.createProject(project);
         return "redirect:/projects/" + project.getProjectId();
     }
 

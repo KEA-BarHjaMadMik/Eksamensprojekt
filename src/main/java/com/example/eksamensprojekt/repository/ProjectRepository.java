@@ -18,7 +18,7 @@ public class ProjectRepository {
         this.jdbcTemplate = jdbcTemplate;
     }
 
-    public void createProjectAndReturnID(Project project){
+    public void createProject(Project project){
         String sql = "INSERT INTO project (owner_id, parent_project_id, title, description, start_date, end_date) VALUES (?,?,?,?,?,?)";
 
         jdbcTemplate.update(

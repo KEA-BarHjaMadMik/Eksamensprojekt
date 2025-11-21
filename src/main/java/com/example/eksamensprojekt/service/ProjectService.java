@@ -14,10 +14,10 @@ public class ProjectService {
         this.repository = repository;
     }
 
-    public void createProjectAndReturnID(Project project){
+    public void createProject(Project project){
         try {
 
-            repository.createProjectAndReturnID(project);
+            repository.createProject(project);
         } catch (DataAccessException e){
             throw new DatabaseOperationException("Failed to create new project", e);
         }
