@@ -20,6 +20,15 @@ public class ProjectController {
         this.service = service;
     }
 
+    @GetMapping("/project/{projectID}")
+    public String showProject(@PathVariable("projectID") int projectID, HttpSession session, Model model){
+        if (!SessionUtil.isLoggedIn(session)) return "redirect:/login";
+
+        Project project = service.getProject(projectID);
+        model.addAttribute("project", project);
+        return "project";
+    }
+
     @GetMapping("/create")
     public String createProject(HttpSession session,
                                 @Valid @ModelAttribute Project newProject,

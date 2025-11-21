@@ -18,25 +18,21 @@ public class UserRepository {
     public User getUserByEmail(String email) {
         String sql = "SELECT user_id, email, password_hash, name, title, external FROM user_account WHERE email = ?";
 
-        RowMapper<User> rowMapper = getUserRowMapper();
-
-        List<User> results = jdbcTemplate.query(sql, rowMapper, email);
+        List<User> results = jdbcTemplate.query(sql, getUserRowMapper(), email);
         return results.isEmpty() ? null : results.getFirst();
     }
 
     public User getUserByUserID(int userID) {
         String sql = "SELECT user_id, email, password_hash, name, title, external FROM user_account WHERE user_id = ?";
 
-        RowMapper<User> rowMapper = getUserRowMapper();
-
-        List<User> results = jdbcTemplate.query(sql, rowMapper, userID);
+        List<User> results = jdbcTemplate.query(sql, getUserRowMapper(), userID);
         return results.isEmpty() ? null : results.getFirst();
     }
 
-    public boolean emailExists(String email) {
+    public int countByEmail(String email) {
         String sql = "SELECT COUNT(*) FROM user_account WHERE email = ?";
         Integer count = jdbcTemplate.queryForObject(sql, Integer.class, email);
-        return count != null && count > 0;
+        return (count != null) ? count : 0;
     }
 
     public void registerUser(User user) {

@@ -46,7 +46,7 @@ public class UserService {
 
     public boolean emailExists(String email) {
         try {
-            return repository.emailExists(email);
+            return repository.countByEmail(email) > 0;
         } catch (DataAccessException e) {
             throw new DatabaseOperationException("Failed to retrieve emails from database", e);
         }

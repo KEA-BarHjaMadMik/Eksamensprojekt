@@ -14,7 +14,8 @@ public class Project {
     private List<Project> subProjects;
     private List<Task> tasks;
 
-    public Project(){}
+    public Project() {
+    }
 
     public Project(int projectId,
                    int ownerID,
@@ -24,8 +25,9 @@ public class Project {
                    LocalDate startDate,
                    LocalDate endDate,
                    List<Project> subProjects,
-                   List<Task> tasks){
+                   List<Task> tasks) {
         this.projectId = projectId;
+        this.ownerID = ownerID;
         this.parentProjectId = parentProjectId;
         this.title = title;
         this.description = description;
@@ -33,7 +35,6 @@ public class Project {
         this.endDate = endDate;
         this.subProjects = subProjects;
         this.tasks = tasks;
-        this.ownerID = ownerID;
     }
 
     public int getProjectId() {
