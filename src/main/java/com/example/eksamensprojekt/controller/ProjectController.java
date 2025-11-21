@@ -34,9 +34,11 @@ public class ProjectController {
     public String createProject(HttpSession session,
                                 @Valid @ModelAttribute Project project,
                                 BindingResult bindingResult,
-                                Model model){
+                                Model model) {
 
         if (!SessionUtil.isLoggedIn(session)) return "redirect:/login";
+
+        boolean fieldsHaveErrors = bindingResult.hasErrors();
 
         project.setOwnerID(setProjectOwner(session));
 
@@ -45,7 +47,8 @@ public class ProjectController {
             return "project_registration_form";
         }
 
-
+        service.createProjectAndReturnID(project);
+        return "redirect:/projects/" + project.getProjectId();
     }
 
 

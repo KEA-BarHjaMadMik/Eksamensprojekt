@@ -3,10 +3,8 @@ package com.example.eksamensprojekt.service;
 import com.example.eksamensprojekt.exceptions.DatabaseOperationException;
 import com.example.eksamensprojekt.model.Project;
 import com.example.eksamensprojekt.repository.ProjectRepository;
-import com.example.eksamensprojekt.repository.UserRepository;
 import org.springframework.dao.DataAccessException;
 import org.springframework.stereotype.Service;
-import java.util.List;
 
 @Service
 public class ProjectService {
@@ -16,13 +14,12 @@ public class ProjectService {
         this.repository = repository;
     }
 
-    /*public List<Project> getProjects(int ownerID){
+    public void createProjectAndReturnID(Project project){
         try {
-            List<Project> projects = repository.getProjects(ownerID);
-            return projects;
-        } catch (DataAccessException e){
-            throw new DatabaseOperationException("Failed to retrieve user", e);
-        }
 
-    }*/
+            repository.createProjectAndReturnID(project);
+        } catch (DataAccessException e){
+            throw new DatabaseOperationException("Failed to create new project", e);
+        }
+    }
 }
