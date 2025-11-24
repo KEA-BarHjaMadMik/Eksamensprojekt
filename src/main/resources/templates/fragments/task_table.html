@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+<div th:fragment="recursiveTableRows(taskList, currentDepth)" th:remove="tag">
+    <th:block th:each="task : ${taskList}">
+        <tr>
+            <td>
+                <span th:style="'margin-left: ' + (${currentDepth} * 20) + 'px;'"></span>
+                <span th:text="${task.title}">Task Title</span>
+            </td>
+
+            <td th:text="${task.startDate}">Start Date</td>
+            <td th:text="${task.endDate}">End Date</td>
+            <td th:text="${#numbers.formatDecimal(task.estimatedHours, 1, 2)}">Estimated Hours</td>
+            <td th:text="${#numbers.formatDecimal(task.actualHours, 1, 2)}">Actual Hours</td>
+            <td th:text="${task.status}">Status</td>
+        </tr>
+
+        <th:block th:unless="${task.subTasks.isEmpty()}">
+            <th:block
+                    th:include="this :: recursiveTableRows(
+                    taskList=${task.subTasks},
+                    currentDepth=${currentDepth + 1})">
+            </th:block>
+        </th:block>
+    </th:block>
+</div>
+</body>
+</html>

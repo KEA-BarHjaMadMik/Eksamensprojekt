@@ -5,11 +5,11 @@
     <title>Title</title>
 </head>
 <body>
-<div th:fragment="recursiveTaskList(taskList)" th:remove="tag">
+<div th:fragment="recursiveList(taskList)" th:remove="tag">
         <ul th:unless="${taskList.isEmpty()}">
             <li th:each="task : ${taskList}">
                 <span th:text="${task.title}">Task Title</span>
-                <div th:include="this :: recursiveTaskList(taskList=${task.subTasks})"></div>
+                <div th:include="this :: recursiveList(taskList=${task.subTasks})"></div>
             </li>
         </ul>
 </div>
