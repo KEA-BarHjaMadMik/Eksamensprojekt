@@ -13,8 +13,8 @@
                 <span th:text="${task.title}">Task Title</span>
             </td>
 
-            <td th:text="${task.startDate}">Start Date</td>
-            <td th:text="${task.endDate}">End Date</td>
+            <td th:text="${#temporals.format(task.startDate)}">Start Date</td>
+            <td th:text="${#temporals.format(task.endDate)}">End Date</td>
             <td th:text="${#numbers.formatDecimal(task.estimatedHours, 1, 2)}">Estimated Hours</td>
             <td th:text="${#numbers.formatDecimal(task.actualHours, 1, 2)}">Actual Hours</td>
             <td th:text="${task.status}">Status</td>

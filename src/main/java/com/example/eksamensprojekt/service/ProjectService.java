@@ -31,6 +31,14 @@ public class ProjectService {
         }
     }
 
+    public List<Project> getProjectsByOwnerID(int userId) {
+        try {
+            return projectRepository.getProjectsByOwnerID(userId);
+        } catch (DataAccessException e){
+            throw new DatabaseOperationException("Failed to get projects", e);
+        }
+    }
+
     public Project getProject(int projectID) {
         try {
             // Retrieve project with id
@@ -49,7 +57,7 @@ public class ProjectService {
 
             return project;
         } catch (DataAccessException e) {
-            throw new DatabaseOperationException("Failed to retrieve project, id=" + projectID, e);
+            throw new DatabaseOperationException("Failed to retrieve project with id=" + projectID, e);
         }
     }
 
@@ -73,7 +81,7 @@ public class ProjectService {
                 loadProjectTree(sub, visitedProjects);
             }
         } catch (DataAccessException e) {
-            throw new DatabaseOperationException("Failed to retrieve subprojects, parent id=" + project.getProjectId(), e);
+            throw new DatabaseOperationException("Failed to retrieve subprojects with parent id=" + project.getProjectId(), e);
         }
 
         // Load project tasks with subtasks

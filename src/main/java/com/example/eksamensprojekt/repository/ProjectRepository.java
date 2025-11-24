@@ -30,6 +30,16 @@ public class ProjectRepository {
         );
     }
 
+    public List<Project> getProjectsByOwnerID(int ownerID) {
+        String sql = """
+                SELECT project_id, owner_id, parent_project_id, title, description, start_date, end_date
+                FROM project
+                WHERE owner_id = ? AND parent_project_id IS NULL
+                """;
+
+        return jdbcTemplate.query(sql, getProjectRowMapper(), ownerID);
+    }
+
     public Project getProject(int projectID) {
         String sql = """
                 SELECT project_id, owner_id, parent_project_id, title, description, start_date, end_date

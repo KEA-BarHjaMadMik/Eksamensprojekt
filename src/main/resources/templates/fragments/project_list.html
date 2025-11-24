@@ -8,7 +8,7 @@
 <div th:fragment="recursiveList(projectList)" th:remove="tag">
     <ul th:unless="${projectList.isEmpty()}">
         <li th:each="project : ${projectList}">
-            <span th:text="${project.title}">Project Title</span>
+            <a th:href="@{/projects/{projectId}(projectId=${project.projectId})}" th:text="${project.title}">Project Title</a>
             <div th:include="this :: recursiveList(projectList=${project.subProjects})"></div>
         </li>
     </ul>
