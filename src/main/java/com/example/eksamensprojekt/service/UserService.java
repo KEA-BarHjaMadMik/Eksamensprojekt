@@ -10,16 +10,16 @@ import org.springframework.stereotype.Service;
 
 @Service
 public class UserService {
-    UserRepository repository;
+    UserRepository userRepository;
 
-    public UserService(UserRepository repository) {
-        this.repository = repository;
+    public UserService(UserRepository userRepository) {
+        this.userRepository = userRepository;
     }
 
     public User authenticate(String email, String pw) {
         // Try to retrieve the username by username or email
         try {
-            User user = repository.getUserByEmail(email);
+            User user = userRepository.getUserByEmail(email);
 
             // Check if user exists and password matches
             if (user != null && PasswordUtil.checkPassword(pw, user.getPasswordHash())) {
@@ -36,7 +36,7 @@ public class UserService {
 
     public User getUserByUserID(int userID) {
         try {
-            User user = repository.getUserByUserID(userID);
+            User user = userRepository.getUserByUserID(userID);
             if (user == null) throw new UserNotFoundException(userID);
             return user;
         } catch (DataAccessException e) {
@@ -46,7 +46,7 @@ public class UserService {
 
     public boolean emailExists(String email) {
         try {
-            return repository.countByEmail(email) > 0;
+            return userRepository.countByEmail(email) > 0;
         } catch (DataAccessException e) {
             throw new DatabaseOperationException("Failed to retrieve emails from database", e);
         }
@@ -57,7 +57,7 @@ public class UserService {
             String plainPassword = user.getPasswordHash();
             String passwordHash = PasswordUtil.hashPassword(plainPassword);
             user.setPasswordHash(passwordHash);
-            repository.registerUser(user);
+            userRepository.registerUser(user);
         } catch (DataAccessException e) {
             throw new DatabaseOperationException("Failed to register user", e);
         }
@@ -65,7 +65,7 @@ public class UserService {
 
     public boolean updateUser(User updatedUser) {
         try {
-            int rowsAffected = repository.updateUser(updatedUser);
+            int rowsAffected = userRepository.updateUser(updatedUser);
             if (rowsAffected == 0) throw new UserNotFoundException(updatedUser.getUserID());
             return true; // User updated
         } catch (DataAccessException e) {
@@ -76,7 +76,7 @@ public class UserService {
     public boolean changePassword(int userID, String newPassword) {
         try {
             String passwordHash = PasswordUtil.hashPassword(newPassword);
-            int rowsAffected = repository.changePassword(userID, passwordHash);
+            int rowsAffected = userRepository.changePassword(userID, passwordHash);
             if (rowsAffected == 0) throw new UserNotFoundException(userID);
             return true; // Password updated
         } catch (DataAccessException e) {
@@ -86,7 +86,7 @@ public class UserService {
 
     public boolean deleteUser(int userID) {
         try {
-            int rowsAffected = repository.deleteUser(userID);
+            int rowsAffected = userRepository.deleteUser(userID);
             if (rowsAffected == 0) throw new UserNotFoundException(userID);
             return true; // User deleted
         } catch (DataAccessException e) {

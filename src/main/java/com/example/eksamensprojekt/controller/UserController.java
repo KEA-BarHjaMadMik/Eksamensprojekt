@@ -15,10 +15,10 @@ import org.springframework.web.bind.annotation.RequestParam;
 
 @Controller
 public class UserController {
-    private final UserService service;
+    private final UserService userService;
 
-    public UserController(UserService service) {
-        this.service = service;
+    public UserController(UserService userService) {
+        this.userService = userService;
     }
 
     @GetMapping("/login")
@@ -33,7 +33,7 @@ public class UserController {
                         Model model) {
 
         // Attempt to authenticate the user
-        User user = service.authenticate(email, pw);
+        User user = userService.authenticate(email, pw);
 
         if (user != null) {
             // Login successful — store the username in the session
@@ -79,7 +79,7 @@ public class UserController {
         boolean fieldsHaveErrors = bindingResult.hasErrors();
 
         // Check if email is free
-        boolean emailTaken = service.emailExists(newUser.getEmail());
+        boolean emailTaken = userService.emailExists(newUser.getEmail());
         if (emailTaken) {
             model.addAttribute("emailTaken", true);
         }
@@ -97,7 +97,7 @@ public class UserController {
         }
 
         // Proceed with saving the user
-        service.registerUser(newUser);
+        userService.registerUser(newUser);
         return "redirect:/login";
     }
 
@@ -112,7 +112,7 @@ public class UserController {
         int userID = (int) session.getAttribute("userID");
 
         // Fetch full user object
-        User user = service.getUserByUserID(userID);
+        User user = userService.getUserByUserID(userID);
 
         // Add user to model
         model.addAttribute("user", user);
@@ -134,8 +134,8 @@ public class UserController {
         boolean fieldsHaveErrors = bindingResult.hasErrors();
 
         // Check if the new email is taken (and not the current one)
-        boolean emailTaken = service.emailExists(user.getEmail()) &&
-                !service.getUserByUserID(user.getUserID()).getEmail().equals(user.getEmail());
+        boolean emailTaken = userService.emailExists(user.getEmail()) &&
+                !userService.getUserByUserID(user.getUserID()).getEmail().equals(user.getEmail());
         if (emailTaken) {
             model.addAttribute("emailTaken", true);
         }
@@ -146,7 +146,7 @@ public class UserController {
         }
 
         // Proceed with updating the user
-        if (service.updateUser(user)) {
+        if (userService.updateUser(user)) {
             model.addAttribute("updateSuccess", true);
         } else {
             model.addAttribute("updateFailure", true);
@@ -175,10 +175,10 @@ public class UserController {
         // Retrieve userID from session
         int userID = (int) session.getAttribute("userID");
         // Retrieve user email
-        String email = service.getUserByUserID(userID).getEmail();
+        String email = userService.getUserByUserID(userID).getEmail();
 
         // Attempt to authenticate the user
-        User user = service.authenticate(email, password);
+        User user = userService.authenticate(email, password);
 
         boolean incorrectPassword = user == null;
         if (incorrectPassword) {
@@ -203,7 +203,7 @@ public class UserController {
         }
 
         // Proceed with updating the password
-        if (service.changePassword(userID, newPassword)) {
+        if (userService.changePassword(userID, newPassword)) {
             return "redirect:/user_admin";
         } else {
             model.addAttribute("updateFailure", true);
@@ -222,7 +222,7 @@ public class UserController {
         int userID = (int) session.getAttribute("userID");
 
         // Proceed with deleting user
-        if(service.deleteUser(userID)) {
+        if(userService.deleteUser(userID)) {
             session.invalidate();
             return "redirect:/";
         }else{

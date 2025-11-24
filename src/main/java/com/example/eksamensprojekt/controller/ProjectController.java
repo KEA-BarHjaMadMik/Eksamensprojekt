@@ -13,17 +13,17 @@ import org.springframework.web.bind.annotation.*;
 @Controller
 @RequestMapping("projects")
 public class ProjectController {
-    private final ProjectService service;
+    private final ProjectService projectService;
 
-    public ProjectController(ProjectService service){
-        this.service = service;
+    public ProjectController(ProjectService projectService){
+        this.projectService = projectService;
     }
 
     @GetMapping("/{projectID}")
     public String showProject(@PathVariable("projectID") int projectID, HttpSession session, Model model) {
         if (!SessionUtil.isLoggedIn(session)) return "redirect:/login";
 
-        Project project = service.getProject(projectID);
+        Project project = projectService.getProject(projectID);
         model.addAttribute("project", project);
         return "project";
     }
@@ -45,7 +45,7 @@ public class ProjectController {
             return "project_registration_form";
         }
 
-        service.createProject(newProject);
+        projectService.createProject(newProject);
         int parentID = newProject.getParentProjectId();
 
         if (parentID != 0){

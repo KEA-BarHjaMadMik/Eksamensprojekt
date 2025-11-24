@@ -15,38 +15,42 @@ import java.util.Set;
 @Service
 public class ProjectService {
 
-    private final ProjectRepository repository;
+    private final ProjectRepository projectRepository;
     private final TaskService taskService;
 
-    public ProjectService(ProjectRepository repository, TaskService taskService) {
-        this.repository = repository;
+    public ProjectService(ProjectRepository projectRepository, TaskService taskService) {
+        this.projectRepository = projectRepository;
         this.taskService = taskService;
     }
 
     public void createProject(Project project) {
         try {
-            repository.createProject(project);
+            projectRepository.createProject(project);
         } catch (DataAccessException e) {
             throw new DatabaseOperationException("Failed to create new project", e);
         }
     }
 
     public Project getProject(int projectID) {
-        // Retrieve project with id
-        Project project = repository.getProject(projectID);
+        try {
+            // Retrieve project with id
+            Project project = projectRepository.getProject(projectID);
 
-        // throw error if the project is not found
-        if (project == null) {
-            throw new ProjectNotFoundException(projectID);
+            // throw error if the project is not found
+            if (project == null) {
+                throw new ProjectNotFoundException(projectID);
+            }
+
+            // Load project tree setting subprojects and subtasks
+            // To prevent infinite recursion, a set is added to track visited projects
+            Set<Integer> visitedProjects = new HashSet<>();
+
+            loadProjectTree(project, visitedProjects);
+
+            return project;
+        } catch (DataAccessException e) {
+            throw new DatabaseOperationException("Failed to retrieve project, id=" + projectID, e);
         }
-
-        // Load project tree setting subprojects and subtasks
-        // To prevent infinite recursion a set is added to track visited projects
-        Set<Integer> visitedProjects = new HashSet<>();
-
-        loadProjectTree(project, visitedProjects);
-
-        return project;
     }
 
     private void loadProjectTree(Project project, Set<Integer> visitedProjects) {
@@ -58,14 +62,18 @@ public class ProjectService {
             return;
         }
 
-        // Load direct subprojects
-        List<Project> subProjects = repository.getDirectSubProjects(project.getProjectId());
-        project.setSubProjects(subProjects);
+        try {
+            // Load direct subprojects
+            List<Project> subProjects = projectRepository.getDirectSubProjects(project.getProjectId());
+            project.setSubProjects(subProjects);
 
-        // For each subproject, load its subprojects and tasks using recursion
-        // Base case implicit: when subProjects is empty loop will not run
-        for (Project sub : subProjects) {
-            loadProjectTree(sub, visitedProjects);
+            // For each subproject, load its subprojects and tasks using recursion
+            // Base case implicit: when subProjects is empty loop will not run
+            for (Project sub : subProjects) {
+                loadProjectTree(sub, visitedProjects);
+            }
+        } catch (DataAccessException e) {
+            throw new DatabaseOperationException("Failed to retrieve subprojects, parent id=" + project.getProjectId(), e);
         }
 
         // Load project tasks with subtasks

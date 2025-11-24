@@ -1,7 +1,9 @@
 package com.example.eksamensprojekt.service;
 
+import com.example.eksamensprojekt.exceptions.DatabaseOperationException;
 import com.example.eksamensprojekt.model.Task;
 import com.example.eksamensprojekt.repository.TaskRepository;
+import org.springframework.dao.DataAccessException;
 import org.springframework.stereotype.Service;
 
 import java.util.HashSet;
@@ -10,24 +12,28 @@ import java.util.Set;
 
 @Service
 public class TaskService {
-    private final TaskRepository repository;
+    private final TaskRepository taskRepository;
 
-    public TaskService(TaskRepository repository) {
-        this.repository = repository;
+    public TaskService(TaskRepository taskRepository) {
+        this.taskRepository = taskRepository;
     }
 
     public List<Task> getProjectTasksWithSubtasks(int projectId) {
-        // Load direct project tasks
-        List<Task> tasks = repository.getDirectProjectTasks(projectId);
+        try {
+            // Load direct project tasks
+            List<Task> tasks = taskRepository.getDirectProjectTasks(projectId);
 
-        // For each task, load project tree
-        // To prevent infinite recursion a set is added to track visited tasks
-        Set<Integer> visitedTasks = new HashSet<>();
-        for (Task task : tasks) {
-            loadTaskTree(task, visitedTasks);
+            // For each task, load project tree
+            // To prevent infinite recursion a set is added to track visited tasks
+            Set<Integer> visitedTasks = new HashSet<>();
+            for (Task task : tasks) {
+                loadTaskTree(task, visitedTasks);
+            }
+
+            return tasks;
+        } catch (DataAccessException e) {
+            throw new DatabaseOperationException("failed to retrieve tasks for project with id " + projectId, e);
         }
-
-        return tasks;
     }
 
     private void loadTaskTree(Task task, Set<Integer> visitedTasks) {
@@ -39,14 +45,18 @@ public class TaskService {
             return;
         }
 
-        // Load direct subtasks
-        List<Task> subTasks = repository.getSubTasks(task.getTaskId());
-        task.setSubTasks(subTasks);
+        try {
+            // Load direct subtasks
+            List<Task> subTasks = taskRepository.getSubTasks(task.getTaskId());
+            task.setSubTasks(subTasks);
 
-        // For each subtask, load its subtasks using recursion
-        // Base case implicit: when subTasks is empty loop will not run
-        for (Task subTask : subTasks) {
-            loadTaskTree(subTask, visitedTasks);
+            // For each subtask, load its subtasks using recursion
+            // Base case implicit: when subTasks is empty loop will not run
+            for (Task subTask : subTasks) {
+                loadTaskTree(subTask, visitedTasks);
+            }
+        } catch (DataAccessException e) {
+            throw new DatabaseOperationException("failed to retrieve subtasks for task with id " + task.getTaskId(), e);
         }
     }
 }
