@@ -93,8 +93,8 @@ public class ProjectService {
 
         // For each subtask, load its subtasks using recursion
         // Base case implicit: when subTasks is empty loop will not run
-        for (Task st : subTasks) {
-            loadTaskTree(st, visitedTasks);
+        for (Task subTask : subTasks) {
+            loadTaskTree(subTask, visitedTasks);
         }
     }
 }

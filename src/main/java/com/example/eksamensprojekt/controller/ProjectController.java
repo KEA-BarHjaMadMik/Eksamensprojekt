@@ -19,7 +19,7 @@ public class ProjectController {
         this.service = service;
     }
 
-    @GetMapping("/project/{projectID}")
+    @GetMapping("/{projectID}")
     public String showProject(@PathVariable("projectID") int projectID, HttpSession session, Model model) {
         if (!SessionUtil.isLoggedIn(session)) return "redirect:/login";
 

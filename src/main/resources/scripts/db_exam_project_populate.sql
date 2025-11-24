@@ -1,5 +1,21 @@
 USE exam_project_db;
 
+-- ==========================================
+-- TRUNCATE ALL TABLES
+-- ==========================================
+SET FOREIGN_KEY_CHECKS = 0;
+
+TRUNCATE TABLE time_entry;
+TRUNCATE TABLE task_users;
+TRUNCATE TABLE project_users;
+TRUNCATE TABLE task;
+TRUNCATE TABLE project;
+TRUNCATE TABLE user_account;
+TRUNCATE TABLE project_role;
+TRUNCATE TABLE task_status;
+
+SET FOREIGN_KEY_CHECKS = 1;
+
 -- ===============================
 -- Task Statuses
 -- ===============================
@@ -17,14 +33,14 @@ VALUES ('Projektleder'),
        ('Teammedlem');
 
 -- ===============================
--- Users
+-- Users (password set to hash value of 'test123')
 -- ===============================
 INSERT INTO user_account (email, password_hash, name, title, external)
-VALUES ('anna@example.dk', 'hashed_pw_1', 'Anna Jensen', 'Teamleder', FALSE),
-       ('bjorn@example.dk', 'hashed_pw_2', 'Bjørn Nielsen', 'Udvikler', FALSE),
-       ('carina@example.dk', 'hashed_pw_3', 'Carina Hansen', 'Testleder', FALSE),
-       ('dan@example.dk', 'hashed_pw_4', 'Dan Sørensen', 'Designer', TRUE),
-       ('eva@example.dk', 'hashed_pw_5', 'Eva Kristensen', NULL, TRUE);
+VALUES ('anna@example.dk', '$2a$10$2fiuXXXrshmlXie3QHLl0Oaa0tM1Suq9AJr3iYIZ5.CNFtZ55VmNS', 'Anna Jensen', 'Teamleder', FALSE),
+       ('bjorn@example.dk', '$2a$10$2fiuXXXrshmlXie3QHLl0Oaa0tM1Suq9AJr3iYIZ5.CNFtZ55VmNS', 'Bjørn Nielsen', 'Udvikler', FALSE),
+       ('carina@example.dk', '$2a$10$2fiuXXXrshmlXie3QHLl0Oaa0tM1Suq9AJr3iYIZ5.CNFtZ55VmNS', 'Carina Hansen', 'Testleder', FALSE),
+       ('dan@example.dk', '$2a$10$2fiuXXXrshmlXie3QHLl0Oaa0tM1Suq9AJr3iYIZ5.CNFtZ55VmNS', 'Dan Sørensen', 'Designer', TRUE),
+       ('eva@example.dk', '$2a$10$2fiuXXXrshmlXie3QHLl0Oaa0tM1Suq9AJr3iYIZ5.CNFtZ55VmNS', 'Eva Kristensen', NULL, TRUE);
 
 -- ===============================
 -- Projects

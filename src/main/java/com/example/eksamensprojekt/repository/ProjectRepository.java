@@ -5,6 +5,9 @@ import com.example.eksamensprojekt.model.Task;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Repository;
+
+import java.sql.Date;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -54,7 +57,7 @@ public class ProjectRepository {
         return ((rs, rowNum) -> new Project(
                 rs.getInt("project_id"),
                 rs.getInt("owner_id"),
-                rs.getObject("parent_project_id", Integer.class), // guard against null value
+                rs.getInt("parent_project_id"),
                 rs.getString("title"),
                 rs.getString("description"),
                 rs.getDate("start_date") != null ? rs.getDate("start_date").toLocalDate() : null,
@@ -111,18 +114,23 @@ public class ProjectRepository {
     }
 
     private RowMapper<Task> getTaskRowMapper() {
-        return ((rs, rowNum) -> new Task(
-                rs.getInt("task_id"),
-                rs.getObject("parent_task_id", Integer.class),
-                rs.getInt("project_id"),
-                rs.getString("title"),
-                rs.getDate("start_date") != null ? rs.getDate("start_date").toLocalDate() : null,
-                rs.getDate("end_date") != null ? rs.getDate("end_date").toLocalDate() : null,
-                rs.getString("description"),
-                rs.getDouble("estimated_hours"),
-                rs.getDouble("actual_hours"),
-                rs.getString("status_name"),
-                new ArrayList<>()
-        ));
+        return ((rs, rowNum) -> {
+            Date startDate = rs.getDate("start_date");
+            Date endDate = rs.getDate("end_date");
+
+            return new Task(
+                    rs.getInt("task_id"),
+                    rs.getInt("parent_task_id"),
+                    rs.getInt("project_id"),
+                    rs.getString("title"),
+                    startDate != null ? startDate.toLocalDate() : null,
+                    endDate != null ? endDate.toLocalDate() : null,
+                    rs.getString("description"),
+                    rs.getDouble("estimated_hours"),
+                    rs.getDouble("actual_hours"),
+                    rs.getString("status_name"),
+                    new ArrayList<>()
+            );
+        });
     }
 }
