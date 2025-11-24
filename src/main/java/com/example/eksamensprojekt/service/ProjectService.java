@@ -16,14 +16,15 @@ import java.util.Set;
 public class ProjectService {
 
     private final ProjectRepository repository;
+    private final TaskService taskService;
 
-    public ProjectService(ProjectRepository repository) {
+    public ProjectService(ProjectRepository repository, TaskService taskService) {
         this.repository = repository;
+        this.taskService = taskService;
     }
 
     public void createProject(Project project) {
         try {
-
             repository.createProject(project);
         } catch (DataAccessException e) {
             throw new DatabaseOperationException("Failed to create new project", e);
@@ -40,16 +41,15 @@ public class ProjectService {
         }
 
         // Load project tree setting subprojects and subtasks
-        // To prevent infinite recursion sets are added to track visited projects and tasks
+        // To prevent infinite recursion a set is added to track visited projects
         Set<Integer> visitedProjects = new HashSet<>();
-        Set<Integer> visitedTasks = new HashSet<>();
 
-        loadProjectTree(project, visitedProjects, visitedTasks);
+        loadProjectTree(project, visitedProjects);
 
         return project;
     }
 
-    private void loadProjectTree(Project project, Set<Integer> visitedProjects, Set<Integer> visitedTasks) {
+    private void loadProjectTree(Project project, Set<Integer> visitedProjects) {
 
         // Prevent endless recursion by tracking visited project IDs.
         // visitedProjects.add(...) returns false if the ID was already added,
@@ -65,36 +65,11 @@ public class ProjectService {
         // For each subproject, load its subprojects and tasks using recursion
         // Base case implicit: when subProjects is empty loop will not run
         for (Project sub : subProjects) {
-            loadProjectTree(sub, visitedProjects, visitedTasks);
+            loadProjectTree(sub, visitedProjects);
         }
 
-        // Load direct project tasks
-        List<Task> tasks = repository.getDirectProjectTasks(project.getProjectId());
+        // Load project tasks with subtasks
+        List<Task> tasks = taskService.getProjectTasksWithSubtasks(project.getProjectId());
         project.setTasks(tasks);
-
-        // For each task, load its subtasks
-        for (Task task : tasks) {
-            loadTaskTree(task, visitedTasks);
-        }
-    }
-
-    private void loadTaskTree(Task task, Set<Integer> visitedTasks) {
-
-        // Prevent endless recursion by tracking visited task IDs.
-        // visitedTasks.add(...) returns false if the ID was already added,
-        // meaning we've already processed this project, so we stop recursing.
-        if (!visitedTasks.add(task.getTaskId())) {
-            return;
-        }
-
-        // Load direct subtasks
-        List<Task> subTasks = repository.getSubTasks(task.getTaskId());
-        task.setSubTasks(subTasks);
-
-        // For each subtask, load its subtasks using recursion
-        // Base case implicit: when subTasks is empty loop will not run
-        for (Task subTask : subTasks) {
-            loadTaskTree(subTask, visitedTasks);
-        }
     }
 }
