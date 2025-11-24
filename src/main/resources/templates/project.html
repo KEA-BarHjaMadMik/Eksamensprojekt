@@ -21,29 +21,30 @@
         <div th:replace="fragments/project_list :: recursiveList(${project.subProjects})">...</div>
     </section>
 
-<!--    <section th:unless="${project.tasks.isEmpty()}">-->
-<!--        <h2>Projektopgaver</h2>-->
-<!--        <div th:replace="fragments/task_list :: recursiveList(${project.tasks})">...</div>-->
-<!--    </section>-->
+    <!--    <section th:unless="${project.tasks.isEmpty()}">-->
+    <!--        <h2>Projektopgaver</h2>-->
+    <!--        <div th:replace="fragments/task_list :: recursiveList(${project.tasks})">...</div>-->
+    <!--    </section>-->
 
     <section th:unless="${project.tasks.isEmpty()}">
         <h2>Projektopgaver</h2>
-        <table>
-            <thead>
-            <tr>
-                <th>Opgave</th>
-                <th>Startdato</th>
-                <th>Slutdato</th>
-                <th>Estimerede timer</th>
-                <th>Faktiske timer</th>
-                <th>Status</th>
-            </tr>
-            </thead>
-            <tbody>
-            <div th:replace="fragments/task_table :: recursiveTableRows(taskList=${project.tasks}, currentDepth=0)">
-            </div>
-            </tbody>
-        </table>
+        <div class="overflow-auto">
+            <table>
+                <thead>
+                <tr>
+                    <th>Opgave</th>
+                    <th>Startdato</th>
+                    <th>Slutdato</th>
+                    <th>Estimerede timer</th>
+                    <th>Faktiske timer</th>
+                    <th>Status</th>
+                </tr>
+                </thead>
+                <tbody>
+                <div th:replace="fragments/task_table :: recursiveTableRows(taskList=${project.tasks}, currentDepth=0)"></div>
+                </tbody>
+            </table>
+        </div>
     </section>
 </main>
 
