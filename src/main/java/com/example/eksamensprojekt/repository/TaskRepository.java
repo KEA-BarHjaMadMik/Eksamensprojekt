@@ -1,11 +1,15 @@
 package com.example.eksamensprojekt.repository;
 
 import com.example.eksamensprojekt.model.Task;
+import org.springframework.dao.DataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Repository;
 
 import java.sql.Date;
+import java.sql.PreparedStatement;
+import java.sql.Types;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -61,6 +65,60 @@ public class TaskRepository {
                 """;
 
         return jdbcTemplate.query(sql, getTaskRowMapper(), parentID);
+    }
+
+    public boolean createTask(Task task) {
+        String sql = "INSERT INTO task (parent_task_id, project id, title, start_date, end_date, description, estimated_hours, status_id) VALUES (?,?,?,?,?,?,?,?)";
+
+        try {
+            jdbcTemplate.update(connection -> {
+                PreparedStatement ps = connection.prepareStatement(sql);
+
+                //handles parent_task_id, if null means its the parent task
+               Integer parentTaskId = task.getParentTaskId();
+               if (parentTaskId != 0) {
+                   ps.setInt(1,parentTaskId);
+               } else {
+                   ps.setNull(1, Types.INTEGER);
+               }
+
+               //required fields
+               ps.setInt(2, task.getProjectId());
+               ps.setString(3, task.getTitle());
+
+               //handles start_Date
+               LocalDate startDate = task.getStartDate();
+               if (startDate != null) {
+                   ps.setDate(4, Date.valueOf(startDate));
+               } else {
+                   ps.setNull(4, Types.DATE);
+               }
+                //handles end_Date
+                LocalDate endDate = task.getEndDate();
+                if (endDate != null) {
+                    ps.setDate(5, Date.valueOf(endDate));
+                } else {
+                    ps.setNull(5, Types.DATE);
+                }
+
+                //Handles description
+                String description = task.getDescription();
+                if (description != null) {
+                   ps.setString(6, description);
+                } else {
+                    ps.setNull(6, Types.VARCHAR);
+                }
+
+                ps.setDouble(7, task.getEstimatedHours());
+                ps.setInt(8,1);
+
+                return ps;
+            });
+            return true;
+        } catch (DataAccessException e) {
+            System.err.println("Database error during task creation: " + e.getMessage());
+            return false;
+        }
     }
 
     private RowMapper<Task> getTaskRowMapper() {
