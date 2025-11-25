@@ -72,6 +72,18 @@ public class ProjectController {
         return "redirect:/projects/" + projectID;
     }
 
+    @GetMapping("/{parentID}/create")
+    public String showCreateSubProjectForm(HttpSession session, Model model, @PathVariable("parentID") int parentID){
+        //If user is not logged in, show login screen
+        if (!SessionUtil.isLoggedIn(session)) return "redirect:/login";
+
+        Project subProject = new Project();
+        subProject.setParentProjectId(parentID);
+
+        model.addAttribute("newProject", subProject);
+        return "project_registration_form";
+    }
+
     //Helper methods
     private int setProjectOwner(HttpSession session) {
         return (int) session.getAttribute("userID");
