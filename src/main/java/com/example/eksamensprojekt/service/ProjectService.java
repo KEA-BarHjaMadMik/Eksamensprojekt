@@ -23,6 +23,19 @@ public class ProjectService {
         this.taskService = taskService;
     }
 
+    public boolean hasAccessToProject(int projectId, int userId) {
+        try {
+            Project project = projectRepository.getProject(projectId);
+            if (project == null) {
+                return false;
+            }
+            // Access granted if user is Owner OR is assigned to the project
+            return project.getOwnerID() == userId || projectRepository.isUserAssignedToProject(projectId, userId);
+        } catch (DataAccessException e) {
+            throw new DatabaseOperationException("Failed to verify project access", e);
+        }
+    }
+
     public void createProject(Project project) {
         try {
             projectRepository.createProject(project);
@@ -58,6 +71,19 @@ public class ProjectService {
             return project;
         } catch (DataAccessException e) {
             throw new DatabaseOperationException("Failed to retrieve project with id=" + projectID, e);
+        }
+    }
+
+    public String getUserRole(Project project, int userId) {
+        // Owner is an implicit role that supersedes database roles
+        if (project.getOwnerID() == userId) {
+            return "Ejer";
+        }
+
+        try {
+            return projectRepository.getProjectUserRole(project.getProjectId(), userId);
+        } catch (DataAccessException e) {
+            throw new DatabaseOperationException("Failed to retrieve user role for project with id=" + project.getProjectId() + "and user with id=" + userId, e);
         }
     }
 

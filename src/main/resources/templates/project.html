@@ -18,7 +18,7 @@
 
     <section th:unless="${project.subProjects.isEmpty()}">
         <h2>Delprojekter</h2>
-        <div th:replace="fragments/project_list :: recursiveList(${project.subProjects})">...</div>
+        <div th:replace="~{fragments/project_list :: recursiveList(${project.subProjects})}">...</div>
     </section>
 
     <!--    <section th:unless="${project.tasks.isEmpty()}">-->
@@ -41,7 +41,7 @@
                 </tr>
                 </thead>
                 <tbody>
-                <div th:replace="fragments/task_table :: recursiveTableRows(taskList=${project.tasks}, currentDepth=0)"></div>
+                <div th:replace="~{fragments/task_table :: recursiveTableRows(taskList=${project.tasks}, currentDepth=0)}"></div>
                 </tbody>
             </table>
         </div>

@@ -22,9 +22,7 @@
 
         <th:block th:unless="${task.subTasks.isEmpty()}">
             <th:block
-                    th:include="this :: recursiveTableRows(
-                    taskList=${task.subTasks},
-                    currentDepth=${currentDepth + 1})">
+                    th:insert="~{this :: recursiveTableRows(taskList=${task.subTasks}, currentDepth=${currentDepth + 1})}">
             </th:block>
         </th:block>
     </th:block>
