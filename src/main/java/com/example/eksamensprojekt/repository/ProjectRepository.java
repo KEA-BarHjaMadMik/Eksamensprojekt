@@ -3,9 +3,13 @@ package com.example.eksamensprojekt.repository;
 import com.example.eksamensprojekt.model.Project;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
+import org.springframework.jdbc.support.GeneratedKeyHolder;
+import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Repository;
 
+import java.sql.Date;
 import java.util.ArrayList;
+import java.sql.PreparedStatement;
 import java.util.List;
 
 @Repository
@@ -16,18 +20,23 @@ public class ProjectRepository {
         this.jdbcTemplate = jdbcTemplate;
     }
 
-    public void createProject(Project project) {
-        String sql = "INSERT INTO project (owner_id, parent_project_id, title, description, start_date, end_date) VALUES (?,?,?,?,?,?)";
+    public int createProject(Project project) {
+        String sql = "INSERT INTO project (owner_id, title, description, start_date, end_date) VALUES (?,?,?,?,?)";
+        KeyHolder keyHolder = new GeneratedKeyHolder();
 
-        jdbcTemplate.update(
-                sql,
-                project.getOwnerID(),
-                project.getParentProjectId(),
-                project.getTitle(),
-                project.getDescription(),
-                project.getStartDate(),
-                project.getEndDate()
+        jdbcTemplate.update(connection ->{
+                    PreparedStatement ps = connection.prepareStatement(sql, PreparedStatement.RETURN_GENERATED_KEYS);
+                    ps.setInt(1, project.getOwnerID());
+                    ps.setString(2, project.getTitle());
+                    ps.setString(3, project.getDescription());
+                    ps.setDate(4, Date.valueOf(project.getStartDate()));
+                    ps.setDate(5, Date.valueOf(project.getEndDate()));
+                    return ps;
+                },
+                keyHolder
         );
+        Number projectID = keyHolder.getKey();
+        return (projectID != null) ? projectID.intValue() : -1;
     }
 
     public List<Project> getProjectsByOwnerID(int ownerID) {

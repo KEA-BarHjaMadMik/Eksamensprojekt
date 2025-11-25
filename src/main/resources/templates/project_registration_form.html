@@ -17,8 +17,25 @@
             <div>
                 <h1>Nyt projekt</h1>
             </div>
-            <form method="post" th:action="@{/create}" th:object="${newProject}">
+            <form method="post" th:action="@{/projects/create}" th:object="${newProject}">
+                <div>
+                    <label for="title">Titel</label>
+                    <input id="title" type="text" th:field="*{title}" placeholder="Projektnavn her" required/>
+                </div>
+                <div>
+                    <label for="description">Beskrivelse</label>
+                    <input id="description" type="text" th:field="*{description}" placeholder="Projektbeskrivelse her"/>
+                </div>
+                <div>
+                    <label for="startdate">Start dato</label>
+                    <input id="startdate" type="date" th:field="*{startDate}"/>
+                </div>
+                <div>
+                    <label for="enddate">Slut dato</label>
+                    <input id="enddate" type="date" th:field="*{endDate}"/>
+                </div>
 
+                <button type="submit">Opret projekt</button>
             </form>
         </div>
     </div>

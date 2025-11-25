@@ -23,9 +23,9 @@ public class ProjectService {
         this.taskService = taskService;
     }
 
-    public void createProject(Project project) {
+    public int createProject(Project project) {
         try {
-            projectRepository.createProject(project);
+            return projectRepository.createProject(project);
         } catch (DataAccessException e) {
             throw new DatabaseOperationException("Failed to create new project", e);
         }
