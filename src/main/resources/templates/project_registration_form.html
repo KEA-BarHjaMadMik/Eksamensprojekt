@@ -12,36 +12,35 @@
 <div th:replace="~{fragments/header :: header}">...</div>
 
 <main class="container-fluid">
-    <div>
-        <div>
-            <div>
-                <h1>Nyt projekt</h1>
-            </div>
-            <form method="post" th:action="@{/projects/create}" th:object="${newProject}">
-                <div>
-                    <input type="hidden" th:field="*{parentProjectId}"/>
-                </div>
-                <div>
-                    <label for="title">Titel</label>
-                    <input id="title" type="text" th:field="*{title}" placeholder="Projektnavn her" required/>
-                </div>
-                <div>
-                    <label for="description">Beskrivelse</label>
-                    <input id="description" type="text" th:field="*{description}" placeholder="Projektbeskrivelse her"/>
-                </div>
-                <div>
-                    <label for="startdate">Start dato</label>
-                    <input id="startdate" type="date" th:field="*{startDate}" required/>
-                </div>
-                <div>
-                    <label for="enddate">Slut dato</label>
-                    <input id="enddate" type="date" th:field="*{endDate}" required/>
-                </div>
 
-                <button type="submit">Opret projekt</button>
-            </form>
-        </div>
+    <div>
+        <h1>Nyt projekt</h1>
     </div>
+    <form method="post" th:action="@{/projects/create}" th:object="${newProject}">
+        <div>
+            <input type="hidden" th:field="*{ownerID}"/>
+            <input type="hidden" th:field="*{parentProjectId}"/>
+        </div>
+        <div>
+            <label for="title">Titel</label>
+            <input id="title" type="text" th:field="*{title}" placeholder="Projektnavn her" required/>
+        </div>
+        <div>
+            <label for="description">Beskrivelse</label>
+            <input id="description" type="text" th:field="*{description}" placeholder="Projektbeskrivelse her"/>
+        </div>
+        <div>
+            <label for="startdate">Start dato</label>
+            <input id="startdate" type="date" th:field="*{startDate}" required/>
+        </div>
+        <div>
+            <label for="enddate">Slut dato</label>
+            <input id="enddate" type="date" th:field="*{endDate}" required/>
+        </div>
+
+        <button type="submit">Opret projekt</button>
+    </form>
+
 </main>
 
 <div th:replace="~{fragments/footer :: footer}">...</div>

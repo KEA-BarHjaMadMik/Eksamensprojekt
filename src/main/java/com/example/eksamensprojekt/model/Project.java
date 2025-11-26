@@ -6,7 +6,7 @@ import java.util.List;
 public class Project {
     private int projectId;
     private int ownerID;
-    private int parentProjectId;
+    private Integer parentProjectId;
     private String title;
     private String description;
     private LocalDate startDate;
@@ -53,11 +53,11 @@ public class Project {
         this.ownerID = ownerID;
     }
 
-    public int getParentProjectId() {
+    public Integer getParentProjectId() {
         return parentProjectId;
     }
 
-    public void setParentProjectId(int parentProjectId) {
+    public void setParentProjectId(Integer parentProjectId) {
         this.parentProjectId = parentProjectId;
     }
 

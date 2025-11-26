@@ -60,7 +60,23 @@ public class ProjectService {
         }
     }
 
-    public Project getProject(int projectID) {
+    public Project getProject(int projectId) {
+        try {
+            // Retrieve project with id
+            Project project = projectRepository.getProject(projectId);
+
+            // throw error if the project is not found
+            if (project == null) {
+                throw new ProjectNotFoundException(projectId);
+            }
+
+            return project;
+        } catch (DataAccessException e) {
+            throw new DatabaseOperationException("Failed to retrieve project with id=" + projectId, e);
+        }
+    }
+
+    public Project getProjectWithTree(int projectID) {
         try {
             // Retrieve project with id
             Project project = projectRepository.getProject(projectID);

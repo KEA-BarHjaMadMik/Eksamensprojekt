@@ -10,7 +10,6 @@ import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 
-import java.time.LocalDate;
 import java.util.List;
 
 @Controller
@@ -25,7 +24,7 @@ public class ProjectController {
     @GetMapping
     public String projects(HttpSession session, Model model) {
         if (!SessionUtil.isLoggedIn(session)) return "redirect:/login";
-        int currentUserID = (int) session.getAttribute("userID");
+        int currentUserID = SessionUtil.getCurrentUserID(session);
 
         List<Project> projects = projectService.getProjectsByOwnerID(currentUserID);
         List<Project> assignedProjects = projectService.getAssignedProjectsByUserId(currentUserID);
@@ -40,14 +39,14 @@ public class ProjectController {
     public String showProject(@PathVariable("projectID") int projectId, HttpSession session, Model model) {
         if (!SessionUtil.isLoggedIn(session)) return "redirect:/login";
 
-        int currentUserID = (int) session.getAttribute("userID");
+        int currentUserID = SessionUtil.getCurrentUserID(session);
 
         // Check if the user has access to the project
         if (!projectService.hasAccessToProject(projectId, currentUserID)) {
             return "redirect:/projects";
         }
 
-        Project project = projectService.getProject(projectId);
+        Project project = projectService.getProjectWithTree(projectId);
         String userRole = projectService.getUserRole(project, currentUserID);
 
         model.addAttribute("project", project);
@@ -61,7 +60,10 @@ public class ProjectController {
         //If user is not logged in, show login screen
         if (!SessionUtil.isLoggedIn(session)) return "redirect:/login";
 
-        model.addAttribute("newProject", new Project());
+        Project newProject = new Project();
+        newProject.setOwnerID(SessionUtil.getCurrentUserID(session));
+
+        model.addAttribute("newProject", newProject);
         return "project_registration_form";
     }
 
@@ -74,7 +76,6 @@ public class ProjectController {
         if (!SessionUtil.isLoggedIn(session)) return "redirect:/login";
 
         boolean fieldsHaveErrors = bindingResult.hasErrors();
-        newProject.setOwnerID(setProjectOwner(session));
 
         //if validation failed, return to form
         if (fieldsHaveErrors) {
@@ -87,13 +88,14 @@ public class ProjectController {
         return "redirect:/projects/" + projectID;
     }
 
-    @GetMapping("/{parentID}/create")
-    public String showCreateSubProjectForm(HttpSession session, Model model, @PathVariable("parentID") int parentID){
+    @GetMapping("/{parentId}/create")
+    public String showCreateSubProjectForm(@PathVariable("parentId") int parentId, HttpSession session, Model model){
         //If user is not logged in, show login screen
         if (!SessionUtil.isLoggedIn(session)) return "redirect:/login";
 
         Project subProject = new Project();
-        subProject.setParentProjectId(parentID);
+        subProject.setOwnerID(projectService.getProject(parentId).getOwnerID());
+        subProject.setParentProjectId(parentId);
 
         model.addAttribute("newProject", subProject);
         return "project_registration_form";

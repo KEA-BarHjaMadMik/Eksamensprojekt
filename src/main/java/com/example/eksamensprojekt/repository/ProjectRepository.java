@@ -9,6 +9,7 @@ import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.sql.Date;
+import java.sql.Types;
 import java.util.ArrayList;
 import java.sql.PreparedStatement;
 import java.util.List;
@@ -29,7 +30,7 @@ public class ProjectRepository {
         jdbcTemplate.update(connection -> {
                     PreparedStatement ps = connection.prepareStatement(sql, PreparedStatement.RETURN_GENERATED_KEYS);
                     ps.setInt(1, project.getOwnerID());
-                    ps.setInt(2, project.getParentProjectId());
+                    ps.setObject(2, project.getParentProjectId(), Types.INTEGER);
                     ps.setString(3, project.getTitle());
                     ps.setString(4, project.getDescription());
                     ps.setDate(5, Date.valueOf(project.getStartDate()));
@@ -38,13 +39,13 @@ public class ProjectRepository {
                 },
                 keyHolder
         );
-        Number projectID = keyHolder.getKey();
+        Number projectId = keyHolder.getKey();
 
         String sql2 = "INSERT INTO project_users(project_id, user_id, role) VALUES(?,?,?)";
 
-        jdbcTemplate.update(sql2, project.getProjectId(), project.getOwnerID(), "OWNER");
+        jdbcTemplate.update(sql2, projectId, project.getOwnerID(), "OWNER");
 
-        return (projectID != null) ? projectID.intValue() : -1;
+        return (projectId != null) ? projectId.intValue() : -1;
     }
 
     public List<Project> getProjectsByOwnerID(int ownerID) {
