@@ -22,7 +22,7 @@ public class TaskController {
         this.projectService = projectService;
     }
 
-    @GetMapping("/project/{projectId}/new")
+    @GetMapping("/{projectId}/create")
     public String showCreateTaskForm(@PathVariable int projectId,
                                      HttpSession session,
                                      Model model) {
@@ -39,7 +39,7 @@ public class TaskController {
         return "task_form";
     }
 
-    @GetMapping("/{parentTaskId}/subtask/new")
+    @GetMapping("/{parentTaskId}/subtask/create")
     public String showCreateSubtaskForm(@PathVariable int parentTaskId,
                                         HttpSession session,
                                         Model model) {
