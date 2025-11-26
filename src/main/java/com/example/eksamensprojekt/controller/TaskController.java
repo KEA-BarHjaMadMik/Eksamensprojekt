@@ -30,7 +30,7 @@ public class TaskController {
         if (!SessionUtil.isLoggedIn(session)) return "redirect:/login";
         //Get project and verify ownership
         Project project = projectService.getProject(projectId);
-        if (!isProjectOwner(session, project)) return "redirect:/";
+        if (!projectService.hasAccessToProject(projectId, getCurrentUserId(session))) return "redirect:/";
 
         //create a blank task
         Task task = new Task();
@@ -55,7 +55,8 @@ public class TaskController {
         if (parentTask == null) return "redirect:/";
 
         Project project = projectService.getProject(parentTask.getProjectId());
-        if (!isProjectOwner(session, project)) return "redirect:/";
+        if (!projectService.hasAccessToProject(parentTask.getProjectId(),
+        getCurrentUserId(session))) return "redirect:/";
 
         Task task = new Task();
         task.setProjectId(parentTask.getProjectId());
@@ -78,7 +79,8 @@ public class TaskController {
 
         //Get project and verify ownership
         Project project = projectService.getProject(task.getProjectId());
-        if (!isProjectOwner(session, project)) return "redirect:/";
+        if (!projectService.hasAccessToProject(task.getProjectId(),
+                getCurrentUserId(session))) return "redirect:/";
 
         //if validation fails return to form
         if (bindingResult.hasErrors()) {
@@ -114,9 +116,5 @@ public class TaskController {
     //Helper methods
     private int getCurrentUserId(HttpSession session){
         return (int) session.getAttribute("userID");
-    }
-
-    private boolean isProjectOwner(HttpSession session, Project project) {
-        return project != null && getCurrentUserId(session) == project.getOwnerID();
     }
 }
