@@ -49,7 +49,8 @@ INSERT INTO project (owner_id, parent_project_id, title, description, start_date
 VALUES (1, NULL, 'Website Redesign', 'Komplet redesign af virksomhedens hjemmeside', '2025-01-01', '2025-06-30'),
        (2, NULL, 'Mobilapp Udvikling', 'Udvikling af ny mobilapplikation', '2025-02-01', '2025-08-31'),
        (1, 1, 'Forside Redesign', 'Redesign af virksomhedens forside', '2025-01-10', '2025-03-15'),
-       (3, 2, 'Login Modul', 'Implementering af sikker login-funktion', '2025-02-05', '2025-04-20');
+       (3, 2, 'Login Modul', 'Implementering af sikker login-funktion', '2025-02-05', '2025-04-20'),
+       (1, NULL, 'Firmajulefrokost', 'Planlægning af årets julefrokost', '2025-11-12', '2025-12-17');
 
 -- ===============================
 -- Tasks

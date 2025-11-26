@@ -23,11 +23,32 @@ public class ProjectService {
         this.taskService = taskService;
     }
 
+    public boolean hasAccessToProject(int projectId, int userId) {
+        try {
+            Project project = projectRepository.getProject(projectId);
+            if (project == null) {
+                return false;
+            }
+            // Access granted if user is Owner OR is assigned to the project
+            return project.getOwnerID() == userId || projectRepository.isUserAssignedToProject(projectId, userId);
+        } catch (DataAccessException e) {
+            throw new DatabaseOperationException("Failed to verify project access", e);
+        }
+    }
+
     public void createProject(Project project) {
         try {
             projectRepository.createProject(project);
         } catch (DataAccessException e) {
             throw new DatabaseOperationException("Failed to create new project", e);
+        }
+    }
+
+    public List<Project> getProjectsByOwnerID(int userId) {
+        try {
+            return projectRepository.getProjectsByOwnerID(userId);
+        } catch (DataAccessException e){
+            throw new DatabaseOperationException("Failed to get projects", e);
         }
     }
 
@@ -49,7 +70,20 @@ public class ProjectService {
 
             return project;
         } catch (DataAccessException e) {
-            throw new DatabaseOperationException("Failed to retrieve project, id=" + projectID, e);
+            throw new DatabaseOperationException("Failed to retrieve project with id=" + projectID, e);
+        }
+    }
+
+    public String getUserRole(Project project, int userId) {
+        // Owner is an implicit role that supersedes database roles
+        if (project.getOwnerID() == userId) {
+            return "Ejer";
+        }
+
+        try {
+            return projectRepository.getProjectUserRole(project.getProjectId(), userId);
+        } catch (DataAccessException e) {
+            throw new DatabaseOperationException("Failed to retrieve user role for project with id=" + project.getProjectId() + "and user with id=" + userId, e);
         }
     }
 
@@ -73,7 +107,7 @@ public class ProjectService {
                 loadProjectTree(sub, visitedProjects);
             }
         } catch (DataAccessException e) {
-            throw new DatabaseOperationException("Failed to retrieve subprojects, parent id=" + project.getProjectId(), e);
+            throw new DatabaseOperationException("Failed to retrieve subprojects with parent id=" + project.getProjectId(), e);
         }
 
         // Load project tasks with subtasks

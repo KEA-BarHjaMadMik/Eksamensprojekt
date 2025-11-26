@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Projekter</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="color-scheme" content="light dark">
+    <link th:href="@{/css/pico.pink.min.css}" rel="stylesheet">
+    <link th:href="@{/css/main.css}" rel="stylesheet">
+</head>
+<body>
+<div th:replace="~{fragments/header :: header}">...</div>
+
+<main class="container-fluid">
+    <section>
+        <h1>Dine projekter</h1>
+        <div class="grid">
+            <article th:each="project : ${projects}">
+
+                <h3 th:text="${project.title}">Title</h3>
+                <hr/>
+                <p th:text="${'Deadline: ' + #temporals.format(project.endDate)}">Deadline</p>
+                <p><small th:text="${project.description}">Description</small></p>
+                <a th:href="@{/projects/{projectId}(projectId=${project.projectId})}">Gå til projekt 🡒</a>
+            </article>
+        </div>
+    </section>
+</main>
+
+<div th:replace="~{fragments/footer :: footer}">...</div>
+</body>
+</html>

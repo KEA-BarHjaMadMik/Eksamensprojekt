@@ -5,16 +5,29 @@
     <title>Title</title>
 </head>
 <body>
-<div th:fragment="header">
-    <header>
-        <div th:unless="${isLoggedIn}">
-            <a role="button" th:href="@{/login}">Log på</a>
-        </div>
+<div th:fragment="header" th:remove="tag">
+    <header class="container-fluid">
+        <nav>
+            <ul>
+                <li><a th:href="@{/}"><h1>ProProjects</h1></a></li>
+                <li><a th:href="@{/projects}">Projekter</a></li>
+            </ul>
 
-        <div th:if="${isLoggedIn}">
-            <a role=button th:href="@{/user_admin}" th:text="${userEmail}">User</a>
-            <a role="button" class="secondary" th:href="@{/logout}">Log ud</a>
-        </div>
+            <ul th:unless="${isLoggedIn}">
+                <li>
+                    <a role="button" th:href="@{/login}">Log på</a>
+                </li>
+            </ul>
+
+            <ul th:if="${isLoggedIn}">
+                <li>
+                    <a role="button" th:href="@{/user_admin}" th:text="${userEmail}">User</a>
+                </li>
+                <li>
+                    <a role="button" class="secondary" th:href="@{/logout}">Log ud</a>
+                </li>
+            </ul>
+        </nav>
     </header>
 </div>
 </body>
