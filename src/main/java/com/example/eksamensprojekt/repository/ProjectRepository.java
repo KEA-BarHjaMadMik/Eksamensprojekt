@@ -24,7 +24,7 @@ public class ProjectRepository {
         String sql = "INSERT INTO project (owner_id, parent_project_id, title, description, start_date, end_date) VALUES (?,?,?,?,?,?)";
         KeyHolder keyHolder = new GeneratedKeyHolder();
 
-        jdbcTemplate.update(connection ->{
+        jdbcTemplate.update(connection -> {
                     PreparedStatement ps = connection.prepareStatement(sql, PreparedStatement.RETURN_GENERATED_KEYS);
                     ps.setInt(1, project.getOwnerID());
                     ps.setInt(2, project.getParentProjectId());
@@ -37,6 +37,11 @@ public class ProjectRepository {
                 keyHolder
         );
         Number projectID = keyHolder.getKey();
+
+        String sql2 = "INSERT INTO project_users(project_id, user_id, role_id) VALUES(?,?,?)";
+
+        jdbcTemplate.update(sql2, project.getProjectId(), project.getOwnerID(), 1); //1 is owner role id
+
         return (projectID != null) ? projectID.intValue() : -1;
     }
 
