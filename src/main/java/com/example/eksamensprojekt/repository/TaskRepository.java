@@ -1,7 +1,6 @@
 package com.example.eksamensprojekt.repository;
 
 import com.example.eksamensprojekt.model.Task;
-import org.springframework.dao.DataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Repository;
