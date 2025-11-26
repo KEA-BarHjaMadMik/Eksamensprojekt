@@ -100,9 +100,4 @@ public class ProjectController {
         model.addAttribute("newProject", subProject);
         return "project_registration_form";
     }
-
-    //Helper methods
-    private int setProjectOwner(HttpSession session) {
-        return (int) session.getAttribute("userId");
-    }
 }
