@@ -42,6 +42,7 @@ public class ProjectRepository {
 
     public List<Project> getAssignedProjectsByUserId(int userId) {
         String sql= """
+                
                 """;
 
         return jdbcTemplate.query(sql, getProjectRowMapper(), userId);
@@ -89,10 +90,9 @@ public class ProjectRepository {
 
     public String getProjectUserRole(int projectId, int userId) {
         String sql = """
-                SELECT pr.role_name
-                FROM project_users pu
-                JOIN project_role pr ON pu.role_id = pr.role_id
-                WHERE pu.project_id = ? AND pu.user_id = ?
+                SELECT role
+                FROM project_users
+                WHERE project_id = ? AND user_id = ?
                 """;
 
         return jdbcTemplate.queryForObject(sql, String.class, projectId, userId);
