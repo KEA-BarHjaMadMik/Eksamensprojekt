@@ -52,7 +52,7 @@
 
                 <div>
                     <label for="estimatedHours">Estimerede timer</label>
-                    <input id="estimatedHours" type="number" th:field="*{estimatedHours}" placeholder="???"/>
+                    <input id="estimatedHours" type="number" th:field="*{estimatedHours}" step="0.01" min="0" value="0" placeholder="0.00"/>
                     <div th:if="${#fields.hasErrors('estimatedHours')}" th:errors="*{estimatedHours}"></div>
                 </div>
 
