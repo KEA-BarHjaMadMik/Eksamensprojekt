@@ -40,6 +40,13 @@ public class ProjectRepository {
         return jdbcTemplate.query(sql, getProjectRowMapper(), ownerID);
     }
 
+    public List<Project> getAssignedProjectsByUserId(int userId) {
+        String sql= """
+                """;
+
+        return jdbcTemplate.query(sql, getProjectRowMapper(), userId);
+    }
+
     public Project getProject(int projectID) {
         String sql = """
                 SELECT project_id, owner_id, parent_project_id, title, description, start_date, end_date
