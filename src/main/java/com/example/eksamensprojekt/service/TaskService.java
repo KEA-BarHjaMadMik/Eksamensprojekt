@@ -1,6 +1,7 @@
 package com.example.eksamensprojekt.service;
 
 import com.example.eksamensprojekt.exceptions.DatabaseOperationException;
+import com.example.eksamensprojekt.exceptions.TaskNotFoundException;
 import com.example.eksamensprojekt.model.Task;
 import com.example.eksamensprojekt.repository.TaskRepository;
 import org.springframework.dao.DataAccessException;
@@ -40,16 +41,39 @@ public class TaskService {
     //and getting parent task info
     public Task getTask(int taskId) {
         try {
-            return taskRepository.getTask(taskId);
+            Task task = taskRepository.getTask(taskId);
+
+            if (task == null) {
+                throw new TaskNotFoundException(taskId);
+            }
+
+            return task;
         } catch (DataAccessException e) {
             throw new DatabaseOperationException("Failed to retrieve task", e);
+        }
+    }
+
+    public Task getTaskWithTree(int taskId) {
+        try {
+            Task task = taskRepository.getTask(taskId);
+
+            if (task == null) {
+                throw new TaskNotFoundException(taskId);
+            }
+
+            Set<Integer> visitedTasks = new HashSet<>();
+            loadTaskTree(task, visitedTasks);
+
+            return task;
+        } catch (DataAccessException e) {
+            throw new DatabaseOperationException("Failed to retrieve task with id=" + taskId, e);
         }
     }
 
     public boolean createTask(Task task) {
         //It works but should probably add validation and exception handling
         try {
-        return taskRepository.createTask(task);
+            return taskRepository.createTask(task);
         } catch (DataAccessException e) {
             throw new DatabaseOperationException("Database error during task creation", e);
         }

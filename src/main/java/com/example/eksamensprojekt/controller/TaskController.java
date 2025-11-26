@@ -22,6 +22,27 @@ public class TaskController {
         this.projectService = projectService;
     }
 
+    @GetMapping("/{taskId}")
+    public String showTask(@PathVariable("taskId") int taskId, Model model, HttpSession session) {
+        if (!SessionUtil.isLoggedIn(session)) return "redirect:/login";
+
+        // Check if the user has access to the task
+        int currentUserId = SessionUtil.getCurrentUserId(session);
+        int projectId = taskService.getTask(taskId).getProjectId();
+        if(!projectService.hasAccessToProject(currentUserId, projectId)){
+            return "redirect:/projects";
+        }
+
+        // Add task and role to the model
+        Task task = taskService.getTaskWithTree(taskId);
+        String userRole = projectService.getUserRole(projectId, currentUserId);
+
+        model.addAttribute("task", task);
+        model.addAttribute("userRole", userRole);
+
+        return "task";
+    }
+
     @GetMapping("/{projectId}/create")
     public String showCreateTaskForm(@PathVariable int projectId,
                                      HttpSession session,

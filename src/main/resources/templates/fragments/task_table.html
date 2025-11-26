@@ -10,7 +10,7 @@
         <tr>
             <td>
                 <span th:style="'margin-left: ' + (${currentDepth} * 20) + 'px;'"></span>
-                <span th:text="${task.title}">Task Title</span>
+                <a th:href="@{/tasks/{taskId}(taskId=${task.taskId})}" th:text="${task.title}">Task Title</a>
             </td>
 
             <td th:text="${#temporals.format(task.startDate)}">Start Date</td>

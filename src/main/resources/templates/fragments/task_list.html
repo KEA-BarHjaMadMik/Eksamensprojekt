@@ -8,7 +8,7 @@
 <div th:fragment="recursiveList(taskList)" th:remove="tag">
         <ul th:unless="${taskList.isEmpty()}">
             <li th:each="task : ${taskList}">
-                <span th:text="${task.title}">Task Title</span>
+                <a th:href="@{/tasks/{taskId}(taskId=${task.taskId})}" th:text="${task.title}">Task Title</a>
                 <div th:insert="~{this :: recursiveList(taskList=${task.subTasks})}"></div>
             </li>
         </ul>

@@ -47,15 +47,15 @@ public class ProjectService {
     public List<Project> getProjectsByOwnerId(int userId) {
         try {
             return projectRepository.getProjectsByOwnerId(userId);
-        } catch (DataAccessException e){
+        } catch (DataAccessException e) {
             throw new DatabaseOperationException("Failed to get projects", e);
         }
     }
 
-    public List<Project> getAssignedProjectsByUserId(int userId){
+    public List<Project> getAssignedProjectsByUserId(int userId) {
         try {
             return projectRepository.getAssignedProjectsByUserId(userId);
-        } catch (DataAccessException e){
+        } catch (DataAccessException e) {
             throw new DatabaseOperationException("Failed to get projects assigned to user with id=" + userId, e);
         }
     }
@@ -98,16 +98,11 @@ public class ProjectService {
         }
     }
 
-    public String getUserRole(Project project, int userId) {
-        // early exit if the owner
-        if (project.getOwnerId() == userId) {
-            return "OWNER";
-        }
-
+    public String getUserRole(int projectId, int userId) {
         try {
-            return projectRepository.getProjectUserRole(project.getProjectId(), userId);
+            return projectRepository.getProjectUserRole(projectId, userId);
         } catch (DataAccessException e) {
-            throw new DatabaseOperationException("Failed to retrieve user role for project with id=" + project.getProjectId() + "and user with id=" + userId, e);
+            throw new DatabaseOperationException("Failed to retrieve user role for project with id=" + projectId + "and user with id=" + userId, e);
         }
     }
 
