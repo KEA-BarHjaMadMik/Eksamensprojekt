@@ -19,6 +19,9 @@
             </div>
             <form method="post" th:action="@{/projects/create}" th:object="${newProject}">
                 <div>
+                    <input type="hidden" th:field="*{parentProjectId}"/>
+                </div>
+                <div>
                     <label for="title">Titel</label>
                     <input id="title" type="text" th:field="*{title}" placeholder="Projektnavn her" required/>
                 </div>

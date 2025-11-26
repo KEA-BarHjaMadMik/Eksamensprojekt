@@ -21,16 +21,17 @@ public class ProjectRepository {
     }
 
     public int createProject(Project project) {
-        String sql = "INSERT INTO project (owner_id, title, description, start_date, end_date) VALUES (?,?,?,?,?)";
+        String sql = "INSERT INTO project (owner_id, parent_project_id, title, description, start_date, end_date) VALUES (?,?,?,?,?,?)";
         KeyHolder keyHolder = new GeneratedKeyHolder();
 
         jdbcTemplate.update(connection ->{
                     PreparedStatement ps = connection.prepareStatement(sql, PreparedStatement.RETURN_GENERATED_KEYS);
                     ps.setInt(1, project.getOwnerID());
-                    ps.setString(2, project.getTitle());
-                    ps.setString(3, project.getDescription());
-                    ps.setDate(4, Date.valueOf(project.getStartDate()));
-                    ps.setDate(5, Date.valueOf(project.getEndDate()));
+                    ps.setInt(2, project.getParentProjectId());
+                    ps.setString(3, project.getTitle());
+                    ps.setString(4, project.getDescription());
+                    ps.setDate(5, Date.valueOf(project.getStartDate()));
+                    ps.setDate(6, Date.valueOf(project.getEndDate()));
                     return ps;
                 },
                 keyHolder
