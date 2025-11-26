@@ -28,9 +28,11 @@ VALUES (1, 'Planlægning'),
 -- ===============================
 -- Project Roles (simplified)
 -- ===============================
-INSERT INTO project_role (role_name)
-VALUES ('Projektleder'),
-       ('Teammedlem');
+INSERT INTO project_role (role, role_name)
+VALUES ('OWNER','Ejer'),
+       ('FULL_ACCESS','Komplet'),
+       ('EDIT', 'Rediger'),
+       ('READ_ONLY','Se kun');
 
 -- ===============================
 -- Users (password set to hash value of 'test123')
@@ -68,17 +70,17 @@ VALUES (NULL, 1, 'Design Mockups', '2025-01-01', '2025-02-15', 'Opret designmock
 -- Project Users (simplified roles)
 -- ===============================
 -- Role 1 = Projektleder, Role 2 = Teammedlem
-INSERT INTO project_users (project_id, user_id, role_id)
-VALUES (1, 1, 1), -- Anna Projektleder
-       (1, 2, 2), -- Bjørn Teammedlem
-       (1, 4, 2), -- Dan Teammedlem
-       (2, 2, 2), -- Bjørn Teammedlem
-       (2, 3, 2), -- Carina Teammedlem
-       (2, 5, 2), -- Eva Teammedlem
-       (3, 1, 1), -- Anna Projektleder
-       (3, 2, 2), -- Bjørn Teammedlem
-       (4, 3, 2), -- Carina Teammedlem
-       (4, 2, 2); -- Bjørn Teammedlem
+INSERT INTO project_users (project_id, user_id, role)
+VALUES (1, 1, 'OWNER'), -- Anna Projektleder
+       (1, 2, 'EDIT'), -- Bjørn Teammedlem
+       (1, 4, 'EDIT'), -- Dan Teammedlem
+       (2, 2, 'EDIT'), -- Bjørn Teammedlem
+       (2, 3, 'EDIT'), -- Carina Teammedlem
+       (2, 5, 'EDIT'), -- Eva Teammedlem
+       (3, 1, 'OWNER'), -- Anna Projektleder
+       (3, 2, 'EDIT'), -- Bjørn Teammedlem
+       (4, 3, 'EDIT'), -- Carina Teammedlem
+       (4, 2, 'EDIT'); -- Bjørn Teammedlem
 
 -- ===============================
 -- Task Users

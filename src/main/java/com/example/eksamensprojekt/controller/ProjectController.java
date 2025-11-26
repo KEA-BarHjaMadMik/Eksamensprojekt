@@ -10,6 +10,7 @@ import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDate;
 import java.util.List;
 
 @Controller
@@ -33,11 +34,22 @@ public class ProjectController {
     }
 
     @GetMapping("/{projectID}")
-    public String showProject(@PathVariable("projectID") int projectID, HttpSession session, Model model) {
+    public String showProject(@PathVariable("projectID") int projectId, HttpSession session, Model model) {
         if (!SessionUtil.isLoggedIn(session)) return "redirect:/login";
 
-        Project project = projectService.getProject(projectID);
+        int currentUserID = (int) session.getAttribute("userID");
+
+        // Check if the user has access to the project
+        if (!projectService.hasAccessToProject(projectId, currentUserID)) {
+            return "redirect:/projects";
+        }
+
+        Project project = projectService.getProject(projectId);
+        String userRole = projectService.getUserRole(project, currentUserID);
+
         model.addAttribute("project", project);
+        model.addAttribute("userRole", userRole);
+
         return "project";
     }
 

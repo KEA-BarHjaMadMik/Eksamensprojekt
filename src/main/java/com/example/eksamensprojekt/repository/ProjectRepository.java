@@ -55,6 +55,14 @@ public class ProjectRepository {
         return jdbcTemplate.query(sql, getProjectRowMapper(), ownerID);
     }
 
+    public List<Project> getAssignedProjectsByUserId(int userId) {
+        String sql= """
+                
+                """;
+
+        return jdbcTemplate.query(sql, getProjectRowMapper(), userId);
+    }
+
     public Project getProject(int projectID) {
         String sql = """
                 SELECT project_id, owner_id, parent_project_id, title, description, start_date, end_date
@@ -87,5 +95,21 @@ public class ProjectRepository {
                 new ArrayList<>(),
                 new ArrayList<>())
         );
+    }
+
+    public boolean isUserAssignedToProject(int projectId, int userId) {
+        String sql = "SELECT COUNT(*) FROM project_users WHERE project_id = ? AND user_id = ?";
+        Integer count = jdbcTemplate.queryForObject(sql, Integer.class, projectId, userId);
+        return count != null && count > 0;
+    }
+
+    public String getProjectUserRole(int projectId, int userId) {
+        String sql = """
+                SELECT role
+                FROM project_users
+                WHERE project_id = ? AND user_id = ?
+                """;
+
+        return jdbcTemplate.queryForObject(sql, String.class, projectId, userId);
     }
 }

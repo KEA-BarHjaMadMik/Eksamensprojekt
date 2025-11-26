@@ -9,7 +9,7 @@
     <ul th:unless="${projectList.isEmpty()}">
         <li th:each="project : ${projectList}">
             <a th:href="@{/projects/{projectId}(projectId=${project.projectId})}" th:text="${project.title}">Project Title</a>
-            <div th:include="this :: recursiveList(projectList=${project.subProjects})"></div>
+            <div th:insert="~{this :: recursiveList(projectList=${project.subProjects})}"></div>
         </li>
     </ul>
 </div>

@@ -9,7 +9,7 @@
         <ul th:unless="${taskList.isEmpty()}">
             <li th:each="task : ${taskList}">
                 <span th:text="${task.title}">Task Title</span>
-                <div th:include="this :: recursiveList(taskList=${task.subTasks})"></div>
+                <div th:insert="~{this :: recursiveList(taskList=${task.subTasks})}"></div>
             </li>
         </ul>
 </div>
