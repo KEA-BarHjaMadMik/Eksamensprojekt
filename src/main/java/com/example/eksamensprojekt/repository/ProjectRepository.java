@@ -6,6 +6,7 @@ import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Repository;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.sql.Date;
 import java.util.ArrayList;
@@ -20,6 +21,7 @@ public class ProjectRepository {
         this.jdbcTemplate = jdbcTemplate;
     }
 
+    @Transactional
     public int createProject(Project project) {
         String sql = "INSERT INTO project (owner_id, parent_project_id, title, description, start_date, end_date) VALUES (?,?,?,?,?,?)";
         KeyHolder keyHolder = new GeneratedKeyHolder();
