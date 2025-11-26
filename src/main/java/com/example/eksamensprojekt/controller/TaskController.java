@@ -35,10 +35,10 @@ public class TaskController {
         //create a blank task
         Task task = new Task();
         task.setProjectId(projectId);
-        task.setParentTaskId(0);
+        task.setParentTaskId(0); ///overflødig
 
         model.addAttribute("task", task);
-        model.addAttribute("project", project);
+        model.addAttribute("project", project); ///?
 
 
         return "task_form";
@@ -62,8 +62,8 @@ public class TaskController {
         task.setParentTaskId(parentTaskId);
 
         model.addAttribute("task", task);
-        model.addAttribute("parentTask", parentTask);
-        model.addAttribute("project", project);
+        model.addAttribute("parentTask", parentTask); ///?
+        model.addAttribute("project", project); ///?
 
         return "task_form";
     }
@@ -82,7 +82,7 @@ public class TaskController {
 
         //if validation fails return to form
         if (bindingResult.hasErrors()) {
-            model.addAttribute("project", project);
+            model.addAttribute("project", project); ///?
             //if it's a subtask, add parent task to model as well
             if (task.getParentTaskId() != 0) {
                 Task parentTask = taskService.getTask(task.getParentTaskId());
@@ -100,7 +100,7 @@ public class TaskController {
                 return "redirect:/tasks/" + task.getParentTaskId();
             } else {
                 //creates a parent task and shows the project page
-                return "redirect:/projects/project/" + task.getProjectId();
+                return "redirect:/projects/" + task.getProjectId();
             }
         } else {
             //if creation failed
