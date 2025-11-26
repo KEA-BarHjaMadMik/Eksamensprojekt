@@ -1,5 +1,7 @@
 package com.example.eksamensprojekt.model;
 
+import org.springframework.format.annotation.DateTimeFormat;
+
 import java.time.LocalDate;
 import java.util.List;
 
@@ -8,8 +10,13 @@ public class Task {
     private Integer parentTaskId;
     private int projectId;
     private String title;
+
+    @DateTimeFormat(pattern = "yyyy-MM-dd")
     private LocalDate startDate;
+
+    @DateTimeFormat(pattern = "yyyy-MM-dd")
     private LocalDate endDate;
+
     private String description;
     private double estimatedHours;
     private double actualHours;

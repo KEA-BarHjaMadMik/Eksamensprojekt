@@ -22,32 +22,6 @@ public class ProjectRepository {
         this.jdbcTemplate = jdbcTemplate;
     }
 
-    @Transactional
-    public int createProject(Project project) {
-        String sql = "INSERT INTO project (owner_id, parent_project_id, title, description, start_date, end_date) VALUES (?,?,?,?,?,?)";
-        KeyHolder keyHolder = new GeneratedKeyHolder();
-
-        jdbcTemplate.update(connection -> {
-                    PreparedStatement ps = connection.prepareStatement(sql, PreparedStatement.RETURN_GENERATED_KEYS);
-                    ps.setInt(1, project.getOwnerId());
-                    ps.setObject(2, project.getParentProjectId(), Types.INTEGER);
-                    ps.setString(3, project.getTitle());
-                    ps.setString(4, project.getDescription());
-                    ps.setDate(5, Date.valueOf(project.getStartDate()));
-                    ps.setDate(6, Date.valueOf(project.getEndDate()));
-                    return ps;
-                },
-                keyHolder
-        );
-        Number projectId = keyHolder.getKey();
-
-        String sql2 = "INSERT INTO project_users(project_id, user_id, role) VALUES(?,?,?)";
-
-        jdbcTemplate.update(sql2, projectId, project.getOwnerId(), "OWNER");
-
-        return (projectId != null) ? projectId.intValue() : -1;
-    }
-
     public List<Project> getProjectsByOwnerId(int ownerId) {
         String sql = """
                 SELECT project_id, owner_id, parent_project_id, title, description, start_date, end_date
@@ -100,18 +74,30 @@ public class ProjectRepository {
         return jdbcTemplate.query(sql, getProjectRowMapper(), parentProjectId);
     }
 
-    private RowMapper<Project> getProjectRowMapper() {
-        return ((rs, rowNum) -> new Project(
-                rs.getInt("project_id"),
-                rs.getInt("owner_id"),
-                rs.getInt("parent_project_id"),
-                rs.getString("title"),
-                rs.getString("description"),
-                rs.getDate("start_date") != null ? rs.getDate("start_date").toLocalDate() : null,
-                rs.getDate("end_date") != null ? rs.getDate("end_date").toLocalDate() : null,
-                new ArrayList<>(),
-                new ArrayList<>())
+    @Transactional
+    public int createProject(Project project) {
+        String sql = "INSERT INTO project (owner_id, parent_project_id, title, description, start_date, end_date) VALUES (?,?,?,?,?,?)";
+        KeyHolder keyHolder = new GeneratedKeyHolder();
+
+        jdbcTemplate.update(connection -> {
+                    PreparedStatement ps = connection.prepareStatement(sql, PreparedStatement.RETURN_GENERATED_KEYS);
+                    ps.setInt(1, project.getOwnerId());
+                    ps.setObject(2, project.getParentProjectId(), Types.INTEGER);
+                    ps.setString(3, project.getTitle());
+                    ps.setString(4, project.getDescription());
+                    ps.setDate(5, Date.valueOf(project.getStartDate()));
+                    ps.setDate(6, Date.valueOf(project.getEndDate()));
+                    return ps;
+                },
+                keyHolder
         );
+        Number projectId = keyHolder.getKey();
+
+        String sql2 = "INSERT INTO project_users(project_id, user_id, role) VALUES(?,?,?)";
+
+        jdbcTemplate.update(sql2, projectId, project.getOwnerId(), "OWNER");
+
+        return (projectId != null) ? projectId.intValue() : -1;
     }
 
     public boolean isUserAssignedToProject(int projectId, int userId) {
@@ -128,5 +114,19 @@ public class ProjectRepository {
                 """;
 
         return jdbcTemplate.queryForObject(sql, String.class, projectId, userId);
+    }
+
+    private RowMapper<Project> getProjectRowMapper() {
+        return ((rs, rowNum) -> new Project(
+                rs.getInt("project_id"),
+                rs.getInt("owner_id"),
+                rs.getInt("parent_project_id"),
+                rs.getString("title"),
+                rs.getString("description"),
+                rs.getDate("start_date") != null ? rs.getDate("start_date").toLocalDate() : null,
+                rs.getDate("end_date") != null ? rs.getDate("end_date").toLocalDate() : null,
+                new ArrayList<>(),
+                new ArrayList<>())
+        );
     }
 }

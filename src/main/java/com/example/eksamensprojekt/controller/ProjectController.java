@@ -10,6 +10,7 @@ import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDate;
 import java.util.List;
 
 @Controller
@@ -62,6 +63,8 @@ public class ProjectController {
 
         Project newProject = new Project();
         newProject.setOwnerId(SessionUtil.getCurrentUserId(session));
+        newProject.setStartDate(LocalDate.now());
+        newProject.setEndDate(LocalDate.now());
 
         model.addAttribute("newProject", newProject);
         return "project_registration_form";
@@ -96,6 +99,8 @@ public class ProjectController {
         Project subProject = new Project();
         subProject.setOwnerId(projectService.getProject(parentId).getOwnerId());
         subProject.setParentProjectId(parentId);
+        subProject.setStartDate(LocalDate.now());
+        subProject.setEndDate(LocalDate.now());
 
         model.addAttribute("newProject", subProject);
         return "project_registration_form";

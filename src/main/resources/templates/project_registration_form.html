@@ -16,6 +16,7 @@
     <div>
         <h1>Nyt projekt</h1>
     </div>
+
     <form method="post" th:action="@{/projects/create}" th:object="${newProject}">
         <div>
             <input type="hidden" th:field="*{ownerId}"/>

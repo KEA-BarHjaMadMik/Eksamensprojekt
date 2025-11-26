@@ -11,6 +11,8 @@ import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDate;
+
 @Controller
 @RequestMapping("tasks")
 public class TaskController {
@@ -54,6 +56,8 @@ public class TaskController {
         //create a blank task
         Task task = new Task();
         task.setProjectId(projectId);
+        task.setStartDate(LocalDate.now());
+        task.setEndDate(LocalDate.now());
 
         model.addAttribute("task", task);
 
@@ -76,6 +80,8 @@ public class TaskController {
         Task task = new Task();
         task.setProjectId(parentTask.getProjectId());
         task.setParentTaskId(parentTaskId);
+        task.setStartDate(LocalDate.now());
+        task.setEndDate(LocalDate.now());
 
         model.addAttribute("task", task);
         model.addAttribute("parentTask", parentTask); /// for subtask form, show parent task context

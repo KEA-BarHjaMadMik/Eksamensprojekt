@@ -1,5 +1,7 @@
 package com.example.eksamensprojekt.model;
 
+import org.springframework.format.annotation.DateTimeFormat;
+
 import java.time.LocalDate;
 import java.util.List;
 
@@ -9,8 +11,13 @@ public class Project {
     private Integer parentProjectId;
     private String title;
     private String description;
+
+    @DateTimeFormat(pattern = "yyyy-MM-dd")
     private LocalDate startDate;
+
+    @DateTimeFormat(pattern = "yyyy-MM-dd")
     private LocalDate endDate;
+
     private List<Project> subProjects;
     private List<Task> tasks;
 
