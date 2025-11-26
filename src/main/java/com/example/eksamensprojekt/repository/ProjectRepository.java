@@ -41,11 +41,25 @@ public class ProjectRepository {
     }
 
     public List<Project> getAssignedProjectsByUserId(int userId) {
-        String sql= """
-                
+        String sql = """
+                SELECT
+                    p.project_id,
+                    p.owner_id,
+                    p.parent_project_id,
+                    p.title,
+                    p.description,
+                    p.start_date,
+                    p.end_date
+                FROM
+                    project p
+                        JOIN
+                    project_users pu ON p.project_id = pu.project_id
+                WHERE
+                    pu.user_id = ? AND p.owner_id != ?
+                        AND p.parent_project_id IS NULL
                 """;
 
-        return jdbcTemplate.query(sql, getProjectRowMapper(), userId);
+        return jdbcTemplate.query(sql, getProjectRowMapper(), userId, userId);
     }
 
     public Project getProject(int projectID) {

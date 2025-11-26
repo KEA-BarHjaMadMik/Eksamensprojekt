@@ -25,6 +25,20 @@
             </article>
         </div>
     </section>
+
+    <section th:unless="${assignedProjects.isEmpty()}">
+        <h1>Tilknyttede projekter</h1>
+        <div class="grid">
+            <article th:each="project : ${assignedProjects}">
+
+                <h3 th:text="${project.title}">Title</h3>
+                <hr/>
+                <p th:text="${'Deadline: ' + #temporals.format(project.endDate)}">Deadline</p>
+                <p><small th:text="${project.description}">Description</small></p>
+                <a th:href="@{/projects/{projectId}(projectId=${project.projectId})}">Gå til projekt 🡒</a>
+            </article>
+        </div>
+    </section>
 </main>
 
 <div th:replace="~{fragments/footer :: footer}">...</div>

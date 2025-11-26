@@ -28,7 +28,10 @@ public class ProjectController {
         int currentUserID = (int) session.getAttribute("userID");
 
         List<Project> projects = projectService.getProjectsByOwnerID(currentUserID);
+        List<Project> assignedProjects = projectService.getAssignedProjectsByUserId(currentUserID);
+
         model.addAttribute("projects", projects);
+        model.addAttribute("assignedProjects", assignedProjects);
 
         return "projects";
     }

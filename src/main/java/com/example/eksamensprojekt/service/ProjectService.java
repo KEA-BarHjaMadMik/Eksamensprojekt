@@ -52,6 +52,14 @@ public class ProjectService {
         }
     }
 
+    public List<Project> getAssignedProjectsByUserId(int userId){
+        try {
+            return projectRepository.getAssignedProjectsByUserId(userId);
+        } catch (DataAccessException e){
+            throw new DatabaseOperationException("Failed to get projects assigned to user with id=" + userId, e);
+        }
+    }
+
     public Project getProject(int projectID) {
         try {
             // Retrieve project with id
