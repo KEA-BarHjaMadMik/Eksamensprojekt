@@ -129,5 +129,9 @@ public class Task {
     public void setSubTasks(List<Task> subTasks) {
         this.subTasks = subTasks;
     }
+
+    public boolean isSubtask() {
+        return parentTaskId != 0;
+    }
 }
 
