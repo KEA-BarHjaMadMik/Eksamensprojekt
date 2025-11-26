@@ -57,6 +57,15 @@ public class ProjectController {
     }
 
     @GetMapping("/create")
+    public String showCreateProjectForm(HttpSession session, Model model){
+        //If user is not logged in, show login screen
+        if (!SessionUtil.isLoggedIn(session)) return "redirect:/login";
+
+        model.addAttribute("newProject", new Project());
+        return "project_registration_form";
+    }
+
+    @PostMapping("/create")
     public String createProject(HttpSession session,
                                 @Valid @ModelAttribute Project newProject,
                                 BindingResult bindingResult,
@@ -69,18 +78,25 @@ public class ProjectController {
 
         //if validation failed, return to form
         if (fieldsHaveErrors) {
-            model.addAttribute("project", newProject);
+            model.addAttribute("newProject", newProject);
             return "project_registration_form";
         }
 
-        projectService.createProject(newProject);
-        int parentID = newProject.getParentProjectId();
+        int projectID = projectService.createProject(newProject);
 
-        if (parentID != 0) {
-            return "redirect:/" + parentID + "/" + newProject.getProjectId();
-        } else {
-            return "redirect:/" + newProject.getProjectId();
-        }
+        return "redirect:/projects/" + projectID;
+    }
+
+    @GetMapping("/{parentID}/create")
+    public String showCreateSubProjectForm(HttpSession session, Model model, @PathVariable("parentID") int parentID){
+        //If user is not logged in, show login screen
+        if (!SessionUtil.isLoggedIn(session)) return "redirect:/login";
+
+        Project subProject = new Project();
+        subProject.setParentProjectId(parentID);
+
+        model.addAttribute("newProject", subProject);
+        return "project_registration_form";
     }
 
     //Helper methods
