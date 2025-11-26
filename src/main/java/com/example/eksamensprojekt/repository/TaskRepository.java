@@ -21,8 +21,27 @@ public class TaskRepository {
         this.jdbcTemplate = jdbcTemplate;
     }
 
+    //Gets all parent tasks for a project
     public List<Task> getDirectProjectTasks(int projectID) {
-        return null;
+        String sql = """
+                SELECT
+                    t.task_id,
+                    t.parent_task_id,
+                    t.project_id,
+                    t.title,
+                    t.start_date,
+                    t.end_date,
+                    t.description,
+                    t.estimated_hours,
+                    COALESCE(SUM(te.hours_worked), 0) AS actual_hours,
+                    ts.status_name
+                FROM task t
+                LEFT JOIN time_entry te ON t.task_id = te.task_id
+                JOIN task_status ts ON t.status_id = ts.status_id
+                WHERE t.project_id = ? AND t.parent_task_id IS NULL /* returns only parent tasks */
+                GROUP BY t.task_id
+                """;
+        return jdbcTemplate.query(sql, getTaskRowMapper(), projectID);
     }
 
     public Task getTask(int taskId) {
