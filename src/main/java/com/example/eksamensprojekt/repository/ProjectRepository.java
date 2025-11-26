@@ -38,9 +38,9 @@ public class ProjectRepository {
         );
         Number projectID = keyHolder.getKey();
 
-        String sql2 = "INSERT INTO project_users(project_id, user_id, role_id) VALUES(?,?,?)";
+        String sql2 = "INSERT INTO project_users(project_id, user_id, role) VALUES(?,?,?)";
 
-        jdbcTemplate.update(sql2, project.getProjectId(), project.getOwnerID(), 1); //1 is owner role id
+        jdbcTemplate.update(sql2, project.getProjectId(), project.getOwnerID(), "OWNER"); //1 is owner role id
 
         return (projectID != null) ? projectID.intValue() : -1;
     }
