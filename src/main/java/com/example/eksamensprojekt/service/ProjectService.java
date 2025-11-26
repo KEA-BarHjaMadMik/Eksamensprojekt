@@ -75,9 +75,9 @@ public class ProjectService {
     }
 
     public String getUserRole(Project project, int userId) {
-        // Owner is an implicit role that supersedes database roles
+        // early exit if the owner
         if (project.getOwnerID() == userId) {
-            return "Ejer";
+            return "OWNER";
         }
 
         try {

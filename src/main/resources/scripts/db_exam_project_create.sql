@@ -87,16 +87,16 @@ CREATE TABLE time_entry
 
 CREATE TABLE project_role
 (
-    role_id   INT          NOT NULL AUTO_INCREMENT,
+    role      VARCHAR(20)  NOT NULL,
     role_name VARCHAR(100) NOT NULL,
-    PRIMARY KEY (role_id)
+    PRIMARY KEY (role)
 );
 
 CREATE TABLE project_users
 (
-    project_id INT NOT NULL,
-    user_id    INT NOT NULL,
-    role_id    INT NOT NULL,
+    project_id INT         NOT NULL,
+    user_id    INT         NOT NULL,
+    role       VARCHAR(20) NOT NULL,
     PRIMARY KEY (project_id, user_id),
     CONSTRAINT fk_project_users_project_id FOREIGN KEY (project_id)
         REFERENCES project (project_id)
@@ -104,8 +104,8 @@ CREATE TABLE project_users
     CONSTRAINT fk_project_users_user_id FOREIGN KEY (user_id)
         REFERENCES user_account (user_id)
         ON DELETE CASCADE,
-    CONSTRAINT fk_project_users_role_id FOREIGN KEY (role_id)
-        REFERENCES project_role (role_id)
+    CONSTRAINT fk_project_users_role_id FOREIGN KEY (role)
+        REFERENCES project_role (role)
         ON DELETE RESTRICT
 );
 
