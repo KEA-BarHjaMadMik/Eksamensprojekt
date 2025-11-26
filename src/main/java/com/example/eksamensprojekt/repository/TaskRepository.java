@@ -75,55 +75,50 @@ public class TaskRepository {
     public boolean createTask(Task task) {
         String sql = "INSERT INTO task (parent_task_id, project_id, title, start_date, end_date, description, estimated_hours, status_id) VALUES (?,?,?,?,?,?,?,?)";
 
-        try {
-            jdbcTemplate.update(connection -> {
-                PreparedStatement ps = connection.prepareStatement(sql);
+        jdbcTemplate.update(connection -> {
+            PreparedStatement ps = connection.prepareStatement(sql);
 
-                //handles parent_task_id, if null means its the parent task
-               Integer parentTaskId = task.getParentTaskId();
-               if (parentTaskId != 0) {
-                   ps.setInt(1,parentTaskId);
-               } else {
-                   ps.setNull(1, Types.INTEGER);
-               }
+            //handles parent_task_id, if null means its the parent task
+            Integer parentTaskId = task.getParentTaskId();
+            if (parentTaskId != 0) {
+                ps.setInt(1, parentTaskId);
+            } else {
+                ps.setNull(1, Types.INTEGER);
+            }
 
-               //required fields
-               ps.setInt(2, task.getProjectId());
-               ps.setString(3, task.getTitle());
+            //required fields
+            ps.setInt(2, task.getProjectId());
+            ps.setString(3, task.getTitle());
 
-               //handles start_Date
-               LocalDate startDate = task.getStartDate();
-               if (startDate != null) {
-                   ps.setDate(4, Date.valueOf(startDate));
-               } else {
-                   ps.setNull(4, Types.DATE);
-               }
-                //handles end_Date
-                LocalDate endDate = task.getEndDate();
-                if (endDate != null) {
-                    ps.setDate(5, Date.valueOf(endDate));
-                } else {
-                    ps.setNull(5, Types.DATE);
-                }
+            //handles start_Date
+            LocalDate startDate = task.getStartDate();
+            if (startDate != null) {
+                ps.setDate(4, Date.valueOf(startDate));
+            } else {
+                ps.setNull(4, Types.DATE);
+            }
+            //handles end_Date
+            LocalDate endDate = task.getEndDate();
+            if (endDate != null) {
+                ps.setDate(5, Date.valueOf(endDate));
+            } else {
+                ps.setNull(5, Types.DATE);
+            }
 
-                //Handles description
-                String description = task.getDescription();
-                if (description != null) {
-                   ps.setString(6, description);
-                } else {
-                    ps.setNull(6, Types.VARCHAR);
-                }
+            //Handles description
+            String description = task.getDescription();
+            if (description != null) {
+                ps.setString(6, description);
+            } else {
+                ps.setNull(6, Types.VARCHAR);
+            }
 
-                ps.setDouble(7, task.getEstimatedHours());
-                ps.setInt(8,1);
+            ps.setDouble(7, task.getEstimatedHours());
+            ps.setInt(8, 1);
 
-                return ps;
-            });
-            return true;
-        } catch (DataAccessException e) {
-            System.err.println("Database error during task creation: " + e.getMessage());
-            return false;
-        }
+            return ps;
+        });
+        return true;
     }
 
     private RowMapper<Task> getTaskRowMapper() {

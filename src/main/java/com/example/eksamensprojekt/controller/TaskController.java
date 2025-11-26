@@ -30,12 +30,12 @@ public class TaskController {
         if (!SessionUtil.isLoggedIn(session)) return "redirect:/login";
         //Get project and verify ownership
         Project project = projectService.getProject(projectId);
-        if (isProjectOwner(session, project)) return "redirect:/";
+        if (!isProjectOwner(session, project)) return "redirect:/";
 
         //create a blank task
         Task task = new Task();
         task.setProjectId(projectId);
-        task.setParentTaskId(0); ///overflødig
+        task.setParentTaskId(0); ///overflødig -M... check to determine if it is a subtask. if its
 
         model.addAttribute("task", task);
         model.addAttribute("project", project); ///?
@@ -55,7 +55,7 @@ public class TaskController {
         if (parentTask == null) return "redirect:/";
 
         Project project = projectService.getProject(parentTask.getProjectId());
-        if (isProjectOwner(session, project)) return "redirect:/";
+        if (!isProjectOwner(session, project)) return "redirect:/";
 
         Task task = new Task();
         task.setProjectId(parentTask.getProjectId());
