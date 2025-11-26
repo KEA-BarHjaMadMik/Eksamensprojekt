@@ -35,10 +35,10 @@ public class TaskController {
         //create a blank task
         Task task = new Task();
         task.setProjectId(projectId);
-        task.setParentTaskId(0); ///overflødig -M... check to determine if it is a subtask. if its
+        task.setParentTaskId(0); ///set to 0 to mark as parent task
 
         model.addAttribute("task", task);
-        model.addAttribute("project", project); ///?
+        model.addAttribute("project", project); ///thymeleaf needs project info i.e. project title
 
 
         return "task_form";
@@ -63,8 +63,8 @@ public class TaskController {
         task.setParentTaskId(parentTaskId);
 
         model.addAttribute("task", task);
-        model.addAttribute("parentTask", parentTask); ///?
-        model.addAttribute("project", project); ///?
+        model.addAttribute("parentTask", parentTask); /// for subtask form, show parent task context
+        model.addAttribute("project", project); /// same logic as line showCreateTaskForm
 
         return "task_form";
     }
@@ -84,9 +84,9 @@ public class TaskController {
 
         //if validation fails return to form
         if (bindingResult.hasErrors()) {
-            model.addAttribute("project", project); ///?
+            model.addAttribute("project", project);
             //if it's a subtask, add parent task to model as well
-            if (task.getParentTaskId() != 0) {
+            if (task.isSubtask()) {
                 Task parentTask = taskService.getTask(task.getParentTaskId());
                 model.addAttribute("parentTask", parentTask);
             }
@@ -97,7 +97,7 @@ public class TaskController {
         boolean success = taskService.createTask(task);
         if (success) {
             //redirect depending on if it's a parent task or subtask
-            if (task.getParentTaskId() != 0) {
+            if (task.isSubtask()) {
                 //creates a subtask if parentId is not 0 and shows the parent task page
                 return "redirect:/tasks/" + task.getParentTaskId();
             } else {
