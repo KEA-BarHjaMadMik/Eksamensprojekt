@@ -36,6 +36,21 @@ public class TaskService {
         }
     }
 
+    //getTask is just for authorization checks
+    //and getting parent task info
+    public Task getTask(int taskId) {
+        try {
+            return taskRepository.getTask(taskId);
+        } catch (DataAccessException e) {
+            throw new DatabaseOperationException("Failed to retrieve task", e);
+        }
+    }
+
+    public boolean createTask(Task task) {
+        //It works but should probably add validation and exception handling
+        return taskRepository.createTask(task);
+    }
+
     private void loadTaskTree(Task task, Set<Integer> visitedTasks) {
 
         // Prevent endless recursion by tracking visited task IDs.

@@ -22,6 +22,10 @@ public class TaskRepository {
     }
 
     public List<Task> getDirectProjectTasks(int projectID) {
+        return null;
+    }
+
+    public Task getTask(int taskId) {
         String sql = """
                 SELECT
                     t.task_id,
@@ -37,11 +41,12 @@ public class TaskRepository {
                 FROM task t
                 LEFT JOIN time_entry te ON t.task_id = te.task_id
                 JOIN task_status ts ON t.status_id = ts.status_id
-                WHERE t.project_id = ? AND t.parent_task_id IS NULL
+                WHERE t.task_id = ?
                 GROUP BY t.task_id
                 """;
 
-        return jdbcTemplate.query(sql, getTaskRowMapper(), projectID);
+        List<Task> results = jdbcTemplate.query(sql, getTaskRowMapper(), taskId);
+        return results.isEmpty() ? null : results.getFirst();
     }
 
     public List<Task> getSubTasks(int parentID) {
@@ -68,7 +73,7 @@ public class TaskRepository {
     }
 
     public boolean createTask(Task task) {
-        String sql = "INSERT INTO task (parent_task_id, project id, title, start_date, end_date, description, estimated_hours, status_id) VALUES (?,?,?,?,?,?,?,?)";
+        String sql = "INSERT INTO task (parent_task_id, project_id, title, start_date, end_date, description, estimated_hours, status_id) VALUES (?,?,?,?,?,?,?,?)";
 
         try {
             jdbcTemplate.update(connection -> {
