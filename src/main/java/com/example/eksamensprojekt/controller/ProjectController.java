@@ -24,10 +24,10 @@ public class ProjectController {
     @GetMapping
     public String projects(HttpSession session, Model model) {
         if (!SessionUtil.isLoggedIn(session)) return "redirect:/login";
-        int currentUserID = SessionUtil.getCurrentUserID(session);
+        int currentUserId = SessionUtil.getCurrentUserId(session);
 
-        List<Project> projects = projectService.getProjectsByOwnerID(currentUserID);
-        List<Project> assignedProjects = projectService.getAssignedProjectsByUserId(currentUserID);
+        List<Project> projects = projectService.getProjectsByOwnerId(currentUserId);
+        List<Project> assignedProjects = projectService.getAssignedProjectsByUserId(currentUserId);
 
         model.addAttribute("projects", projects);
         model.addAttribute("assignedProjects", assignedProjects);
@@ -35,19 +35,19 @@ public class ProjectController {
         return "projects";
     }
 
-    @GetMapping("/{projectID}")
-    public String showProject(@PathVariable("projectID") int projectId, HttpSession session, Model model) {
+    @GetMapping("/{projectId}")
+    public String showProject(@PathVariable("projectId") int projectId, HttpSession session, Model model) {
         if (!SessionUtil.isLoggedIn(session)) return "redirect:/login";
 
-        int currentUserID = SessionUtil.getCurrentUserID(session);
+        int currentUserId = SessionUtil.getCurrentUserId(session);
 
         // Check if the user has access to the project
-        if (!projectService.hasAccessToProject(projectId, currentUserID)) {
+        if (!projectService.hasAccessToProject(projectId, currentUserId)) {
             return "redirect:/projects";
         }
 
         Project project = projectService.getProjectWithTree(projectId);
-        String userRole = projectService.getUserRole(project, currentUserID);
+        String userRole = projectService.getUserRole(project, currentUserId);
 
         model.addAttribute("project", project);
         model.addAttribute("userRole", userRole);
@@ -61,7 +61,7 @@ public class ProjectController {
         if (!SessionUtil.isLoggedIn(session)) return "redirect:/login";
 
         Project newProject = new Project();
-        newProject.setOwnerID(SessionUtil.getCurrentUserID(session));
+        newProject.setOwnerId(SessionUtil.getCurrentUserId(session));
 
         model.addAttribute("newProject", newProject);
         return "project_registration_form";
@@ -83,9 +83,9 @@ public class ProjectController {
             return "project_registration_form";
         }
 
-        int projectID = projectService.createProject(newProject);
+        int projectId = projectService.createProject(newProject);
 
-        return "redirect:/projects/" + projectID;
+        return "redirect:/projects/" + projectId;
     }
 
     @GetMapping("/{parentId}/create")
@@ -94,7 +94,7 @@ public class ProjectController {
         if (!SessionUtil.isLoggedIn(session)) return "redirect:/login";
 
         Project subProject = new Project();
-        subProject.setOwnerID(projectService.getProject(parentId).getOwnerID());
+        subProject.setOwnerId(projectService.getProject(parentId).getOwnerId());
         subProject.setParentProjectId(parentId);
 
         model.addAttribute("newProject", subProject);
@@ -103,6 +103,6 @@ public class ProjectController {
 
     //Helper methods
     private int setProjectOwner(HttpSession session) {
-        return (int) session.getAttribute("userID");
+        return (int) session.getAttribute("userId");
     }
 }

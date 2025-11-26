@@ -37,7 +37,7 @@ public class UserController {
 
         if (user != null) {
             // Login successful — store the username in the session
-            session.setAttribute("userID", user.getUserID());
+            session.setAttribute("userId", user.getUserId());
             session.setAttribute("userEmail", user.getEmail());
             // redirect
             return "redirect:/";
@@ -108,11 +108,11 @@ public class UserController {
             return "redirect:/login";
         }
 
-        // Retrieve userID from session
-        int userID = (int) session.getAttribute("userID");
+        // Retrieve userId from session
+        int userId = (int) session.getAttribute("userId");
 
         // Fetch full user object
-        User user = userService.getUserByUserID(userID);
+        User user = userService.getUserByUserId(userId);
 
         // Add user to model
         model.addAttribute("user", user);
@@ -135,7 +135,7 @@ public class UserController {
 
         // Check if the new email is taken (and not the current one)
         boolean emailTaken = userService.emailExists(user.getEmail()) &&
-                !userService.getUserByUserID(user.getUserID()).getEmail().equals(user.getEmail());
+                !userService.getUserByUserId(user.getUserId()).getEmail().equals(user.getEmail());
         if (emailTaken) {
             model.addAttribute("emailTaken", true);
         }
@@ -172,10 +172,10 @@ public class UserController {
                                  HttpSession session,
                                  Model model) {
 
-        // Retrieve userID from session
-        int userID = (int) session.getAttribute("userID");
+        // Retrieve userId from session
+        int userId = (int) session.getAttribute("userId");
         // Retrieve user email
-        String email = userService.getUserByUserID(userID).getEmail();
+        String email = userService.getUserByUserId(userId).getEmail();
 
         // Attempt to authenticate the user
         User user = userService.authenticate(email, password);
@@ -203,7 +203,7 @@ public class UserController {
         }
 
         // Proceed with updating the password
-        if (userService.changePassword(userID, newPassword)) {
+        if (userService.changePassword(userId, newPassword)) {
             return "redirect:/user_admin";
         } else {
             model.addAttribute("updateFailure", true);
@@ -218,11 +218,11 @@ public class UserController {
             return "redirect:/login";
         }
 
-        // Retrieve userID from session
-        int userID = (int) session.getAttribute("userID");
+        // Retrieve userId from session
+        int userId = (int) session.getAttribute("userId");
 
         // Proceed with deleting user
-        if(userService.deleteUser(userID)) {
+        if(userService.deleteUser(userId)) {
             session.invalidate();
             return "redirect:/";
         }else{

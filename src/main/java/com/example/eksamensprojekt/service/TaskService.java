@@ -57,8 +57,8 @@ public class TaskService {
 
     private void loadTaskTree(Task task, Set<Integer> visitedTasks) {
 
-        // Prevent endless recursion by tracking visited task IDs.
-        // visitedTasks.add(...) returns false if the ID was already added,
+        // Prevent endless recursion by tracking visited task Ids.
+        // visitedTasks.add(...) returns false if the Id was already added,
         // meaning we've already processed this project, so we stop recursing.
         if (!visitedTasks.add(task.getTaskId())) {
             return;

@@ -21,7 +21,7 @@ public class TaskRepository {
     }
 
     //Gets all parent tasks for a project
-    public List<Task> getDirectProjectTasks(int projectID) {
+    public List<Task> getDirectProjectTasks(int projectId) {
         String sql = """
                 SELECT
                     t.task_id,
@@ -40,7 +40,7 @@ public class TaskRepository {
                 WHERE t.project_id = ? AND t.parent_task_id IS NULL /* returns only parent tasks */
                 GROUP BY t.task_id
                 """;
-        return jdbcTemplate.query(sql, getTaskRowMapper(), projectID);
+        return jdbcTemplate.query(sql, getTaskRowMapper(), projectId);
     }
 
     public Task getTask(int taskId) {
@@ -67,7 +67,7 @@ public class TaskRepository {
         return results.isEmpty() ? null : results.getFirst();
     }
 
-    public List<Task> getSubTasks(int parentID) {
+    public List<Task> getSubTasks(int parentId) {
         String sql = """
                 SELECT
                     t.task_id,
@@ -87,7 +87,7 @@ public class TaskRepository {
                 GROUP BY t.task_id
                 """;
 
-        return jdbcTemplate.query(sql, getTaskRowMapper(), parentID);
+        return jdbcTemplate.query(sql, getTaskRowMapper(), parentId);
     }
 
     public boolean createTask(Task task) {
@@ -97,12 +97,13 @@ public class TaskRepository {
             PreparedStatement ps = connection.prepareStatement(sql);
 
             //handles parent_task_id, if null means its the parent task
-            Integer parentTaskId = task.getParentTaskId();
-            if (parentTaskId != 0) {
-                ps.setInt(1, parentTaskId);
-            } else {
-                ps.setNull(1, Types.INTEGER);
-            }
+            ps.setObject(1, task.getParentTaskId(), Types.INTEGER);
+//            int parentTaskId = task.getParentTaskId();
+//            if (parentTaskId != 0) {
+//                ps.setInt(1, parentTaskId);
+//            } else {
+//                ps.setNull(1, Types.INTEGER);
+//            }
 
             //required fields
             ps.setInt(2, task.getProjectId());

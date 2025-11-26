@@ -22,10 +22,10 @@ public class UserRepository {
         return results.isEmpty() ? null : results.getFirst();
     }
 
-    public User getUserByUserID(int userID) {
+    public User getUserByUserId(int userId) {
         String sql = "SELECT user_id, email, password_hash, name, title, external FROM user_account WHERE user_id = ?";
 
-        List<User> results = jdbcTemplate.query(sql, getUserRowMapper(), userID);
+        List<User> results = jdbcTemplate.query(sql, getUserRowMapper(), userId);
         return results.isEmpty() ? null : results.getFirst();
     }
 
@@ -57,20 +57,20 @@ public class UserRepository {
                 updatedUser.getName(),
                 updatedUser.getTitle(),
                 updatedUser.isExternal(),
-                updatedUser.getUserID()
+                updatedUser.getUserId()
         );
     }
 
-    public int changePassword(int userID, String passwordHash) {
+    public int changePassword(int userId, String passwordHash) {
         String sql = "UPDATE user_account SET password_hash = ? WHERE user_id = ?";
 
-        return jdbcTemplate.update(sql, passwordHash, userID);
+        return jdbcTemplate.update(sql, passwordHash, userId);
     }
 
-    public int deleteUser(int userID) {
+    public int deleteUser(int userId) {
         String sql = "DELETE FROM user_account WHERE user_id = ?";
 
-        return jdbcTemplate.update(sql, userID);
+        return jdbcTemplate.update(sql, userId);
     }
 
     private RowMapper<User> getUserRowMapper() {

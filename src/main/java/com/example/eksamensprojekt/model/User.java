@@ -6,7 +6,7 @@ import jakarta.validation.constraints.Size;
 
 public class User {
 
-    private int userID;
+    private int userId;
 
     @Email(message = "Ugyldig e-mailadresse")
     @NotBlank(message = "E-mail må ikke være tom")
@@ -32,13 +32,13 @@ public class User {
 
     }
 
-    public User(int userID,
+    public User(int userId,
                 String email,
                 String passwordHash,
                 String name,
                 String title,
                 boolean external){
-        this.userID = userID;
+        this.userId = userId;
         this.email = email;
         this.passwordHash = passwordHash;
         this.name = name;
@@ -86,11 +86,11 @@ public class User {
         this.external = external;
     }
 
-    public int getUserID() {
-        return userID;
+    public int getUserId() {
+        return userId;
     }
 
-    public void setUserID(int userID) {
-        this.userID = userID;
+    public void setUserId(int userId) {
+        this.userId = userId;
     }
 }

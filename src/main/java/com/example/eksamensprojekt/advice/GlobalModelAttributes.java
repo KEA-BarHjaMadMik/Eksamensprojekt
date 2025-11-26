@@ -17,7 +17,7 @@ public class GlobalModelAttributes {
         model.addAttribute("isLoggedIn", isLoggedIn);
 
         if (isLoggedIn) {
-            model.addAttribute("userID", session.getAttribute("userID"));
+            model.addAttribute("userId", session.getAttribute("userId"));
             model.addAttribute("userEmail", session.getAttribute("userEmail"));
         }
     }

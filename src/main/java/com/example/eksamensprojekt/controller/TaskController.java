@@ -1,6 +1,5 @@
 package com.example.eksamensprojekt.controller;
 
-import com.example.eksamensprojekt.model.Project;
 import com.example.eksamensprojekt.model.Task;
 import com.example.eksamensprojekt.service.ProjectService;
 import com.example.eksamensprojekt.service.TaskService;
@@ -28,18 +27,14 @@ public class TaskController {
                                      HttpSession session,
                                      Model model) {
         if (!SessionUtil.isLoggedIn(session)) return "redirect:/login";
-        //Get project and verify ownership
-        Project project = projectService.getProject(projectId);
-        if (!projectService.hasAccessToProject(projectId, getCurrentUserId(session))) return "redirect:/";
+        // Verify ownership / access
+        if (!projectService.hasAccessToProject(projectId, SessionUtil.getCurrentUserId(session))) return "redirect:/";
 
         //create a blank task
         Task task = new Task();
         task.setProjectId(projectId);
-        task.setParentTaskId(0); ///set to 0 to mark as parent task
 
         model.addAttribute("task", task);
-        model.addAttribute("project", project); ///thymeleaf needs project info i.e. project title
-
 
         return "task_form";
     }
@@ -54,9 +49,8 @@ public class TaskController {
         Task parentTask = taskService.getTask(parentTaskId);
         if (parentTask == null) return "redirect:/";
 
-        Project project = projectService.getProject(parentTask.getProjectId());
         if (!projectService.hasAccessToProject(parentTask.getProjectId(),
-        getCurrentUserId(session))) return "redirect:/";
+                SessionUtil.getCurrentUserId(session))) return "redirect:/";
 
         Task task = new Task();
         task.setProjectId(parentTask.getProjectId());
@@ -64,7 +58,6 @@ public class TaskController {
 
         model.addAttribute("task", task);
         model.addAttribute("parentTask", parentTask); /// for subtask form, show parent task context
-        model.addAttribute("project", project); /// same logic as line showCreateTaskForm
 
         return "task_form";
     }
@@ -77,15 +70,13 @@ public class TaskController {
 
         if (!SessionUtil.isLoggedIn(session)) return "redirect:/login";
 
-        //Get project and verify ownership
-        Project project = projectService.getProject(task.getProjectId());
+        // Verify ownership / access
         if (!projectService.hasAccessToProject(task.getProjectId(),
-                getCurrentUserId(session))) return "redirect:/";
+                SessionUtil.getCurrentUserId(session))) return "redirect:/";
 
-        //if validation fails return to form
+        //if validation fails, return to form
         if (bindingResult.hasErrors()) {
-            model.addAttribute("project", project);
-            //if it's a subtask, add parent task to model as well
+            //if it's a subtask, add the parent task to the model as well
             if (task.isSubtask()) {
                 Task parentTask = taskService.getTask(task.getParentTaskId());
                 model.addAttribute("parentTask", parentTask);
@@ -94,27 +85,15 @@ public class TaskController {
         }
 
         //If all went successful, redirect to the result
-        boolean success = taskService.createTask(task);
-        if (success) {
-            //redirect depending on if it's a parent task or subtask
-            if (task.isSubtask()) {
-                //creates a subtask if parentId is not 0 and shows the parent task page
-                return "redirect:/tasks/" + task.getParentTaskId();
-            } else {
-                //creates a parent task and shows the project page
-                return "redirect:/projects/" + task.getProjectId();
-            }
+        taskService.createTask(task);
+
+        //redirect depending on if it's a parent task or subtask
+        if (task.isSubtask()) {
+            //creates a subtask if parentId is not 0 and shows the parent task page
+            return "redirect:/tasks/" + task.getParentTaskId();
         } else {
-            //if creation failed
-            model.addAttribute("saveFailure", true);
-            model.addAttribute("project", project);
-            return "task_form";
+            //creates a parent task and shows the project page
+            return "redirect:/projects/" + task.getProjectId();
         }
-
-    }
-
-    //Helper methods
-    private int getCurrentUserId(HttpSession session){
-        return (int) session.getAttribute("userID");
     }
 }

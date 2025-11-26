@@ -34,10 +34,10 @@ public class UserService {
         }
     }
 
-    public User getUserByUserID(int userID) {
+    public User getUserByUserId(int userId) {
         try {
-            User user = userRepository.getUserByUserID(userID);
-            if (user == null) throw new UserNotFoundException(userID);
+            User user = userRepository.getUserByUserId(userId);
+            if (user == null) throw new UserNotFoundException(userId);
             return user;
         } catch (DataAccessException e) {
             throw new DatabaseOperationException("Failed to retrieve user", e);
@@ -66,28 +66,28 @@ public class UserService {
     public boolean updateUser(User updatedUser) {
         try {
             int rowsAffected = userRepository.updateUser(updatedUser);
-            if (rowsAffected == 0) throw new UserNotFoundException(updatedUser.getUserID());
+            if (rowsAffected == 0) throw new UserNotFoundException(updatedUser.getUserId());
             return true; // User updated
         } catch (DataAccessException e) {
             throw new DatabaseOperationException("Failed to update user", e);
         }
     }
 
-    public boolean changePassword(int userID, String newPassword) {
+    public boolean changePassword(int userId, String newPassword) {
         try {
             String passwordHash = PasswordUtil.hashPassword(newPassword);
-            int rowsAffected = userRepository.changePassword(userID, passwordHash);
-            if (rowsAffected == 0) throw new UserNotFoundException(userID);
+            int rowsAffected = userRepository.changePassword(userId, passwordHash);
+            if (rowsAffected == 0) throw new UserNotFoundException(userId);
             return true; // Password updated
         } catch (DataAccessException e) {
             throw new DatabaseOperationException("Failed to update password", e);
         }
     }
 
-    public boolean deleteUser(int userID) {
+    public boolean deleteUser(int userId) {
         try {
-            int rowsAffected = userRepository.deleteUser(userID);
-            if (rowsAffected == 0) throw new UserNotFoundException(userID);
+            int rowsAffected = userRepository.deleteUser(userId);
+            if (rowsAffected == 0) throw new UserNotFoundException(userId);
             return true; // User deleted
         } catch (DataAccessException e) {
             throw new DatabaseOperationException("Failed to delete user", e);

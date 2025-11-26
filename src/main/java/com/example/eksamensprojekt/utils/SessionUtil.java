@@ -7,7 +7,7 @@ public class SessionUtil {
         return session.getAttribute("userID") != null;
     }
 
-    public static int getCurrentUserID(HttpSession session) {
+    public static int getCurrentUserId(HttpSession session) {
         return (int) session.getAttribute("userID");
     }
 }

@@ -18,7 +18,7 @@
     </div>
     <form method="post" th:action="@{/projects/create}" th:object="${newProject}">
         <div>
-            <input type="hidden" th:field="*{ownerID}"/>
+            <input type="hidden" th:field="*{ownerId}"/>
             <input type="hidden" th:field="*{parentProjectId}"/>
         </div>
         <div>

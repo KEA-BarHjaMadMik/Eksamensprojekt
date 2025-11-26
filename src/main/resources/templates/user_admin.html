@@ -28,7 +28,7 @@
             <div th:if="${updateFailure}">🚫 Noget gik galt. Prøv igen.</div>
 
             <form method="post" th:action="@{/update_user}" th:object="${user}">
-                <input type="hidden" th:field="*{userID}">
+                <input type="hidden" th:field="*{userId}">
 
                 <div>
                     <label for="email">E-mail</label>

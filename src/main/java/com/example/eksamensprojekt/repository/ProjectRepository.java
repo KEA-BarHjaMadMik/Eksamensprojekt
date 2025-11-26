@@ -29,7 +29,7 @@ public class ProjectRepository {
 
         jdbcTemplate.update(connection -> {
                     PreparedStatement ps = connection.prepareStatement(sql, PreparedStatement.RETURN_GENERATED_KEYS);
-                    ps.setInt(1, project.getOwnerID());
+                    ps.setInt(1, project.getOwnerId());
                     ps.setObject(2, project.getParentProjectId(), Types.INTEGER);
                     ps.setString(3, project.getTitle());
                     ps.setString(4, project.getDescription());
@@ -43,19 +43,19 @@ public class ProjectRepository {
 
         String sql2 = "INSERT INTO project_users(project_id, user_id, role) VALUES(?,?,?)";
 
-        jdbcTemplate.update(sql2, projectId, project.getOwnerID(), "OWNER");
+        jdbcTemplate.update(sql2, projectId, project.getOwnerId(), "OWNER");
 
         return (projectId != null) ? projectId.intValue() : -1;
     }
 
-    public List<Project> getProjectsByOwnerID(int ownerID) {
+    public List<Project> getProjectsByOwnerId(int ownerId) {
         String sql = """
                 SELECT project_id, owner_id, parent_project_id, title, description, start_date, end_date
                 FROM project
                 WHERE owner_id = ? AND parent_project_id IS NULL
                 """;
 
-        return jdbcTemplate.query(sql, getProjectRowMapper(), ownerID);
+        return jdbcTemplate.query(sql, getProjectRowMapper(), ownerId);
     }
 
     public List<Project> getAssignedProjectsByUserId(int userId) {
@@ -80,24 +80,24 @@ public class ProjectRepository {
         return jdbcTemplate.query(sql, getProjectRowMapper(), userId, userId);
     }
 
-    public Project getProject(int projectID) {
+    public Project getProject(int projectId) {
         String sql = """
                 SELECT project_id, owner_id, parent_project_id, title, description, start_date, end_date
                 FROM project
                 WHERE project_id = ?
                 """;
-        List<Project> results = jdbcTemplate.query(sql, getProjectRowMapper(), projectID);
+        List<Project> results = jdbcTemplate.query(sql, getProjectRowMapper(), projectId);
         return results.isEmpty() ? null : results.getFirst();
     }
 
-    public List<Project> getDirectSubProjects(int parentProjectID) {
+    public List<Project> getDirectSubProjects(int parentProjectId) {
         String sql = """
                 SELECT project_id, owner_id, parent_project_id, title, description, start_date, end_date
                 FROM project
                 WHERE parent_project_id = ?
                 """;
 
-        return jdbcTemplate.query(sql, getProjectRowMapper(), parentProjectID);
+        return jdbcTemplate.query(sql, getProjectRowMapper(), parentProjectId);
     }
 
     private RowMapper<Project> getProjectRowMapper() {

@@ -5,7 +5,7 @@ import java.util.List;
 
 public class Task {
     private int taskId;
-    private int parentTaskId;
+    private Integer parentTaskId;
     private int projectId;
     private String title;
     private LocalDate startDate;
@@ -50,11 +50,11 @@ public class Task {
         this.taskId = taskId;
     }
 
-    public int getParentTaskId() {
+    public Integer getParentTaskId() {
         return parentTaskId;
     }
 
-    public void setParentTaskId(int parentTaskId) {
+    public void setParentTaskId(Integer parentTaskId) {
         this.parentTaskId = parentTaskId;
     }
 
@@ -131,7 +131,7 @@ public class Task {
     }
 
     public boolean isSubtask() {
-        return parentTaskId != 0;
+        return parentTaskId != null;
     }
 }
 

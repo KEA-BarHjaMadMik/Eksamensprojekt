@@ -30,7 +30,7 @@ public class ProjectService {
                 return false;
             }
             // Access granted if user is Owner OR is assigned to the project
-            return project.getOwnerID() == userId || projectRepository.isUserAssignedToProject(projectId, userId);
+            return project.getOwnerId() == userId || projectRepository.isUserAssignedToProject(projectId, userId);
         } catch (DataAccessException e) {
             throw new DatabaseOperationException("Failed to verify project access", e);
         }
@@ -44,9 +44,9 @@ public class ProjectService {
         }
     }
 
-    public List<Project> getProjectsByOwnerID(int userId) {
+    public List<Project> getProjectsByOwnerId(int userId) {
         try {
-            return projectRepository.getProjectsByOwnerID(userId);
+            return projectRepository.getProjectsByOwnerId(userId);
         } catch (DataAccessException e){
             throw new DatabaseOperationException("Failed to get projects", e);
         }
@@ -76,14 +76,14 @@ public class ProjectService {
         }
     }
 
-    public Project getProjectWithTree(int projectID) {
+    public Project getProjectWithTree(int projectId) {
         try {
             // Retrieve project with id
-            Project project = projectRepository.getProject(projectID);
+            Project project = projectRepository.getProject(projectId);
 
             // throw error if the project is not found
             if (project == null) {
-                throw new ProjectNotFoundException(projectID);
+                throw new ProjectNotFoundException(projectId);
             }
 
             // Load project tree setting subprojects and subtasks
@@ -94,13 +94,13 @@ public class ProjectService {
 
             return project;
         } catch (DataAccessException e) {
-            throw new DatabaseOperationException("Failed to retrieve project with id=" + projectID, e);
+            throw new DatabaseOperationException("Failed to retrieve project with id=" + projectId, e);
         }
     }
 
     public String getUserRole(Project project, int userId) {
         // early exit if the owner
-        if (project.getOwnerID() == userId) {
+        if (project.getOwnerId() == userId) {
             return "OWNER";
         }
 
@@ -113,8 +113,8 @@ public class ProjectService {
 
     private void loadProjectTree(Project project, Set<Integer> visitedProjects) {
 
-        // Prevent endless recursion by tracking visited project IDs.
-        // visitedProjects.add(...) returns false if the ID was already added,
+        // Prevent endless recursion by tracking visited project Ids.
+        // visitedProjects.add(...) returns false if the Id was already added,
         // meaning we've already processed this project, so we stop recursing.
         if (!visitedProjects.add(project.getProjectId())) {
             return;
