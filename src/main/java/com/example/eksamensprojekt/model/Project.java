@@ -1,5 +1,7 @@
 package com.example.eksamensprojekt.model;
 
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import org.springframework.format.annotation.DateTimeFormat;
 
 import java.time.LocalDate;
@@ -9,12 +11,18 @@ public class Project {
     private int projectId;
     private int ownerId;
     private Integer parentProjectId;
+
+    @NotBlank(message = "Title is required")
     private String title;
+
+    @NotBlank(message = "Description is required")
     private String description;
 
+    @NotNull(message = "Start date is required")
     @DateTimeFormat(pattern = "yyyy-MM-dd")
     private LocalDate startDate;
 
+    @NotNull(message = "End date is required")
     @DateTimeFormat(pattern = "yyyy-MM-dd")
     private LocalDate endDate;
 

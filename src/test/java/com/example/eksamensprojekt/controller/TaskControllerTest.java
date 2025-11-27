@@ -5,17 +5,16 @@ import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 
 @WebMvcTest(UserController.class)
 
-class UserControllerTest {
+public class TaskControllerTest {
 
     @Test
     void contextLoads() {
     }
 
-    //CreateUser test success/failed?
-    //Login test success/failed
-    //Already used email test?
-    //Wrong password test?
-    //Test logout
+    //Create task test success/failed
+    //Create subtask test
+    //Show task when has access test
+    //Show task when not has access test
 
 
 }
