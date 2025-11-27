@@ -23,7 +23,8 @@ public class Task {
     private String status;
     private List<Task> subTasks;
 
-    public Task(){}
+    public Task() {
+    }
 
     public Task(int taskId,
                 int parentTaskId,
@@ -35,7 +36,7 @@ public class Task {
                 double estimatedHours,
                 double actualHours,
                 String status,
-                List<Task> subtasks){
+                List<Task> subtasks) {
         this.taskId = taskId;
         this.parentTaskId = parentTaskId;
         this.projectId = projectId;
@@ -106,7 +107,11 @@ public class Task {
     }
 
     public double getEstimatedHours() {
-        return estimatedHours;
+        if (subTasks == null || subTasks.isEmpty()) {
+            return estimatedHours;
+        } else {
+            return subTasks.stream().mapToDouble(Task::getEstimatedHours).sum();
+        }
     }
 
     public void setEstimatedHours(double estimatedHours) {
@@ -114,7 +119,11 @@ public class Task {
     }
 
     public double getActualHours() {
-        return actualHours;
+        if (subTasks == null || subTasks.isEmpty()) {
+            return actualHours;
+        } else {
+            return actualHours + subTasks.stream().mapToDouble(Task::getActualHours).sum();
+        }
     }
 
     public void setActualHours(double actualHours) {

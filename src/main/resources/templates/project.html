@@ -12,9 +12,13 @@
 <div th:replace="~{fragments/header :: header}">...</div>
 
 <main class="container-fluid">
-    <div>
+    <hgroup>
         <h1 th:text="${project.title}">Project title</h1>
-    </div>
+        <p th:text="${project.description}"></p>
+    </hgroup>
+
+    <p th:text="${'Periode: '+ #temporals.format(project.startDate) + ' - ' + #temporals.format(project.endDate)}">Period</p>
+    <p th:text="${'Estimerede/faktiske timer: ' + project.estimatedHours + '/' + project.actualHours}"></p>
 
     <section th:unless="${project.subProjects.isEmpty()}">
         <h2>Delprojekter</h2>
