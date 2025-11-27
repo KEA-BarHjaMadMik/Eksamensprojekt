@@ -13,7 +13,20 @@
 
 <main class="container-fluid">
     <section>
-        <h1>Dine projekter</h1>
+        <nav>
+            <ul>
+                <li>
+                    <h1>Dine projekter</h1>
+                </li>
+            </ul>
+
+            <ul>
+                <li>
+                    <a role="button" th:href="@{/projects/create}">+ Projekt</a>
+                </li>
+            </ul>
+        </nav>
+
         <div class="grid">
             <article th:each="project : ${projects}">
 

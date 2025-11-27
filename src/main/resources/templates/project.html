@@ -12,10 +12,25 @@
 <div th:replace="~{fragments/header :: header}">...</div>
 
 <main class="container-fluid">
-    <hgroup>
-        <h1 th:text="${project.title}">Project title</h1>
-        <p th:text="${project.description}"></p>
-    </hgroup>
+    <nav>
+        <ul>
+            <li>
+                <hgroup>
+                    <h1 th:text="${project.title}">Project title</h1>
+                    <p th:text="${project.description}"></p>
+                </hgroup>
+            </li>
+        </ul>
+
+        <ul>
+            <li>
+                <div role="group">
+                    <a role="button" th:href="@{/tasks/{projectId}/create(projectId=${project.projectId})}">+ Opgave</a>
+                    <a role="button" th:href="@{/projects/{parentId}/create(parentId=${project.projectId})}">+ Delprojekt</a>
+                </div>
+            </li>
+        </ul>
+    </nav>
 
     <p th:text="${'Periode: '+ #temporals.format(project.startDate) + ' - ' + #temporals.format(project.endDate)}">Period</p>
     <p th:text="${'Estimerede/faktiske timer: ' + project.estimatedHours + '/' + project.actualHours}"></p>
