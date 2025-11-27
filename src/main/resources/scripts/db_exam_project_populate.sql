@@ -26,7 +26,7 @@ VALUES (1, 'Planlægning'),
        (4, 'Færdig');
 
 -- ===============================
--- Project Roles (simplified)
+-- Project Roles
 -- ===============================
 INSERT INTO project_role (role, role_name)
 VALUES ('OWNER','Ejer'),
