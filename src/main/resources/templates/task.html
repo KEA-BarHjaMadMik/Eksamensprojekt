@@ -12,9 +12,21 @@
 <div th:replace="~{fragments/header :: header}">...</div>
 
 <main class="container-fluid">
-    <div>
-        <h1 th:text="${task.title}">Task title</h1>
-    </div>
+    <nav>
+        <ul>
+            <li>
+                <h1 th:text="${task.title}">Task title</h1>
+            </li>
+        </ul>
+
+        <ul>
+            <li>
+                <div role="group">
+                    <a role="button" th:href="@{/tasks/{parentId}/subtask/create(parentId=${task.taskId})}">+ Underopgave</a>
+                </div>
+            </li>
+        </ul>
+    </nav>
 
     <section>
         <article th:text="${task.description}"></article>
