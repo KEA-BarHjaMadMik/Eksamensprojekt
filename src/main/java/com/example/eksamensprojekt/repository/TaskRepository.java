@@ -32,13 +32,16 @@ public class TaskRepository {
                     t.end_date,
                     t.description,
                     t.estimated_hours,
-                    COALESCE(SUM(te.hours_worked), 0) AS actual_hours,
+                    COALESCE(te.total_hours, 0) AS actual_hours,
                     ts.status_name
                 FROM task t
-                LEFT JOIN time_entry te ON t.task_id = te.task_id
+                LEFT JOIN (
+                    SELECT task_id, SUM(hours_worked) AS total_hours
+                    FROM time_entry
+                    GROUP BY task_id
+                ) te ON t.task_id = te.task_id
                 JOIN task_status ts ON t.status_id = ts.status_id
                 WHERE t.project_id = ? AND t.parent_task_id IS NULL /* returns only parent tasks */
-                GROUP BY t.task_id
                 """;
         return jdbcTemplate.query(sql, getTaskRowMapper(), projectId);
     }
@@ -54,13 +57,16 @@ public class TaskRepository {
                     t.end_date,
                     t.description,
                     t.estimated_hours,
-                    COALESCE(SUM(te.hours_worked), 0) AS actual_hours,
+                    COALESCE(te.total_hours, 0) AS actual_hours,
                     ts.status_name
                 FROM task t
-                LEFT JOIN time_entry te ON t.task_id = te.task_id
+                LEFT JOIN (
+                    SELECT task_id, SUM(hours_worked) AS total_hours
+                    FROM time_entry
+                    GROUP BY task_id
+                ) te ON t.task_id = te.task_id
                 JOIN task_status ts ON t.status_id = ts.status_id
                 WHERE t.task_id = ?
-                GROUP BY t.task_id
                 """;
 
         List<Task> results = jdbcTemplate.query(sql, getTaskRowMapper(), taskId);
@@ -78,19 +84,22 @@ public class TaskRepository {
                     t.end_date,
                     t.description,
                     t.estimated_hours,
-                    COALESCE(SUM(te.hours_worked), 0) AS actual_hours,
+                    COALESCE(te.total_hours, 0) AS actual_hours,
                     ts.status_name
                 FROM task t
-                LEFT JOIN time_entry te ON t.task_id = te.task_id
+                LEFT JOIN (
+                    SELECT task_id, SUM(hours_worked) AS total_hours
+                    FROM time_entry
+                    GROUP BY task_id
+                ) te ON t.task_id = te.task_id
                 JOIN task_status ts ON t.status_id = ts.status_id
                 WHERE t.parent_task_id = ?
-                GROUP BY t.task_id
                 """;
 
         return jdbcTemplate.query(sql, getTaskRowMapper(), parentId);
     }
 
-    public boolean createTask(Task task) {
+    public void createTask(Task task) {
         String sql = "INSERT INTO task (parent_task_id, project_id, title, start_date, end_date, description, estimated_hours, status_id) VALUES (?,?,?,?,?,?,?,?)";
 
         jdbcTemplate.update(connection -> {
@@ -98,12 +107,6 @@ public class TaskRepository {
 
             //handles parent_task_id, if null means its the parent task
             ps.setObject(1, task.getParentTaskId(), Types.INTEGER);
-//            int parentTaskId = task.getParentTaskId();
-//            if (parentTaskId != 0) {
-//                ps.setInt(1, parentTaskId);
-//            } else {
-//                ps.setNull(1, Types.INTEGER);
-//            }
 
             //required fields
             ps.setInt(2, task.getProjectId());
@@ -137,7 +140,6 @@ public class TaskRepository {
 
             return ps;
         });
-        return true;
     }
 
     private RowMapper<Task> getTaskRowMapper() {

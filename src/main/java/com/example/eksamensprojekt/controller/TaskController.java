@@ -120,7 +120,7 @@ public class TaskController {
             return "redirect:/tasks/" + task.getParentTaskId();
         } else {
             //creates a parent task and shows the project page
-            return "redirect:/projects/" + task.getProjectId();
+                return "redirect:/projects/" + task.getProjectId();
         }
     }
 }
