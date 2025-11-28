@@ -14,6 +14,27 @@ import java.util.List;
 
 @Repository
 public class TaskRepository {
+    private static final String BASE_TASK_SQL = """
+                SELECT
+                    t.task_id,
+                    t.parent_task_id,
+                    t.project_id,
+                    t.title,
+                    t.start_date,
+                    t.end_date,
+                    t.description,
+                    t.estimated_hours,
+                    COALESCE(te.total_hours, 0) AS actual_hours,
+                    ts.status_name
+                FROM task t
+                LEFT JOIN (
+                    SELECT task_id, SUM(hours_worked) AS total_hours
+                    FROM time_entry
+                    GROUP BY task_id
+                ) te ON t.task_id = te.task_id
+                JOIN task_status ts ON t.status_id = ts.status_id
+                """;
+
     private final JdbcTemplate jdbcTemplate;
 
     public TaskRepository(JdbcTemplate jdbcTemplate) {
@@ -22,79 +43,20 @@ public class TaskRepository {
 
     //Gets all parent tasks for a project
     public List<Task> getDirectProjectTasks(int projectId) {
-        String sql = """
-                SELECT
-                    t.task_id,
-                    t.parent_task_id,
-                    t.project_id,
-                    t.title,
-                    t.start_date,
-                    t.end_date,
-                    t.description,
-                    t.estimated_hours,
-                    COALESCE(te.total_hours, 0) AS actual_hours,
-                    ts.status_name
-                FROM task t
-                LEFT JOIN (
-                    SELECT task_id, SUM(hours_worked) AS total_hours
-                    FROM time_entry
-                    GROUP BY task_id
-                ) te ON t.task_id = te.task_id
-                JOIN task_status ts ON t.status_id = ts.status_id
-                WHERE t.project_id = ? AND t.parent_task_id IS NULL /* returns only parent tasks */
-                """;
+        String sql = BASE_TASK_SQL + "WHERE t.project_id = ? AND t.parent_task_id IS NULL"; /* returns only parent tasks */
+
         return jdbcTemplate.query(sql, getTaskRowMapper(), projectId);
     }
 
     public Task getTask(int taskId) {
-        String sql = """
-                SELECT
-                    t.task_id,
-                    t.parent_task_id,
-                    t.project_id,
-                    t.title,
-                    t.start_date,
-                    t.end_date,
-                    t.description,
-                    t.estimated_hours,
-                    COALESCE(te.total_hours, 0) AS actual_hours,
-                    ts.status_name
-                FROM task t
-                LEFT JOIN (
-                    SELECT task_id, SUM(hours_worked) AS total_hours
-                    FROM time_entry
-                    GROUP BY task_id
-                ) te ON t.task_id = te.task_id
-                JOIN task_status ts ON t.status_id = ts.status_id
-                WHERE t.task_id = ?
-                """;
+        String sql = BASE_TASK_SQL + "WHERE t.task_id = ?";
 
         List<Task> results = jdbcTemplate.query(sql, getTaskRowMapper(), taskId);
         return results.isEmpty() ? null : results.getFirst();
     }
 
     public List<Task> getSubTasks(int parentId) {
-        String sql = """
-                SELECT
-                    t.task_id,
-                    t.parent_task_id,
-                    t.project_id,
-                    t.title,
-                    t.start_date,
-                    t.end_date,
-                    t.description,
-                    t.estimated_hours,
-                    COALESCE(te.total_hours, 0) AS actual_hours,
-                    ts.status_name
-                FROM task t
-                LEFT JOIN (
-                    SELECT task_id, SUM(hours_worked) AS total_hours
-                    FROM time_entry
-                    GROUP BY task_id
-                ) te ON t.task_id = te.task_id
-                JOIN task_status ts ON t.status_id = ts.status_id
-                WHERE t.parent_task_id = ?
-                """;
+        String sql = BASE_TASK_SQL + "WHERE t.parent_task_id = ?";
 
         return jdbcTemplate.query(sql, getTaskRowMapper(), parentId);
     }
