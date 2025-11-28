@@ -31,7 +31,7 @@
 
                 <div>
                     <label for="description">Beskrivelse</label>
-                    <input id="description" type="text" th:field="*{description}" placeholder="Indtast beskrivelse" required/>
+                    <textarea id="description" th:field="*{description}" placeholder="Indtast beskrivelse"></textarea>
                     <div th:if="${#fields.hasErrors('description')}" th:errors="*{description}"></div>
                 </div>
 

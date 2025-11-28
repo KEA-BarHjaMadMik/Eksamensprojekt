@@ -23,7 +23,7 @@ CREATE TABLE project
     owner_id          INT          NOT NULL,
     parent_project_id INT          NULL,
     title             VARCHAR(100) NOT NULL,
-    description       TEXT         NOT NULL,
+    description       TEXT         NULL,
     start_date        DATE         NOT NULL,
     end_date          DATE         NOT NULL,
     PRIMARY KEY (project_id),
@@ -42,15 +42,15 @@ CREATE TABLE task_status
 
 CREATE TABLE task
 (
-    task_id         INT          NOT NULL AUTO_INCREMENT,
-    parent_task_id  INT          NULL,
-    project_id      INT          NOT NULL,
-    title           VARCHAR(100) NOT NULL,
-    start_date      DATE         NOT NULL,
-    end_date        DATE         NOT NULL,
-    description     TEXT         NOT NULL,
-    estimated_hours DECIMAL      NOT NULL,
-    status_id       INT          NOT NULL,
+    task_id         INT            NOT NULL AUTO_INCREMENT,
+    parent_task_id  INT            NULL,
+    project_id      INT            NOT NULL,
+    title           VARCHAR(100)   NOT NULL,
+    start_date      DATE           NOT NULL,
+    end_date        DATE           NOT NULL,
+    description     TEXT           NULL,
+    estimated_hours DECIMAL(10, 2) NOT NULL,
+    status_id       INT            NOT NULL,
     PRIMARY KEY (task_id),
     CONSTRAINT fk_task_parent_task_id FOREIGN KEY (parent_task_id)
         REFERENCES task (task_id)
@@ -69,11 +69,11 @@ CREATE TABLE task
 
 CREATE TABLE time_entry
 (
-    time_entry_id INT          NOT NULL AUTO_INCREMENT,
-    task_id       INT          NOT NULL,
-    user_id       INT          NOT NULL,
-    hours_worked  DECIMAL      NOT NULL,
-    description   VARCHAR(150) NULL,
+    time_entry_id INT            NOT NULL AUTO_INCREMENT,
+    task_id       INT            NOT NULL,
+    user_id       INT            NOT NULL,
+    hours_worked  DECIMAL(10, 2) NOT NULL,
+    description   VARCHAR(150)   NULL,
     PRIMARY KEY (time_entry_id),
     CONSTRAINT fk_time_entry_task_id FOREIGN KEY (task_id)
         REFERENCES task (task_id)

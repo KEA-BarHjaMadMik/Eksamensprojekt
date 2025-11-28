@@ -5,6 +5,7 @@ import jakarta.validation.constraints.NotNull;
 import org.springframework.format.annotation.DateTimeFormat;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
 
 public class Project {
@@ -30,6 +31,8 @@ public class Project {
     private List<Task> tasks;
 
     public Project() {
+        this.subProjects = new ArrayList<>();
+        this.tasks = new ArrayList<>();
     }
 
     public Project(int projectId,
@@ -124,4 +127,13 @@ public class Project {
         this.description = description;
     }
 
+    public double getEstimatedHours() {
+        return tasks.stream().mapToDouble(Task::getEstimatedHours).sum()
+                + subProjects.stream().mapToDouble(Project::getEstimatedHours).sum();
+    }
+
+    public double getActualHours() {
+        return tasks.stream().mapToDouble(Task::getActualHours).sum()
+                + subProjects.stream().mapToDouble(Project::getActualHours).sum();
+    }
 }

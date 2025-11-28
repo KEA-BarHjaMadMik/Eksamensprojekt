@@ -21,10 +21,10 @@
 
             <ul th:if="${isLoggedIn}">
                 <li>
-                    <a role="button" th:href="@{/user_admin}" th:text="${userEmail}">User</a>
-                </li>
-                <li>
-                    <a role="button" class="secondary" th:href="@{/logout}">Log ud</a>
+                    <div role="group">
+                        <a role="button" th:href="@{/user_admin}" th:text="${userEmail}">User</a>
+                        <a role="button" class="secondary" th:href="@{/logout}">Log ud</a>
+                    </div>
                 </li>
             </ul>
         </nav>

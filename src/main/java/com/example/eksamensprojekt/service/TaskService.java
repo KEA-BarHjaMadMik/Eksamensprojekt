@@ -70,10 +70,10 @@ public class TaskService {
         }
     }
 
-    public boolean createTask(Task task) {
+    public void createTask(Task task) {
         //It works but should probably add validation and exception handling
         try {
-            return taskRepository.createTask(task);
+            taskRepository.createTask(task);
         } catch (DataAccessException e) {
             throw new DatabaseOperationException("Database error during task creation", e);
         }

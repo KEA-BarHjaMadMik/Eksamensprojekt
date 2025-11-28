@@ -31,7 +31,7 @@ public class TaskController {
         // Check if the user has access to the task
         int currentUserId = SessionUtil.getCurrentUserId(session);
         int projectId = taskService.getTask(taskId).getProjectId();
-        if(!projectService.hasAccessToProject(currentUserId, projectId)){
+        if(!projectService.hasAccessToProject(projectId, currentUserId)){
             return "redirect:/projects";
         }
 
@@ -120,7 +120,7 @@ public class TaskController {
             return "redirect:/tasks/" + task.getParentTaskId();
         } else {
             //creates a parent task and shows the project page
-            return "redirect:/projects/" + task.getProjectId();
+                return "redirect:/projects/" + task.getProjectId();
         }
     }
 }
