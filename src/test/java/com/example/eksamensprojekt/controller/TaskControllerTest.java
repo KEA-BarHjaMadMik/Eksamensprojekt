@@ -49,7 +49,7 @@ public class TaskControllerTest {
                             1,
                             "Test task 1",
                             LocalDate.ofEpochDay(2025-11-11),
-                            LocalDate.ofEpochDay(2025-11-12),
+                            LocalDate.ofEpochDay(2025-11-14),
                             "Test task setup",
                             6.5,
                             6.0,
@@ -92,8 +92,8 @@ public class TaskControllerTest {
                         .param("parentTaskId", "1")
                         .param("title", "Test subtask")
                         .param("description", "Test subtask description")
-                        .param("startDate", "2025-07-12")
-                        .param("endDate", "2025-07-13")
+                        .param("startDate", "2025-11-12")
+                        .param("endDate", "2025-11-13")
                         .param("estimatedHours", "3"))
                 .andExpect(status().is3xxRedirection())
                 .andExpect(redirectedUrl("/tasks/1"));
