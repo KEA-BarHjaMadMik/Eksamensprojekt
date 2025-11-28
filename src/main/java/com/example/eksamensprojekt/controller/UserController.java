@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 @Controller
 public class UserController {
@@ -24,13 +25,13 @@ public class UserController {
     @GetMapping("/login")
     public String showLoginForm(HttpSession session) {
         // if already logged in, return to front page, else proceed to form
-        return SessionUtil.isLoggedIn(session) ? "index" : "login";
+        return SessionUtil.isLoggedIn(session) ? "redirect:/" : "login";
     }
 
     @PostMapping("/login")
     public String login(@RequestParam("email") String email, @RequestParam("pw") String pw,
                         HttpSession session,
-                        Model model) {
+                        RedirectAttributes redirectAttributes) {
 
         // Attempt to authenticate the user
         User user = userService.authenticate(email, pw);
@@ -44,10 +45,10 @@ public class UserController {
         }
 
         // Login failed — add an attribute to indicate incorrect credentials
-        model.addAttribute("wrongCredentials", true);
+        redirectAttributes.addFlashAttribute("wrongCredentials", true);
 
         // Return to the login page
-        return "login";
+        return "redirect:/login";
     }
 
     @GetMapping("/logout")
