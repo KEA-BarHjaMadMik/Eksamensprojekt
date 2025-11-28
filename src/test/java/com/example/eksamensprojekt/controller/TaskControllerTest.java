@@ -1,6 +1,5 @@
 package com.example.eksamensprojekt.controller;
 
-import com.example.eksamensprojekt.model.Project;
 import com.example.eksamensprojekt.model.Task;
 import com.example.eksamensprojekt.service.ProjectService;
 import com.example.eksamensprojekt.service.TaskService;
@@ -17,10 +16,10 @@ import java.time.LocalDate;
 import java.util.ArrayList;
 
 import static org.mockito.Mockito.*;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.redirectedUrl;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 
 @WebMvcTest(TaskController.class)
@@ -39,26 +38,10 @@ public class TaskControllerTest {
     void setUp() {
         session = new MockHttpSession();
         session.setAttribute("userId", 1);
-        Project project = new Project(1, 1, 0, "Test Project", "Test",
-                                      LocalDate.ofEpochDay(2025-1-1),
-                                      LocalDate.ofEpochDay(2025-12-12),
-                                      new ArrayList<Project>(),
-                                      new ArrayList<Task>());
-        Task task = new Task(1,
-                            0,
-                            1,
-                            "Test task 1",
-                            LocalDate.ofEpochDay(2025-11-11),
-                            LocalDate.ofEpochDay(2025-11-14),
-                            "Test task setup",
-                            6.5,
-                            6.0,
-                            "Test status",
-                            new ArrayList<Task>());
     }
 
     @Test
-    void shouldCreateTask() throws Exception {
+    void shouldCreateTaskSuccessfully() throws Exception {
         when(projectService.hasAccessToProject(1, 1)).thenReturn(true);
 
         mockMvc.perform(post("/tasks/create")
@@ -83,7 +66,35 @@ public class TaskControllerTest {
     }
 
     @Test
-    void shouldCreateSubTask() throws Exception {
+    void shouldShowTask() throws Exception {
+        Task shownTask = new Task();
+        shownTask.setTaskId(2);
+        shownTask.setProjectId(1);
+        shownTask.setTitle("Show Test");
+        shownTask.setStartDate(LocalDate.of(2025, 10, 10));
+        shownTask.setEndDate(LocalDate.of(2025, 11, 11));
+        shownTask.setEstimatedHours(3.6);
+        shownTask.setActualHours(3.5);
+        shownTask.setStatus("Done");
+        shownTask.setSubTasks(new ArrayList<>());
+
+        when(projectService.hasAccessToProject(1, 1)).thenReturn(true);
+        when(taskService.getTask(2)).thenReturn(shownTask);
+        when(taskService.getTaskWithTree(2)).thenReturn(shownTask);
+        when(projectService.getUserRole(1, 1)).thenReturn("OWNER");
+
+        mockMvc.perform(get("/tasks/2").session(session))
+                .andExpect(status().isOk())
+                .andExpect(view().name("task"))
+                .andExpect(model().attributeExists("task"))
+                .andExpect(model().attributeExists("userRole"));
+
+        verify(projectService).hasAccessToProject(1, 1);
+        verify(taskService).getTaskWithTree(2);
+    }
+
+    @Test
+    void shouldCreateSubTaskSuccessfully() throws Exception {
         when(projectService.hasAccessToProject(1, 1)).thenReturn(true);
 
         mockMvc.perform(post("/tasks/create")
