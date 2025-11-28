@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="color-scheme" content="light dark">
+    <link th:href="@{/css/pico.pink.min.css}" rel="stylesheet">
+    <link th:href="@{/css/main.css}" rel="stylesheet">
+</head>
+<body>
+<div th:replace="~{fragments/header :: header}">...</div>
+
+<main class="container-fluid">
+    <nav>
+        <ul>
+            <li>
+                <h1 th:text="${task.title}">Task title</h1>
+            </li>
+        </ul>
+
+        <ul>
+            <li>
+                <div role="group">
+                    <a role="button" th:href="@{/tasks/{parentId}/subtask/create(parentId=${task.taskId})}">+ Underopgave</a>
+                </div>
+            </li>
+        </ul>
+    </nav>
+
+    <section>
+        <article th:text="${task.description}"></article>
+    </section>
+
+    <section th:unless="${task.subTasks.isEmpty()}">
+        <h2>Underopgaver</h2>
+        <div th:replace="~{fragments/task_list :: recursiveList(${task.subTasks})}">...</div>
+    </section>
+</main>
+
+<div th:replace="~{fragments/footer :: footer}">...</div>
+</body>
+</html>

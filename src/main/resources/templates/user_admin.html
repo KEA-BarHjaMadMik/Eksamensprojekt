@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="color-scheme" content="light dark">
+    <link th:href="@{/css/pico.pink.min.css}" rel="stylesheet">
+    <link th:href="@{/css/main.css}" rel="stylesheet">
+</head>
+<body>
+<div th:replace="~{fragments/header :: header}">...</div>
+
+<main class="container-fluid">
+    <div>
+        <div>
+            <h1>Kontoindstillinger</h1>
+        </div>
+
+        <!-- Account Information Section -->
+        <section>
+            <div>
+                <h2>👤 Brugeroplysninger</h2>
+                <p>Opdater dine kontooplysninger</p>
+            </div>
+
+            <div th:if="${updateSuccess}">✅ Konto opdateret succesfuldt!</div>
+            <div th:if="${updateFailure}">🚫 Noget gik galt. Prøv igen.</div>
+
+            <form method="post" th:action="@{/update_user}" th:object="${user}">
+                <input type="hidden" th:field="*{userId}">
+
+                <div>
+                    <label for="email">E-mail</label>
+                    <input id="email" type="email" th:field="*{email}" required/>
+
+                    <div th:if="${#fields.hasErrors('email')}" th:errors="*{email}"></div>
+                    <div th:if="${emailTaken}">🚫 E-mail er allerede i brug.</div>
+                </div>
+
+                <div>
+                    <label for="name">Navn:</label>
+                    <input id="name" type="text" th:field="*{name}" required/>
+
+                    <div th:if="${#fields.hasErrors('name')}" th:errors="*{name}"></div>
+                </div>
+
+                <div>
+                    <label for="title">Titel:</label>
+                    <input id="title" type="text" th:field="*{title}"/>
+
+                    <div th:if="${#fields.hasErrors('title')}" th:errors="*{title}"></div>
+                </div>
+
+                <div>
+                    <label for="external">Intern eller ekstern?</label>
+                    <select id="external" th:field="*{external}">
+                        <option th:value="false">Intern</option>
+                        <option th:value="true">Ekstern</option>
+                    </select>
+                </div>
+
+                <button type="submit">Gem ændringer</button>
+            </form>
+        </section>
+
+        <!-- Security Section -->
+        <section>
+            <div>
+                <h2>🔒 Sikkerhed</h2>
+                <p>Administrer din kontosikkerhed</p>
+            </div>
+            <a role="button" th:href="@{/change_password}">Skift password</a>
+        </section>
+
+        <!-- Danger Zone -->
+        <section>
+            <div>
+                <h2>⚠️ Farezone</h2>
+                <p>Permanent sletning af din konto</p>
+            </div>
+
+            <div>
+                <p><strong>Advarsel:</strong> Når du sletter din konto, vil alle dine ønskesedler og data blive permanent fjernet. Denne handling kan ikke fortrydes.</p>
+            </div>
+
+            <form th:action="@{/delete}" method="post">
+                <button type="submit" onclick="return confirm('Er du sikker på at du vil slette din bruger permanent? Denne handling kan ikke fortrydes!')">
+                    Slet min konto permanent
+                </button>
+            </form>
+        </section>
+    </div>
+</main>
+
+<div th:replace="~{fragments/footer :: footer}">...</div>
+</body>
+</html>

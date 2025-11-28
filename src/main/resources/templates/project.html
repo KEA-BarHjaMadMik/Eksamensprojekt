@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title th:text="${project.title}">Projekt</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="color-scheme" content="light dark">
+    <link th:href="@{/css/pico.pink.min.css}" rel="stylesheet">
+    <link th:href="@{/css/main.css}" rel="stylesheet">
+</head>
+<body>
+<div th:replace="~{fragments/header :: header}">...</div>
+
+<main class="container-fluid">
+    <nav>
+        <ul>
+            <li>
+                <h1 th:text="${project.title}">Project title</h1>
+            </li>
+        </ul>
+
+        <ul>
+            <li>
+                <div role="group">
+                    <a role="button" th:href="@{/tasks/{projectId}/create(projectId=${project.projectId})}">+ Opgave</a>
+                    <a role="button" th:href="@{/projects/{parentId}/create(parentId=${project.projectId})}">+
+                        Delprojekt</a>
+                </div>
+            </li>
+        </ul>
+    </nav>
+
+    <p th:text="${project.description}"></p>
+    <p th:text="${'Periode: '+ #temporals.format(project.startDate) + ' - ' + #temporals.format(project.endDate)}">
+        Period</p>
+    <p th:text="${'Estimerede/faktiske timer: ' + project.estimatedHours + '/' + project.actualHours}"></p>
+
+    <section th:unless="${project.subProjects.isEmpty()}">
+        <h2>Delprojekter</h2>
+        <div th:replace="~{fragments/project_list :: recursiveList(${project.subProjects})}">...</div>
+    </section>
+
+    <!--    <section th:unless="${project.tasks.isEmpty()}">-->
+    <!--        <h2>Projektopgaver</h2>-->
+    <!--        <div th:replace="fragments/task_list :: recursiveList(${project.tasks})">...</div>-->
+    <!--    </section>-->
+
+    <section th:unless="${project.tasks.isEmpty()}">
+        <h2>Projektopgaver</h2>
+        <div class="overflow-auto">
+            <table>
+                <thead>
+                <tr>
+                    <th>Opgave</th>
+                    <th>Startdato</th>
+                    <th>Slutdato</th>
+                    <th>Estimerede timer</th>
+                    <th>Faktiske timer</th>
+                    <th>Status</th>
+                </tr>
+                </thead>
+                <tbody>
+                <div th:replace="~{fragments/task_table :: recursiveTableRows(taskList=${project.tasks}, currentDepth=0)}"></div>
+                </tbody>
+            </table>
+        </div>
+    </section>
+</main>
+
+<div th:replace="~{fragments/footer :: footer}">...</div>
+</body>
+</html>

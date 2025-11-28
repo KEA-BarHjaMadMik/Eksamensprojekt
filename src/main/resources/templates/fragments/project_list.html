@@ -1,0 +1,17 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+<div th:fragment="recursiveList(projectList)" th:remove="tag">
+    <ul th:unless="${projectList.isEmpty()}">
+        <li th:each="project : ${projectList}">
+            <a th:href="@{/projects/{projectId}(projectId=${project.projectId})}" th:text="${project.title}">Project Title</a>
+            <div th:insert="~{this :: recursiveList(projectList=${project.subProjects})}"></div>
+        </li>
+    </ul>
+</div>
+</body>
+</html>
