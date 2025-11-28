@@ -122,6 +122,7 @@ public class Task {
         if (subTasks == null || subTasks.isEmpty()) {
             return actualHours;
         } else {
+            // actual hours are based on time entries. Therefore, actual hours of parent task must be included in sum.
             return actualHours + subTasks.stream().mapToDouble(Task::getActualHours).sum();
         }
     }
