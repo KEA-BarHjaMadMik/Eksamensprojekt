@@ -75,6 +75,10 @@ public class UserController {
                                BindingResult bindingResult,
                                @RequestParam("confirmPassword") String confirmPassword) {
 
+        if (bindingResult.hasErrors()) {
+            return "user_registration_form";
+        }
+
         // Verify email is free
         if (userService.emailExists(newUser.getEmail())) {
             bindingResult.rejectValue("email", "error.email", "E-mail er allerede i brug");

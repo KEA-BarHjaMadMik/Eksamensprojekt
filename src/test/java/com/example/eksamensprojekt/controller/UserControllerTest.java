@@ -168,7 +168,65 @@ class UserControllerTest {
     }
 
     @Test
-    void registerUser() {
+    void shouldRegisterUserWhenValid() throws Exception {
+        // userService.emailExists returns false
+        when(userService.emailExists("test@mail.dk")).thenReturn(false);
+
+        mockMvc.perform(post("/register_user")
+                        .param("email", "test@mail.dk")
+                        .param("passwordHash", "test123")
+                        .param("confirmPassword", "test123"))
+                .andExpect(status().is3xxRedirection())
+                .andExpect(redirectedUrl("/login"));
+
+        verify(userService).registerUser(any(User.class));
+    }
+
+    @Test
+    void shouldReturnFormWhenEmailIsTaken() throws Exception {
+        when(userService.emailExists("used@mail.dk")).thenReturn(true);
+
+        mockMvc.perform(post("/register_user")
+                        .param("email", "used@mail.dk")
+                        .param("passwordHash", "test123")
+                        .param("confirmPassword", "test123"))
+                .andExpect(status().isOk())
+                .andExpect(view().name("user_registration_form"))
+                .andExpect(model().hasErrors())
+                .andExpect(model().attributeHasFieldErrors("newUser", "email"));
+
+        verify(userService, never()).registerUser(any());
+    }
+
+    @Test
+    void shouldReturnFormWhenPasswordsDoNotMatch() throws Exception {
+        when(userService.emailExists("test@mail.dk")).thenReturn(false);
+
+        mockMvc.perform(post("/register_user")
+                        .param("email", "test@mail.dk")
+                        .param("passwordHash", "pw1")
+                        .param("confirmPassword", "pw2"))
+                .andExpect(status().isOk())
+                .andExpect(view().name("user_registration_form"))
+                .andExpect(model().hasErrors())
+                .andExpect(model().attributeHasFieldErrors("newUser", "passwordHash"));
+
+        verify(userService, never()).registerUser(any());
+    }
+
+    @Test
+    void shouldReturnFormWhenBeanValidationFails() throws Exception {
+
+        mockMvc.perform(post("/register_user")
+                        .param("email", "")                       // invalid
+                        .param("passwordHash", "pw")
+                        .param("confirmPassword", "pw"))
+                .andExpect(status().isOk())
+                .andExpect(view().name("user_registration_form"))
+                .andExpect(model().hasErrors())
+                .andExpect(model().attributeHasFieldErrors("newUser", "email"));
+
+        verify(userService, never()).registerUser(any());
     }
 
     @Test
