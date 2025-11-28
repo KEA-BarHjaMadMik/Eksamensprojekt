@@ -19,8 +19,6 @@
             </div>
 
             <form method="post" th:action="@{/register_user}" th:object="${newUser}">
-                <div th:if="${registrationFailure}">🚫 Noget gik galt. Prøv igen.</div>
-
                 <div>
                     <label for="email">E-mail</label>
                     <input id="email" type="email" th:field="*{email}" placeholder="din@email.dk" required/>
