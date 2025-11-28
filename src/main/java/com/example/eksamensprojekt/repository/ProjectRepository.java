@@ -16,6 +16,19 @@ import java.util.List;
 
 @Repository
 public class ProjectRepository {
+    private static final String BASE_PROJECT_SQL = """
+            SELECT
+                p.project_id,
+                p.owner_id,
+                p.parent_project_id,
+                p.title,
+                p.description,
+                p.start_date,
+                p.end_date
+            FROM
+                project p
+            """;
+
     private final JdbcTemplate jdbcTemplate;
 
     public ProjectRepository(JdbcTemplate jdbcTemplate) {
@@ -23,28 +36,14 @@ public class ProjectRepository {
     }
 
     public List<Project> getProjectsByOwnerId(int ownerId) {
-        String sql = """
-                SELECT project_id, owner_id, parent_project_id, title, description, start_date, end_date
-                FROM project
-                WHERE owner_id = ? AND parent_project_id IS NULL
-                """;
+        String sql = BASE_PROJECT_SQL + "WHERE owner_id = ? AND parent_project_id IS NULL";
 
         return jdbcTemplate.query(sql, getProjectRowMapper(), ownerId);
     }
 
     public List<Project> getAssignedProjectsByUserId(int userId) {
-        String sql = """
-                SELECT
-                    p.project_id,
-                    p.owner_id,
-                    p.parent_project_id,
-                    p.title,
-                    p.description,
-                    p.start_date,
-                    p.end_date
-                FROM
-                    project p
-                        JOIN
+        String sql = BASE_PROJECT_SQL + """
+                JOIN
                     project_users pu ON p.project_id = pu.project_id
                 WHERE
                     pu.user_id = ? AND p.owner_id != ?
@@ -55,20 +54,16 @@ public class ProjectRepository {
     }
 
     public Project getProject(int projectId) {
-        String sql = """
-                SELECT project_id, owner_id, parent_project_id, title, description, start_date, end_date
-                FROM project
-                WHERE project_id = ?
+        String sql = BASE_PROJECT_SQL + """
+                WHERE p.project_id = ?
                 """;
         List<Project> results = jdbcTemplate.query(sql, getProjectRowMapper(), projectId);
         return results.isEmpty() ? null : results.getFirst();
     }
 
     public List<Project> getDirectSubProjects(int parentProjectId) {
-        String sql = """
-                SELECT project_id, owner_id, parent_project_id, title, description, start_date, end_date
-                FROM project
-                WHERE parent_project_id = ?
+        String sql = BASE_PROJECT_SQL + """
+                WHERE p.parent_project_id = ?
                 """;
 
         return jdbcTemplate.query(sql, getProjectRowMapper(), parentProjectId);

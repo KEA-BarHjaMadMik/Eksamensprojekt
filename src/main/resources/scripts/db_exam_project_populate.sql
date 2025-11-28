@@ -101,7 +101,7 @@ VALUES (1, 1, 'OWNER'), -- Anna Projektleder
        (3, 2, 'EDIT'), -- Bjørn Teammedlem
        (4, 3, 'EDIT'), -- Carina Teammedlem
        (4, 2, 'EDIT'), -- Bjørn Teammedlem
-       (5, 1, 'OWNER'); -- Anna Projekleder
+       (5, 1, 'OWNER'); -- Anna Projektleder
 
 -- ===============================
 -- Task Users
