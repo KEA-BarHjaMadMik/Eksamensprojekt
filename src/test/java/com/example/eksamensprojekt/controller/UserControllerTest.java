@@ -2,7 +2,6 @@ package com.example.eksamensprojekt.controller;
 
 import com.example.eksamensprojekt.model.User;
 import com.example.eksamensprojekt.service.UserService;
-import com.example.eksamensprojekt.utils.SessionUtil;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -14,6 +13,8 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.web.servlet.FlashMap;
 
+import static org.hamcrest.Matchers.instanceOf;
+import static org.hamcrest.Matchers.notNullValue;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -93,17 +94,16 @@ class UserControllerTest {
         when(userService.authenticate("test@email.dk", "incorrectPassword")).thenReturn(null);
 
         // act
-        MvcResult result = mockMvc.perform(post("/login")
+        mockMvc.perform(post("/login")
                         .session(session)
                         .param("email", "test@email.dk")
                         .param("pw", "incorrectPassword"))
                 .andExpect(status().is3xxRedirection())
                 .andExpect(redirectedUrl("/login"))
-                .andReturn();
+                .andExpect(flash().attribute("wrongCredentials", true));
 
         verify(userService, times(1)).authenticate("test@email.dk","incorrectPassword");
 
-        assertEquals(true, result.getFlashMap().get("wrongCredentials"));
         assertNull(session.getAttribute("userId"));
         assertNull(session.getAttribute("userEmail"));
     }
@@ -148,7 +148,23 @@ class UserControllerTest {
     }
 
     @Test
-    void showRegistrationForm() {
+    void shouldShowRegistrationFormWhenNotLoggedIn() throws Exception {
+        mockMvc.perform(get("/register_user").session(session))
+                .andExpect(status().isOk())
+                .andExpect(view().name("user_registration_form"))
+                .andExpect(model().attributeExists("newUser"))
+                .andExpect(model().attribute("newUser", instanceOf(User.class)))
+                .andExpect(model().attribute("newUser", notNullValue()));
+    }
+
+    @Test
+    void shouldRedirectToFrontPageWhenLoggedIn() throws Exception {
+        // arrange
+        session.setAttribute("userId", 1);
+
+        mockMvc.perform(get("/register_user").session(session))
+                .andExpect(status().is3xxRedirection())
+                .andExpect(redirectedUrl("/"));
     }
 
     @Test
@@ -177,10 +193,7 @@ class UserControllerTest {
 
 
     //CreateUser test success/failed?
-    //Login test success/failed
     //Already used email test?
-    //Wrong password test?
-    //Test logout
 
 
 }

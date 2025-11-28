@@ -62,7 +62,7 @@ public class UserController {
     public String showRegistrationForm(HttpSession session, Model model) {
         // if already logged in, return to front page, else proceed to form
         if (SessionUtil.isLoggedIn(session)) {
-            return "index";
+            return "redirect:/";
         }
 
         model.addAttribute("newUser", new User());
@@ -71,29 +71,22 @@ public class UserController {
 
 
     @PostMapping("/register_user")
-    public String registerUser(@Valid @ModelAttribute User newUser,
+    public String registerUser(@Valid @ModelAttribute("newUser") User newUser,
                                BindingResult bindingResult,
-                               @RequestParam("confirmPassword") String confirmPassword,
-                               Model model) {
+                               @RequestParam("confirmPassword") String confirmPassword) {
 
-        // Check for field validation errors
-        boolean fieldsHaveErrors = bindingResult.hasErrors();
-
-        // Check if email is free
-        boolean emailTaken = userService.emailExists(newUser.getEmail());
-        if (emailTaken) {
-            model.addAttribute("emailTaken", true);
+        // Verify email is free
+        if (userService.emailExists(newUser.getEmail())) {
+            bindingResult.rejectValue("email", "error.email", "E-mail er allerede i brug");
         }
 
-        // Check if passwords match
-        boolean passwordMismatch = !newUser.getPasswordHash().equals(confirmPassword);
-        if (passwordMismatch) {
-            model.addAttribute("passwordMismatch", true);
+        // Verify confirm password matches
+        if (!newUser.getPasswordHash().equals(confirmPassword)) {
+            bindingResult.rejectValue("passwordHash", "error.password", "Passwords matcher ikke");
         }
 
         // If validation failed, return to form
-        if (fieldsHaveErrors || emailTaken || passwordMismatch) {
-            model.addAttribute("newUser", newUser);
+        if (bindingResult.hasErrors()) {
             return "user_registration_form";
         }
 

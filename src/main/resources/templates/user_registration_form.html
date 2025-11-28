@@ -25,7 +25,6 @@
                     <label for="email">E-mail</label>
                     <input id="email" type="email" th:field="*{email}" placeholder="din@email.dk" required/>
                     <div th:if="${#fields.hasErrors('email')}" th:errors="*{email}"></div>
-                    <div th:if="${emailTaken}">🚫 E-mail er allerede i brug.</div>
                 </div>
 
                 <div>
@@ -39,7 +38,6 @@
                     <label for="confirmPw">Gentag password</label>
                     <input id="confirmPw" type="password" name="confirmPassword" placeholder="Gentag dit password"
                            required/>
-                    <div th:if="${passwordMismatch}">🚫 Passwords matcher ikke.</div>
                 </div>
 
                 <div>
