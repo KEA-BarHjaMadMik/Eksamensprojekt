@@ -3,24 +3,26 @@ package com.example.eksamensprojekt.service;
 import com.example.eksamensprojekt.exceptions.ProjectNotFoundException;
 import com.example.eksamensprojekt.exceptions.DatabaseOperationException;
 import com.example.eksamensprojekt.model.Project;
+import com.example.eksamensprojekt.model.ProjectRole;
 import com.example.eksamensprojekt.model.Task;
+import com.example.eksamensprojekt.model.User;
 import com.example.eksamensprojekt.repository.ProjectRepository;
 import org.springframework.dao.DataAccessException;
 import org.springframework.stereotype.Service;
 
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 @Service
 public class ProjectService {
 
     private final ProjectRepository projectRepository;
     private final TaskService taskService;
+    private final UserService userService;
 
-    public ProjectService(ProjectRepository projectRepository, TaskService taskService) {
+    public ProjectService(ProjectRepository projectRepository, TaskService taskService, UserService userService) {
         this.projectRepository = projectRepository;
         this.taskService = taskService;
+        this.userService = userService;
     }
 
     public boolean hasAccessToProject(int projectId, int userId) {
@@ -98,11 +100,37 @@ public class ProjectService {
         }
     }
 
-    public String getUserRole(int projectId, int userId) {
+    public ProjectRole getUserRole(int projectId, int userId) {
         try {
             return projectRepository.getProjectUserRole(projectId, userId);
         } catch (DataAccessException e) {
             throw new DatabaseOperationException("Failed to retrieve user role for project with id=" + projectId + "and user with id=" + userId, e);
+        }
+    }
+
+    public List<User> getProjectUsers(int projectId) {
+        return userService.getUsersByProjectId(projectId);
+    }
+
+    public Map<User,ProjectRole> getProjectUsersWithRoles(int projectId) {
+        try {
+            Map<User,ProjectRole> projectUsersWithRoles = new HashMap<>();
+            List<User> projectUsers = userService.getUsersByProjectId(projectId);
+            for(User user : projectUsers) {
+                ProjectRole projectRole = projectRepository.getProjectUserRole(projectId, user.getUserId());
+                projectUsersWithRoles.put(user,projectRole);
+            }
+            return projectUsersWithRoles;
+        }catch (DataAccessException e) {
+            throw new DatabaseOperationException("Failed to retrieve users with projectId=" + projectId, e);
+        }
+    }
+
+    public List<ProjectRole> getAllProjectRoles() {
+        try {
+            return projectRepository.getAllProjectRoles();
+        } catch (DataAccessException e) {
+            throw new DatabaseOperationException("Failed to retrieve projectRoles", e);
         }
     }
 
@@ -132,5 +160,15 @@ public class ProjectService {
         // Load project tasks with subtasks
         List<Task> tasks = taskService.getProjectTasksWithSubtasks(project.getProjectId());
         project.setTasks(tasks);
+    }
+
+    public void addUserToProject(int projectId, String email, String role) {
+        try {
+            int userId = userService.getUserByEmail(email).getUserId();
+
+            projectRepository.addUserToProject(projectId, userId, role);
+        }catch (DataAccessException e) {
+            throw new DatabaseOperationException("Failed to add user to project", e);
+        }
     }
 }

@@ -9,10 +9,30 @@ import java.util.List;
 
 @Repository
 public class UserRepository {
+    private static final String BASE_USER_SQL = """
+            SELECT
+                ua.user_id,
+                ua.email,
+                ua.password_hash,
+                ua.name,
+                ua.title,
+                ua.external
+            FROM
+                user_account ua
+            """;
+
     private final JdbcTemplate jdbcTemplate;
 
     public UserRepository(JdbcTemplate jdbcTemplate) {
         this.jdbcTemplate = jdbcTemplate;
+    }
+
+    public List<User> getUsersByProjectId(int projectId) {
+        String sql = BASE_USER_SQL + """
+                JOIN project_users pu ON ua.user_id = pu.user_id
+                WHERE pu.project_id = ?""";
+
+        return jdbcTemplate.query(sql, getUserRowMapper(), projectId);
     }
 
     public User getUserByEmail(String email) {

@@ -8,6 +8,8 @@ import com.example.eksamensprojekt.utils.PasswordUtil;
 import org.springframework.dao.DataAccessException;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
+
 @Service
 public class UserService {
     UserRepository userRepository;
@@ -34,12 +36,30 @@ public class UserService {
         }
     }
 
+    public List<User> getUsersByProjectId(int projectId) {
+        try {
+            return userRepository.getUsersByProjectId(projectId);
+        }catch (DataAccessException e) {
+            throw new DatabaseOperationException("Failed to retrieve users by project id=" + projectId, e);
+        }
+    }
+
     public User getUserByUserId(int userId) {
         try {
             User user = userRepository.getUserByUserId(userId);
             if (user == null) throw new UserNotFoundException(userId);
             return user;
         } catch (DataAccessException e) {
+            throw new DatabaseOperationException("Failed to retrieve user", e);
+        }
+    }
+
+    public User getUserByEmail(String email) {
+        try {
+            User user = userRepository.getUserByEmail(email);
+            if(user == null) throw new UserNotFoundException(email);
+            return user;
+        }catch (DataAccessException e) {
             throw new DatabaseOperationException("Failed to retrieve user", e);
         }
     }

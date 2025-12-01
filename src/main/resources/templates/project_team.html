@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Project team</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="color-scheme" content="light dark">
+    <link th:href="@{/css/pico.pink.min.css}" rel="stylesheet">
+    <link th:href="@{/css/main.css}" rel="stylesheet">
+</head>
+<body>
+<div th:replace="~{fragments/header :: header}">...</div>
+
+<main class="container-fluid">
+    <nav>
+        <ul>
+            <li>
+                <h1 th:text="${project.title}">Project title</h1>
+            </li>
+        </ul>
+
+        <ul>
+            <li>
+                <div role="group">
+                    <a role="button" class="secondary"
+                       th:href="@{/projects/{projectId}/team(projectId=${project.projectId})}">Team</a>
+                    <a role="button" th:href="@{/tasks/{projectId}/create(projectId=${project.projectId})}">+ Opgave</a>
+                    <a role="button" th:href="@{/projects/{parentId}/create(parentId=${project.projectId})}">+
+                        Delprojekt</a>
+                </div>
+            </li>
+        </ul>
+    </nav>
+
+    <section>
+        <nav>
+            <ul>
+                <li>
+                    <h1>Teammedlemmer</h1>
+                </li>
+            </ul>
+
+            <ul>
+                <li>
+                    <div role="group">
+
+                    </div>
+                </li>
+            </ul>
+        </nav>
+        <div class="overflow-auto">
+            <table>
+                <thead>
+                <tr>
+                    <th>Navn</th>
+                    <th>Titel</th>
+                    <th>E-mail</th>
+                    <th>Rolle</th>
+                </tr>
+                </thead>
+                <tbody>
+                <th:block th:each="user: ${team.keySet()}">
+                    <tr>
+                        <td th:text="${user.name}">Name</td>
+                        <td th:text="${user.title}">Title</td>
+                        <td th:text="${user.email}">Email</td>
+                        <td th:text="${team.get(user)}">Role</td>
+                    </tr>
+                </th:block>
+                </tbody>
+            </table>
+        </div>
+    </section>
+    <section>
+        <h2>Tilføj medlem til projekt:</h2>
+        <div th:if="${message}" th:text="${message}"></div>
+        <form th:action="@{/projects/{projectId}/team/add(projectId=${project.projectId})}" th:method="post">
+            <fieldset role="group">
+                <input name="email" type="email" placeholder="E-mail" required/>
+                <select id="role" name="role" required>
+                    <option value="" disabled selected>Vælg rolle…</option>
+                    <option th:each="projectRole: ${projectRoles}"
+                            th:value="${projectRole.role}"
+                            th:text="${projectRole.roleName}">Role</option>
+                </select>
+                <button type="submit">Tilføj</button>
+            </fieldset>
+        </form>
+    </section>
+</main>
+
+<div th:replace="~{fragments/footer :: footer}">...</div>
+</body>
+</html>

@@ -1,5 +1,6 @@
 package com.example.eksamensprojekt.controller;
 
+import com.example.eksamensprojekt.model.ProjectRole;
 import com.example.eksamensprojekt.model.Task;
 import com.example.eksamensprojekt.service.ProjectService;
 import com.example.eksamensprojekt.service.TaskService;
@@ -37,7 +38,7 @@ public class TaskController {
 
         // Add task and role to the model
         Task task = taskService.getTaskWithTree(taskId);
-        String userRole = projectService.getUserRole(projectId, currentUserId);
+        ProjectRole userRole = projectService.getUserRole(projectId, currentUserId);
 
         model.addAttribute("task", task);
         model.addAttribute("userRole", userRole);
