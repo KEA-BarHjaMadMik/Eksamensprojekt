@@ -82,7 +82,7 @@ class UserControllerTest {
                 .andExpect(status().is3xxRedirection())
                 .andExpect(redirectedUrl("/"));
 
-        verify(userService, times(1)).authenticate("test@email.dk","test123");
+        verify(userService, times(1)).authenticate("test@email.dk", "test123");
 
         assertEquals(1, session.getAttribute("userId"));
         assertEquals("test@email.dk", session.getAttribute("userEmail"));
@@ -102,7 +102,7 @@ class UserControllerTest {
                 .andExpect(redirectedUrl("/login"))
                 .andExpect(flash().attribute("wrongCredentials", true));
 
-        verify(userService, times(1)).authenticate("test@email.dk","incorrectPassword");
+        verify(userService, times(1)).authenticate("test@email.dk", "incorrectPassword");
 
         assertNull(session.getAttribute("userId"));
         assertNull(session.getAttribute("userEmail"));
@@ -176,7 +176,7 @@ class UserControllerTest {
                         .param("email", "test@mail.dk")
                         .param("passwordHash", "test123")
                         .param("confirmPassword", "test123")
-                        .param("name","testnavn"))
+                        .param("name", "testnavn"))
                 .andExpect(status().is3xxRedirection())
                 .andExpect(redirectedUrl("/login"));
 
@@ -191,7 +191,7 @@ class UserControllerTest {
                         .param("email", "used@mail.dk")
                         .param("passwordHash", "test123")
                         .param("confirmPassword", "test123")
-                        .param("name","testnavn"))
+                        .param("name", "testnavn"))
                 .andExpect(status().isOk())
                 .andExpect(view().name("user_registration_form"))
                 .andExpect(model().hasErrors())
@@ -208,7 +208,7 @@ class UserControllerTest {
                         .param("email", "test@mail.dk")
                         .param("passwordHash", "pw1")
                         .param("confirmPassword", "pw2")
-                        .param("name","testnavn"))
+                        .param("name", "testnavn"))
                 .andExpect(status().isOk())
                 .andExpect(view().name("user_registration_form"))
                 .andExpect(model().hasErrors())
@@ -224,7 +224,7 @@ class UserControllerTest {
                         .param("email", "")                       // invalid
                         .param("passwordHash", "pw")
                         .param("confirmPassword", "pw")
-                        .param("name","testnavn"))
+                        .param("name", "testnavn"))
                 .andExpect(status().isOk())
                 .andExpect(view().name("user_registration_form"))
                 .andExpect(model().hasErrors())
@@ -234,15 +234,70 @@ class UserControllerTest {
     }
 
     @Test
-    void showUserAdminPage() {
+    void shouldShowUserAdminPageWhenLoggedIn() throws Exception {
+        // Arrange
+        User user = new User();
+        user.setUserId(1);
+        user.setEmail("test@mail.dk");
+        session.setAttribute("userId", 1);
+
+        when(userService.getUserByUserId(1)).thenReturn(user);
+
+        // Act and Assert
+        mockMvc.perform(get("/user_admin")
+                        .session(session))
+                .andExpect(status().isOk())
+                .andExpect(view().name("user_admin"))
+                .andExpect(model().attributeExists("user"))
+                .andExpect(model().attribute("user", user));
+
+        verify(userService, times(1)).getUserByUserId(1);
     }
 
     @Test
-    void updateUser() {
+    void updateUser_ShouldSucceed() throws Exception {
+        session.setAttribute("userId", 1);
+
+        User original = new User();
+        original.setUserId(1);
+        original.setEmail("old@mail.dk");
+        original.setPasswordHash("oldHash");
+        original.setName("oldName");
+
+        User updated = new User();
+        updated.setUserId(1);
+        updated.setEmail("old@mail.dk"); // email unchanged
+        updated.setPasswordHash("oldHash");
+        updated.setName("newName"); // name changed
+
+        when(userService.getUserByUserId(1)).thenReturn(original);
+        when(userService.updateUser(updated)).thenReturn(true);
+
+        MvcResult result = mockMvc.perform(post("/update_user")
+                        .session(session)
+                        .flashAttr("user", updated))
+                .andExpect(status().is3xxRedirection())
+                .andExpect(redirectedUrl("/user_admin"))
+                .andReturn();
+
+        FlashMap flash = result.getFlashMap();
+        assertEquals(true, flash.get("updateSuccess"));
     }
 
     @Test
-    void showChangePasswordForm() {
+    void showChangePasswordForm_ShouldRedirect_WhenNotLoggedIn() throws Exception {
+        mockMvc.perform(get("/change_password").session(session))
+                .andExpect(status().is3xxRedirection())
+                .andExpect(redirectedUrl("/login"));
+    }
+
+    @Test
+    void showChangePasswordForm_ShouldRenderForm_WhenLoggedIn() throws Exception {
+        session.setAttribute("userId", 1);
+
+        mockMvc.perform(get("/change_password").session(session))
+                .andExpect(status().isOk())
+                .andExpect(view().name("change_password"));
     }
 
     @Test
