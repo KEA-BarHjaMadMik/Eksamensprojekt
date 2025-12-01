@@ -133,4 +133,14 @@ public class ProjectService {
         List<Task> tasks = taskService.getProjectTasksWithSubtasks(project.getProjectId());
         project.setTasks(tasks);
     }
+
+    public void deleteProject(int projectId){
+        try {
+            int rowsAffected = projectRepository.deleteProject(projectId);
+            if (rowsAffected == 0) throw new ProjectNotFoundException(projectId);
+            //project deleted if at least 1 row is affected
+        } catch (DataAccessException e){
+            throw new DatabaseOperationException("Failed to delete project", e);
+        }
+    }
 }

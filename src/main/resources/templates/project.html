@@ -28,6 +28,15 @@
                 </div>
             </li>
         </ul>
+        <ul th:if="${userRole.equals('OWNER')}">
+            <li>
+                <form th:action="@{/projects/{projectId}/delete(projectId = ${project.projectId})}" method="post">
+                    <button type="submit" onclick="return confirm('Er du sikker?')">
+                        Slet projekt
+                    </button>
+                </form>
+            </li>
+        </ul>
     </nav>
 
     <p th:text="${project.description}"></p>

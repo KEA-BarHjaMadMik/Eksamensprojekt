@@ -105,4 +105,17 @@ public class ProjectController {
         model.addAttribute("newProject", subProject);
         return "project_registration_form";
     }
+
+    @PostMapping("/{projectId}/delete")
+    public String deleteProject(@PathVariable("projectId") int projectId, HttpSession session){
+        if (!SessionUtil.isLoggedIn(session)) return "redirect:/login";
+
+        Project project = projectService.getProject(projectId);
+        if (SessionUtil.getCurrentUserId(session) != project.getOwnerId()){
+            return "redirect:/";
+        }
+
+        projectService.deleteProject(projectId);
+        return "redirect:/projects";
+    }
 }
