@@ -65,6 +65,13 @@
                         <td th:text="${user.title}">Title</td>
                         <td th:text="${user.email}">Email</td>
                         <td th:text="${team.get(user)}">Role</td>
+                        <td th:if="${user.userId != project.ownerId}">
+                            <form th:action="@{/projects/{projectId}/team/{userId}/remove(projectId=${project.projectId}, userId=${user.userId})}" method="post">
+                                <button type="submit" onclick="return confirm('Er du sikker på at du fjerne denne bruger fra projektet?')">
+                                    Fjern
+                                </button>
+                            </form>
+                        </td>
                     </tr>
                 </th:block>
                 </tbody>

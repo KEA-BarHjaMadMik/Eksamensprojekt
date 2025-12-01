@@ -171,4 +171,12 @@ public class ProjectService {
             throw new DatabaseOperationException("Failed to add user to project", e);
         }
     }
+
+    public void removeUserFromProject(int projectId, int userId) {
+        try {
+            projectRepository.removeUserFromProject(projectId,userId);
+        } catch (DataAccessException e) {
+            throw new DatabaseOperationException("Failed to remove user from project", e);
+        }
+    }
 }

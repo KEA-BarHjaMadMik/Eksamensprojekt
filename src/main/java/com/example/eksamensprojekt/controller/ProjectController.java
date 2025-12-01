@@ -159,4 +159,29 @@ public class ProjectController {
 
         return String.format("redirect:/projects/%s/team", projectId);
     }
+
+    @PostMapping("/{projectId}/team/{userId}/remove")
+    public String removeTeamMember(@PathVariable("projectId") int projectId,
+                                   @PathVariable("userId") int userId,
+                                   HttpSession session,
+                                   RedirectAttributes redirectAttributes) {
+        if (!SessionUtil.isLoggedIn(session)) return "redirect:/login";
+        int currentUserId = SessionUtil.getCurrentUserId(session);
+
+        // Access check
+        if (!projectService.hasAccessToProject(projectId, currentUserId)) {
+            return "redirect:/projects";
+        }
+
+        // Prevent removing the project owner
+        Project project = projectService.getProject(projectId);
+        if (project.getOwnerId() == userId) {
+            redirectAttributes.addFlashAttribute("message", "Projektets ejer kan ikke fjernes fra teamet.");
+            return String.format("redirect:/projects/%s/team", projectId);
+        }
+
+        projectService.removeUserFromProject(projectId, userId);
+
+        return String.format("redirect:/projects/%s/team", projectId);
+    }
 }
