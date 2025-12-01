@@ -80,7 +80,7 @@
     </section>
     <section>
         <h2>Tilføj medlem til projekt:</h2>
-        <div th:if="${message}" th:text="${message}"></div>
+        <div th:if="${addErrorMessage}" th:text="${addErrorMessage}"></div>
         <form th:action="@{/projects/{projectId}/team/add(projectId=${project.projectId})}" th:method="post">
             <fieldset role="group">
                 <input name="email" type="email" placeholder="E-mail" required/>

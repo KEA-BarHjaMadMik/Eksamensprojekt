@@ -160,12 +160,12 @@ public class ProjectController {
 
         // if a user with the provided email exists, proceed
         if (!userService.emailExists(email)) {
-            redirectAttributes.addFlashAttribute("message", "Bruger med e-mail, " + email + ", ikke fundet");
+            redirectAttributes.addFlashAttribute("addErrorMessage", "Bruger med e-mail, " + email + ", ikke fundet");
         } else if (projectService
                 .getProjectUsers(projectId)
                 .stream()
                 .anyMatch(u -> u.getEmail().equalsIgnoreCase(email))) {
-            redirectAttributes.addFlashAttribute("message", "Bruger med e-mail, " + email + ", er allerede tilknyttet projektet");
+            redirectAttributes.addFlashAttribute("addErrorMessage", "Bruger med e-mail, " + email + ", er allerede tilknyttet projektet");
         } else {
             projectService.addUserToProject(projectId, email, role);
         }
@@ -189,7 +189,6 @@ public class ProjectController {
         // Prevent removing the project owner
         Project project = projectService.getProject(projectId);
         if (project.getOwnerId() == userId) {
-            redirectAttributes.addFlashAttribute("message", "Projektets ejer kan ikke fjernes fra teamet.");
             return String.format("redirect:/projects/%s/team", projectId);
         }
 
