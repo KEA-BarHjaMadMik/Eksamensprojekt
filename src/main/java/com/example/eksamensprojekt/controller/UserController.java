@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 @Controller
 public class UserController {
@@ -24,13 +25,13 @@ public class UserController {
     @GetMapping("/login")
     public String showLoginForm(HttpSession session) {
         // if already logged in, return to front page, else proceed to form
-        return SessionUtil.isLoggedIn(session) ? "index" : "login";
+        return SessionUtil.isLoggedIn(session) ? "redirect:/" : "login";
     }
 
     @PostMapping("/login")
     public String login(@RequestParam("email") String email, @RequestParam("pw") String pw,
                         HttpSession session,
-                        Model model) {
+                        RedirectAttributes redirectAttributes) {
 
         // Attempt to authenticate the user
         User user = userService.authenticate(email, pw);
@@ -44,10 +45,10 @@ public class UserController {
         }
 
         // Login failed — add an attribute to indicate incorrect credentials
-        model.addAttribute("wrongCredentials", true);
+        redirectAttributes.addFlashAttribute("wrongCredentials", true);
 
         // Return to the login page
-        return "login";
+        return "redirect:/login";
     }
 
     @GetMapping("/logout")
@@ -61,7 +62,7 @@ public class UserController {
     public String showRegistrationForm(HttpSession session, Model model) {
         // if already logged in, return to front page, else proceed to form
         if (SessionUtil.isLoggedIn(session)) {
-            return "index";
+            return "redirect:/";
         }
 
         model.addAttribute("newUser", new User());
@@ -70,29 +71,26 @@ public class UserController {
 
 
     @PostMapping("/register_user")
-    public String registerUser(@Valid @ModelAttribute User newUser,
+    public String registerUser(@Valid @ModelAttribute("newUser") User newUser,
                                BindingResult bindingResult,
-                               @RequestParam("confirmPassword") String confirmPassword,
-                               Model model) {
+                               @RequestParam("confirmPassword") String confirmPassword) {
 
-        // Check for field validation errors
-        boolean fieldsHaveErrors = bindingResult.hasErrors();
-
-        // Check if email is free
-        boolean emailTaken = userService.emailExists(newUser.getEmail());
-        if (emailTaken) {
-            model.addAttribute("emailTaken", true);
+        if (bindingResult.hasErrors()) {
+            return "user_registration_form";
         }
 
-        // Check if passwords match
-        boolean passwordMismatch = !newUser.getPasswordHash().equals(confirmPassword);
-        if (passwordMismatch) {
-            model.addAttribute("passwordMismatch", true);
+        // Verify email is free
+        if (userService.emailExists(newUser.getEmail())) {
+            bindingResult.rejectValue("email", "error.email", "E-mail er allerede i brug");
+        }
+
+        // Verify confirm password matches
+        if (!newUser.getPasswordHash().equals(confirmPassword)) {
+            bindingResult.rejectValue("passwordHash", "error.password", "Passwords matcher ikke");
         }
 
         // If validation failed, return to form
-        if (fieldsHaveErrors || emailTaken || passwordMismatch) {
-            model.addAttribute("newUser", newUser);
+        if (bindingResult.hasErrors()) {
             return "user_registration_form";
         }
 
@@ -109,7 +107,7 @@ public class UserController {
         }
 
         // Retrieve userId from session
-        int userId = (int) session.getAttribute("userId");
+        int userId = SessionUtil.getCurrentUserId(session);
 
         // Fetch full user object
         User user = userService.getUserByUserId(userId);
@@ -121,35 +119,42 @@ public class UserController {
     }
 
     @PostMapping("/update_user")
-    public String updateUser(@Valid @ModelAttribute("user") User user,
-                             BindingResult bindingResult,
-                             HttpSession session,
-                             Model model) {
-        // Ensure user is logged in
+    public String updateUser(
+            @Valid @ModelAttribute("user") User user,
+            BindingResult bindingResult,
+            HttpSession session,
+            RedirectAttributes redirectAttributes) {
+
+        // Require login
         if (!SessionUtil.isLoggedIn(session)) {
             return "redirect:/login";
         }
 
-        // Check for field validation errors
-        boolean fieldsHaveErrors = bindingResult.hasErrors();
-
-        // Check if the new email is taken (and not the current one)
-        boolean emailTaken = userService.emailExists(user.getEmail()) &&
-                !userService.getUserByUserId(user.getUserId()).getEmail().equals(user.getEmail());
-        if (emailTaken) {
-            model.addAttribute("emailTaken", true);
+        // Prevent updating other users
+        int currentUserId = SessionUtil.getCurrentUserId(session);
+        if (user.getUserId() != currentUserId) {
+            return "redirect:/login";
         }
 
-        // If validation failed, return to form
-        if (fieldsHaveErrors || emailTaken) {
+        // Bean validation errors?
+        if (bindingResult.hasErrors()) {
             return "user_admin";
         }
 
-        // Proceed with updating the user
+        // Load current user once
+        User currentUser = userService.getUserByUserId(user.getUserId());
+
+        // Check email uniqueness only if changed
+        boolean emailChanged = !currentUser.getEmail().equals(user.getEmail());
+
+        if (emailChanged && userService.emailExists(user.getEmail())) {
+            bindingResult.rejectValue("email", "error.email", "E-mail er allerede i brug");
+            return "user_admin";
+        }
+
+        // Update
         if (userService.updateUser(user)) {
-            model.addAttribute("updateSuccess", true);
-        } else {
-            model.addAttribute("updateFailure", true);
+            redirectAttributes.addFlashAttribute("updateSuccess", true);
         }
 
         return "redirect:/user_admin";
@@ -173,7 +178,7 @@ public class UserController {
                                  Model model) {
 
         // Retrieve userId from session
-        int userId = (int) session.getAttribute("userId");
+        int userId = SessionUtil.getCurrentUserId(session);
         // Retrieve user email
         String email = userService.getUserByUserId(userId).getEmail();
 
@@ -219,7 +224,7 @@ public class UserController {
         }
 
         // Retrieve userId from session
-        int userId = (int) session.getAttribute("userId");
+        int userId = SessionUtil.getCurrentUserId(session);
 
         // Proceed with deleting user
         if(userService.deleteUser(userId)) {

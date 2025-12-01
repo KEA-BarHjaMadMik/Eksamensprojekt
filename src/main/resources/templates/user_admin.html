@@ -25,17 +25,16 @@
             </div>
 
             <div th:if="${updateSuccess}">✅ Konto opdateret succesfuldt!</div>
-            <div th:if="${updateFailure}">🚫 Noget gik galt. Prøv igen.</div>
 
             <form method="post" th:action="@{/update_user}" th:object="${user}">
                 <input type="hidden" th:field="*{userId}">
+                <input type="hidden" th:field="*{passwordHash}">
 
                 <div>
                     <label for="email">E-mail</label>
                     <input id="email" type="email" th:field="*{email}" required/>
 
                     <div th:if="${#fields.hasErrors('email')}" th:errors="*{email}"></div>
-                    <div th:if="${emailTaken}">🚫 E-mail er allerede i brug.</div>
                 </div>
 
                 <div>

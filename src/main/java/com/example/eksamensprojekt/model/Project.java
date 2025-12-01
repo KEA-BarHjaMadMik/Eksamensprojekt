@@ -37,7 +37,7 @@ public class Project {
 
     public Project(int projectId,
                    int ownerId,
-                   int parentProjectId,
+                   Integer parentProjectId,
                    String title,
                    String description,
                    LocalDate startDate,

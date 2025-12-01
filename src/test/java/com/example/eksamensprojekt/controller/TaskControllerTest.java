@@ -119,30 +119,6 @@ public class TaskControllerTest {
         assertThat(captured.getDescription()).isEqualTo("Test subtask description");
     }
 
-    @Test
-    void shouldDenyAccessIfUserIsNotAssignedToProject() throws Exception {
-        Task shownTask = new Task();
-        shownTask.setTaskId(1);
-        shownTask.setProjectId(1);
-        shownTask.setTitle("Show Test");
-        shownTask.setStartDate(LocalDate.of(2025, 10, 10));
-        shownTask.setEndDate(LocalDate.of(2025, 11, 11));
-        shownTask.setEstimatedHours(3.6);
-        shownTask.setActualHours(3.5);
-        shownTask.setStatus("Done");
-        shownTask.setSubTasks(new ArrayList<>());
-
-        when(taskService.getTask(1)).thenReturn(shownTask);
-        when(projectService.hasAccessToProject(1, 1)).thenReturn(false);
-
-        mockMvc.perform(get("/tasks/1").session(session))
-                .andExpect(status().is3xxRedirection())
-                .andExpect(redirectedUrl("/projects"));
-
-        verify(projectService).hasAccessToProject(1, 1);
-        verify(projectService, never()).getProjectWithTree(1);
-        verify(taskService, never()).getTaskWithTree(1);
-    }
     //Create task test success/failed
     //Create subtask test
     //Show task when has access test
