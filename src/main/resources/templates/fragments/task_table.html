@@ -16,7 +16,7 @@
             <td th:text="${#temporals.format(task.startDate)}">Start Date</td>
             <td th:text="${#temporals.format(task.endDate)}">End Date</td>
             <td>
-                <span th:attr="data-tooltip=${!task.subTasks.isEmpty()} ? 'Viser summen af estimerede timer denne opgaves underopgaver' : null"
+                <span th:attr="data-tooltip=${!task.subTasks.isEmpty()} ? 'Viser summen af estimerede timer på denne opgaves underopgaver' : null"
                       th:text="${#numbers.formatDecimal(task.estimatedHours, 1, 2)}">Estimated Hours</span>
             </td>
             <td>
