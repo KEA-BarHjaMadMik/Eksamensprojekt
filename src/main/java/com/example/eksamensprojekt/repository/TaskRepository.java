@@ -104,6 +104,12 @@ public class TaskRepository {
         });
     }
 
+    public int deleteTask(int taskId){
+        String sql = "DELETE FROM task WHERE task_id = ?";
+
+        return jdbcTemplate.update(sql, taskId);
+    }
+
     private RowMapper<Task> getTaskRowMapper() {
         return ((rs, rowNum) -> {
             Date startDate = rs.getDate("start_date");

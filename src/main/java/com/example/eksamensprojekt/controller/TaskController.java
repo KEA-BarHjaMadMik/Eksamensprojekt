@@ -123,4 +123,24 @@ public class TaskController {
                 return "redirect:/projects/" + task.getProjectId();
         }
     }
+
+    @PostMapping("/{taskId}/delete")
+    public String deleteTask(@PathVariable("taskId") int taskId, HttpSession session){
+        if (!SessionUtil.isLoggedIn(session)) return "redirect:/login";
+
+        Task task = taskService.getTask(taskId);
+        int parentId = task.getParentTaskId();
+        int projectId = task.getProjectId();
+
+        if (projectService.hasAccessToProject(projectId, SessionUtil.getCurrentUserId(session))){
+            return "redirect:/";
+        }
+
+            taskService.deleteTask(taskId);
+        if (parentId != 0) {
+            return "redirect:/tasks/" + parentId;
+        }else{
+            return "redirect:/projects/" + projectId;
+        }
+    }
 }
