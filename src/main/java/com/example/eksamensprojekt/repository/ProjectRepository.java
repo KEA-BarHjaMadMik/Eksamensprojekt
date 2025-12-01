@@ -144,6 +144,12 @@ public class ProjectRepository {
         jdbcTemplate.update(sql, projectId, userId);
     }
 
+    public int deleteProject(int projectId){
+        String sql = "DELETE FROM project WHERE project_id = ?";
+
+        return jdbcTemplate.update(sql, projectId);
+    }
+
     private RowMapper<Project> getProjectRowMapper() {
         return ((rs, rowNum) -> new Project(
                 rs.getInt("project_id"),

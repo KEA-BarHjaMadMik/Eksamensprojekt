@@ -113,6 +113,19 @@ public class ProjectController {
         return "project_registration_form";
     }
 
+    @PostMapping("/{projectId}/delete")
+    public String deleteProject(@PathVariable("projectId") int projectId, HttpSession session){
+        if (!SessionUtil.isLoggedIn(session)) return "redirect:/login";
+
+        Project project = projectService.getProject(projectId);
+        if (SessionUtil.getCurrentUserId(session) != project.getOwnerId()){
+            return "redirect:/";
+        }
+
+        projectService.deleteProject(projectId);
+        return "redirect:/projects";
+    }
+
     @GetMapping("/{projectId}/team")
     public String showTeam(@PathVariable("projectId") int projectId, HttpSession session, Model model) {
         if (!SessionUtil.isLoggedIn(session)) return "redirect:/login";

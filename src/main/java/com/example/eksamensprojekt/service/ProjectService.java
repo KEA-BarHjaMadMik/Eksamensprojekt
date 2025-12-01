@@ -162,6 +162,16 @@ public class ProjectService {
         project.setTasks(tasks);
     }
 
+    public void deleteProject(int projectId){
+        try {
+            int rowsAffected = projectRepository.deleteProject(projectId);
+            if (rowsAffected == 0) throw new ProjectNotFoundException(projectId);
+            //project deleted if at least 1 row is affected
+        } catch (DataAccessException e){
+            throw new DatabaseOperationException("Failed to delete project", e);
+        }
+    }
+
     public void addUserToProject(int projectId, String email, String role) {
         try {
             int userId = userService.getUserByEmail(email).getUserId();
