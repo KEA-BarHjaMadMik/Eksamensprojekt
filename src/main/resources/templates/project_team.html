@@ -64,7 +64,21 @@
                         <td th:text="${user.name}">Name</td>
                         <td th:text="${user.title}">Title</td>
                         <td th:text="${user.email}">Email</td>
-                        <td th:text="${team.get(user)}">Role</td>
+                        <td th:if="${user.userId == project.ownerId}" th:text="${team.get(user)}">Role</td>
+                        <td th:unless="${user.userId == project.ownerId}">
+                            <form th:action="@{/projects/{projectId}/team/{userId}/update_role(projectId=${project.projectId}, userId=${user.userId})}" method="post">
+                                <fieldset role="group">
+                                    <select name="role" required>
+                                        <option th:each="projectRole: ${projectRoles}"
+                                                th:value="${projectRole.role}"
+                                                th:text="${projectRole.roleName}"
+                                                th:selected="${projectRole.role == team.get(user).role}">
+                                        </option>
+                                    </select>
+                                    <button type="submit">Opdater</button>
+                                </fieldset>
+                            </form>
+                        </td>
                         <td th:if="${user.userId != project.ownerId}">
                             <form th:action="@{/projects/{projectId}/team/{userId}/remove(projectId=${project.projectId}, userId=${user.userId})}" method="post">
                                 <button type="submit" onclick="return confirm('Er du sikker på at du fjerne denne bruger fra projektet?')">

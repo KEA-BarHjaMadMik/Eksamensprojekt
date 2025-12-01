@@ -136,15 +136,25 @@ public class ProjectRepository {
         jdbcTemplate.update(sql, projectId, userId, role);
     }
 
+    public void updateUserRole(int projectId, int userId, String role) {
+        String sql = """
+                UPDATE project_users
+                SET role = ?
+                WHERE project_id = ? AND user_id = ?
+                """;
+
+        jdbcTemplate.update(sql, role, projectId, userId);
+    }
+
     public void removeUserFromProject(int projectId, int userId) {
         String sql = """
-                DELETE FROM project_users WHERE project_id = ? AND user_id = ?
-        """;
+                        DELETE FROM project_users WHERE project_id = ? AND user_id = ?
+                """;
 
         jdbcTemplate.update(sql, projectId, userId);
     }
 
-    public int deleteProject(int projectId){
+    public int deleteProject(int projectId) {
         String sql = "DELETE FROM project WHERE project_id = ?";
 
         return jdbcTemplate.update(sql, projectId);

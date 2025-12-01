@@ -173,6 +173,32 @@ public class ProjectController {
         return String.format("redirect:/projects/%s/team", projectId);
     }
 
+    @PostMapping("/{projectId}/team/{userId}/update_role")
+    public String updateTeamMemberRole(@PathVariable("projectId") int projectId,
+                                       @PathVariable("userId") int userId,
+                                       @RequestParam("role") String role,
+                                       HttpSession session,
+                                       RedirectAttributes redirectAttributes) {
+        if (!SessionUtil.isLoggedIn(session)) return "redirect:/login";
+        int currentUserId = SessionUtil.getCurrentUserId(session);
+
+        // Access check
+        if (!projectService.hasAccessToProject(projectId, currentUserId)) {
+            return "redirect:/projects";
+        }
+
+        // Prevent updating the owner's role
+        Project project = projectService.getProject(projectId);
+        if (project.getOwnerId() == userId) {
+            return String.format("redirect:/projects/%s/team", projectId);
+        }
+
+        // Update the role
+        projectService.updateUserRole(projectId, userId, role);
+
+        return String.format("redirect:/projects/%s/team", projectId);
+    }
+
     @PostMapping("/{projectId}/team/{userId}/remove")
     public String removeTeamMember(@PathVariable("projectId") int projectId,
                                    @PathVariable("userId") int userId,

@@ -182,6 +182,10 @@ public class ProjectService {
         }
     }
 
+    public void updateUserRole(int projectId, int userId, String role) {
+        projectRepository.updateUserRole(projectId, userId, role);
+    }
+
     public void removeUserFromProject(int projectId, int userId) {
         try {
             projectRepository.removeUserFromProject(projectId,userId);
