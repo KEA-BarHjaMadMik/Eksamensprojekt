@@ -4,6 +4,8 @@ import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
 
+import java.util.Objects;
+
 public class User {
 
     private int userId;
@@ -28,7 +30,7 @@ public class User {
     private boolean external;
 
 
-    public User(){
+    public User() {
 
     }
 
@@ -37,7 +39,7 @@ public class User {
                 String passwordHash,
                 String name,
                 String title,
-                boolean external){
+                boolean external) {
         this.userId = userId;
         this.email = email;
         this.passwordHash = passwordHash;
@@ -92,5 +94,16 @@ public class User {
 
     public void setUserId(int userId) {
         this.userId = userId;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (!(o instanceof User user)) return false;
+        return userId == user.userId && external == user.external && Objects.equals(email, user.email) && Objects.equals(passwordHash, user.passwordHash) && Objects.equals(name, user.name) && Objects.equals(title, user.title);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(userId, email, passwordHash, name, title, external);
     }
 }

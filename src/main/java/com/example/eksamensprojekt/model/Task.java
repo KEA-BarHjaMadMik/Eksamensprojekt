@@ -27,7 +27,7 @@ public class Task {
     }
 
     public Task(int taskId,
-                int parentTaskId,
+                Integer parentTaskId,
                 int projectId,
                 String title,
                 LocalDate startDate,

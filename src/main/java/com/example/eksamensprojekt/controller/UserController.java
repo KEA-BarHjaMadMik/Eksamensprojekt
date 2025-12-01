@@ -107,7 +107,7 @@ public class UserController {
         }
 
         // Retrieve userId from session
-        int userId = (int) session.getAttribute("userId");
+        int userId = SessionUtil.getCurrentUserId(session);
 
         // Fetch full user object
         User user = userService.getUserByUserId(userId);
@@ -119,35 +119,42 @@ public class UserController {
     }
 
     @PostMapping("/update_user")
-    public String updateUser(@Valid @ModelAttribute("user") User user,
-                             BindingResult bindingResult,
-                             HttpSession session,
-                             Model model) {
-        // Ensure user is logged in
+    public String updateUser(
+            @Valid @ModelAttribute("user") User user,
+            BindingResult bindingResult,
+            HttpSession session,
+            RedirectAttributes redirectAttributes) {
+
+        // Require login
         if (!SessionUtil.isLoggedIn(session)) {
             return "redirect:/login";
         }
 
-        // Check for field validation errors
-        boolean fieldsHaveErrors = bindingResult.hasErrors();
-
-        // Check if the new email is taken (and not the current one)
-        boolean emailTaken = userService.emailExists(user.getEmail()) &&
-                !userService.getUserByUserId(user.getUserId()).getEmail().equals(user.getEmail());
-        if (emailTaken) {
-            model.addAttribute("emailTaken", true);
+        // Prevent updating other users
+        int currentUserId = SessionUtil.getCurrentUserId(session);
+        if (user.getUserId() != currentUserId) {
+            return "redirect:/login";
         }
 
-        // If validation failed, return to form
-        if (fieldsHaveErrors || emailTaken) {
+        // Bean validation errors?
+        if (bindingResult.hasErrors()) {
             return "user_admin";
         }
 
-        // Proceed with updating the user
+        // Load current user once
+        User currentUser = userService.getUserByUserId(user.getUserId());
+
+        // Check email uniqueness only if changed
+        boolean emailChanged = !currentUser.getEmail().equals(user.getEmail());
+
+        if (emailChanged && userService.emailExists(user.getEmail())) {
+            bindingResult.rejectValue("email", "error.email", "E-mail er allerede i brug");
+            return "user_admin";
+        }
+
+        // Update
         if (userService.updateUser(user)) {
-            model.addAttribute("updateSuccess", true);
-        } else {
-            model.addAttribute("updateFailure", true);
+            redirectAttributes.addFlashAttribute("updateSuccess", true);
         }
 
         return "redirect:/user_admin";
@@ -171,7 +178,7 @@ public class UserController {
                                  Model model) {
 
         // Retrieve userId from session
-        int userId = (int) session.getAttribute("userId");
+        int userId = SessionUtil.getCurrentUserId(session);
         // Retrieve user email
         String email = userService.getUserByUserId(userId).getEmail();
 
@@ -217,7 +224,7 @@ public class UserController {
         }
 
         // Retrieve userId from session
-        int userId = (int) session.getAttribute("userId");
+        int userId = SessionUtil.getCurrentUserId(session);
 
         // Proceed with deleting user
         if(userService.deleteUser(userId)) {
