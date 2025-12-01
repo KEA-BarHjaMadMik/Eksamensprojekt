@@ -29,7 +29,7 @@
             </li>
         </ul>
         <ul>
-            <li>
+            <li th:if="${userRole.equals('OWNER')}">
                 <form th:action="@{/projects/{projectId}/delete(projectId = ${project.projectId})}" method="post">
                     <button type="submit" onclick="return confirm('Er du sikker?')">
                         Slet projekt
