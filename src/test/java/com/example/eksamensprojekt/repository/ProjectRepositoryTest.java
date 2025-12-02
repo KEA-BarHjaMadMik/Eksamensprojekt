@@ -33,7 +33,7 @@ class ProjectRepositoryTest {
 
     @Test
     void shouldNotGetProjectsByOwnerId(){
-        int ownerId = 0;
+        int ownerId = 999999;
         List<Project> projects = projectRepository.getProjectsByOwnerId(ownerId);
 
         assertThat(projects).isNotNull();
@@ -52,7 +52,7 @@ class ProjectRepositoryTest {
 
     @Test
     void shouldNotGetAssignedProjectsByUserId(){
-        int userId = 0;
+        int userId = 999999;
         List<Project> assignedProjects = projectRepository.getAssignedProjectsByUserId(userId);
 
         assertThat(assignedProjects).isNotNull();
@@ -71,7 +71,7 @@ class ProjectRepositoryTest {
 
     @Test
     void shouldGetNullProject(){
-        int projectId = 0;
+        int projectId = 999999;
         Project project = projectRepository.getProject(projectId);
 
         assertThat(project).isNull();
@@ -89,7 +89,7 @@ class ProjectRepositoryTest {
 
     @Test
     void shouldNotGetNoSubProjects(){
-        int parentProjectId = 0;
+        int parentProjectId = 999999;
         List<Project> subProjects = projectRepository.getDirectSubProjects(parentProjectId);
 
         assertThat(subProjects).isNotNull();
@@ -136,7 +136,7 @@ class ProjectRepositoryTest {
     @Test
     void shouldGetNullProjectUserRole(){
         int projectId = 1;
-        int userId = 0;
+        int userId = 999999;
         ProjectRole userRole = projectRepository.getProjectUserRole(projectId, userId);
 
         assertThat(userRole).isNull();
@@ -153,9 +153,29 @@ class ProjectRepositoryTest {
 
     @Test
     void shouldDeleteNoProject(){
-        int projectId = 0;
+        int projectId = 999999;
         int projectsDeleted = projectRepository.deleteProject(projectId);
 
         assertThat(projectsDeleted).isEqualTo(0);
+    }
+
+    @Test
+    void userIsAssignedToProject(){
+        int projectId = 1;
+        int userId = 2;
+
+        boolean isAssigned = projectRepository.isUserAssignedToProject(projectId, userId);
+
+        assertThat(isAssigned).isEqualTo(true);
+    }
+
+    @Test
+    void userIsNotAssignedToProject(){
+        int projectId = 1;
+        int userId = 999999;
+
+        boolean isAssigned = projectRepository.isUserAssignedToProject(projectId, userId);
+
+        assertThat(isAssigned).isEqualTo(false);
     }
 }
