@@ -2,6 +2,7 @@ package com.example.eksamensprojekt.service;
 
 import com.example.eksamensprojekt.exceptions.ProjectNotFoundException;
 import com.example.eksamensprojekt.exceptions.DatabaseOperationException;
+import com.example.eksamensprojekt.exceptions.UserNotFoundException;
 import com.example.eksamensprojekt.model.Project;
 import com.example.eksamensprojekt.model.ProjectRole;
 import com.example.eksamensprojekt.model.Task;
@@ -191,6 +192,16 @@ public class ProjectService {
             projectRepository.removeUserFromProject(projectId,userId);
         } catch (DataAccessException e) {
             throw new DatabaseOperationException("Failed to remove user from project", e);
+        }
+    }
+
+    public boolean updateProject(Project updatedProject) {
+        try {
+            int rowsAffected = projectRepository.updateProject(updatedProject);
+            if (rowsAffected == 0) throw new ProjectNotFoundException(updatedProject.getProjectId());
+            return true; // project updated
+        } catch (DataAccessException e) {
+            throw new DatabaseOperationException("Failed to update project", e);
         }
     }
 }

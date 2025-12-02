@@ -160,6 +160,17 @@ public class ProjectRepository {
         return jdbcTemplate.update(sql, projectId);
     }
 
+    public int updateProject(Project updatedProject) {
+        String sql = "UPDATE project SET title = ?, description = ?, start_date = ?, end_date = ? WHERE project_id = ?";
+        return jdbcTemplate.update(
+                sql,
+                updatedProject.getTitle(),
+                updatedProject.getDescription(),
+                Date.valueOf(updatedProject.getStartDate()),
+                Date.valueOf(updatedProject.getEndDate()),
+                updatedProject.getProjectId());
+    }
+
     private RowMapper<Project> getProjectRowMapper() {
         return ((rs, rowNum) -> new Project(
                 rs.getInt("project_id"),
