@@ -124,6 +124,36 @@ class ProjectRepositoryTest {
     }
 
     @Test
+    void shouldCreateSubProject(){
+        int ownerId = 1;
+        int parentProjectId = 1;
+        String title = "Test create";
+        String description = "Test description";
+        LocalDate startDate = LocalDate.of(2026, 1, 1);
+        LocalDate endDate = LocalDate.of(2026, 2, 1);
+
+        Project createdProject = new Project();
+        createdProject.setOwnerId(ownerId);
+        createdProject.setParentProjectId(parentProjectId);
+        createdProject.setTitle(title);
+        createdProject.setDescription(description);
+        createdProject.setStartDate(startDate);
+        createdProject.setEndDate(endDate);
+
+        int projectId = projectRepository.createProject(createdProject);
+        assertThat(projectId).isEqualTo(6);
+
+        Project project = projectRepository.getProject(projectId);
+
+        assertThat(project.getOwnerId()).isEqualTo(ownerId);
+        assertThat(project.getParentProjectId()).isEqualTo(1);
+        assertThat(project.getTitle()).isEqualTo("Test create");
+        assertThat(project.getDescription()).isEqualTo("Test description");
+        assertThat(project.getStartDate()).isEqualTo(LocalDate.of(2026, 1, 1));
+        assertThat(project.getEndDate()).isEqualTo(LocalDate.of(2026, 2, 1));
+    }
+
+    @Test
     void shouldGetProjectUserRole(){
         int projectId = 1;
         int userId = 1;
