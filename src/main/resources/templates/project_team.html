@@ -97,7 +97,10 @@
         <div th:if="${addErrorMessage}" th:text="${addErrorMessage}"></div>
         <form th:action="@{/projects/{projectId}/team/add(projectId=${project.projectId})}" th:method="post">
             <fieldset role="group">
-                <input name="email" type="email" placeholder="E-mail" required/>
+                <input name="email" type="email" placeholder="E-mail" list="email-list" required/>
+                <datalist id="email-list">
+                    <option th:each="user: ${allUsers}" th:value="${user.email}">
+                </datalist>
                 <select id="role" name="role" required>
                     <option value="" disabled selected>Vælg rolle…</option>
                     <option th:each="projectRole: ${projectRoles}"

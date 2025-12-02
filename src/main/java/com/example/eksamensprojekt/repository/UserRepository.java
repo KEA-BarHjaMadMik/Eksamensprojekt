@@ -93,6 +93,12 @@ public class UserRepository {
         return jdbcTemplate.update(sql, userId);
     }
 
+    public List<User> getAllUsers() {
+        String sql = BASE_USER_SQL + "ORDER BY ua.name";
+
+        return jdbcTemplate.query(sql, getUserRowMapper());
+    }
+
     private RowMapper<User> getUserRowMapper() {
         return (rs, rowNum) -> new User(
                 rs.getInt("user_id"),
