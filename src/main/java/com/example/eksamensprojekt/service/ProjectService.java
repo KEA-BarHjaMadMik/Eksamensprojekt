@@ -2,7 +2,6 @@ package com.example.eksamensprojekt.service;
 
 import com.example.eksamensprojekt.exceptions.ProjectNotFoundException;
 import com.example.eksamensprojekt.exceptions.DatabaseOperationException;
-import com.example.eksamensprojekt.exceptions.UserNotFoundException;
 import com.example.eksamensprojekt.model.Project;
 import com.example.eksamensprojekt.model.ProjectRole;
 import com.example.eksamensprojekt.model.Task;
