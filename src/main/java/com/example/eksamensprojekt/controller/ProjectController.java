@@ -140,9 +140,13 @@ public class ProjectController {
 
         List<ProjectRole> projectRoles = projectService.getAllProjectRoles();
 
+        //Get all users for the datalist
+        List<User> allUsers = userService.getAllUsers();
+
         model.addAttribute("project", project);
         model.addAttribute("team", projectUsersWithRoles);
         model.addAttribute("projectRoles", projectRoles);
+        model.addAttribute("allUsers", allUsers);
         return "project_team";
     }
 

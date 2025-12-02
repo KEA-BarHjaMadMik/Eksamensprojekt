@@ -308,9 +308,4 @@ class UserControllerTest {
     void deleteUser() {
     }
 
-
-    //CreateUser test success/failed?
-    //Already used email test?
-
-
 }
