@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Rediget projekt</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="color-scheme" content="light dark">
+    <link th:href="@{/css/pico.pink.min.css}" rel="stylesheet">
+    <link th:href="@{/css/main.css}" rel="stylesheet">
+</head>
+<body>
+<div th:replace="~{fragments/header :: header}">...</div>
+
+<main class="container-fluid">
+    <div>
+        <div>
+            <h1>Rediger projekt</h1>
+        </div>
+
+        <form method="post" th:action="@{/projects/{parentId}/edit(parentId=${project.projectId})}"
+              th:object="${project}">
+            <input type="hidden" th:field="*{projectId}"/>
+            <input type="hidden" th:field="*{ownerId}"/>
+            <input type="hidden" th:field="*{parentProjectId}"/>
+
+            <div>
+                <label for="title">Titel</label>
+                <input id="title" type="text" th:field="*{title}" placeholder="Indtast projekttitel" required/>
+                <div th:if="${#fields.hasErrors('title')}" th:errors="*{title}">
+                </div>
+            </div>
+        </form>
+    </div>
+</main>
+<div th:replace="~{fragments/footer :: footer}">...</div>
+</body>
+</html>
