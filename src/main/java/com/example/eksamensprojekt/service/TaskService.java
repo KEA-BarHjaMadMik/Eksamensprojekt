@@ -102,4 +102,14 @@ public class TaskService {
             throw new DatabaseOperationException("failed to retrieve subtasks for task with id " + task.getTaskId(), e);
         }
     }
+
+    public void deleteTask(int taskId){
+        try {
+            int rowsAffected = taskRepository.deleteTask(taskId);
+            if (rowsAffected == 0) throw new TaskNotFoundException(taskId);
+            //task deleted if at least 1 row is affected
+        }catch (DataAccessException e){
+            throw new DatabaseOperationException("Failed to delete task with id " + taskId, e);
+        }
+    }
 }
