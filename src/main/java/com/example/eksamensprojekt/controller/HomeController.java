@@ -10,6 +10,6 @@ public class HomeController {
 
     @GetMapping("/")
     public String showHomePage(HttpSession session) {
-        return !SessionUtil.isLoggedIn(session) ? "index" : "redirect:/projects";
+        return !SessionUtil.isLoggedIn(session) ? "login" : "redirect:/projects";
     }
 }
