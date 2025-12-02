@@ -113,4 +113,21 @@ class ProjectRepositoryTest {
 
         assertThat(userRole).isNull();
     }
+
+    @Test
+    void shouldDeleteProject(){
+        int projectId = 1;
+
+        int projectDeleted = projectRepository.deleteProject(projectId);
+
+        assertThat(projectDeleted).isGreaterThanOrEqualTo(1);
+    }
+
+    @Test
+    void shouldDeleteNoProject(){
+        int projectId = 0;
+        int projectsDeleted = projectRepository.deleteProject(projectId);
+
+        assertThat(projectsDeleted).isEqualTo(0);
+    }
 }
