@@ -3,6 +3,7 @@ package com.example.eksamensprojekt.service;
 import com.example.eksamensprojekt.exceptions.DatabaseOperationException;
 import com.example.eksamensprojekt.exceptions.TaskNotFoundException;
 import com.example.eksamensprojekt.model.Task;
+import com.example.eksamensprojekt.model.TaskStatus;
 import com.example.eksamensprojekt.repository.TaskRepository;
 import org.springframework.dao.DataAccessException;
 import org.springframework.stereotype.Service;
@@ -70,12 +71,28 @@ public class TaskService {
         }
     }
 
+    public List<TaskStatus> getAllTaskStatuses() {
+        try{
+            return taskRepository.getAllTaskStatuses();
+        }catch (DataAccessException e){
+            throw new DatabaseOperationException("failed to retrieve all task statuses", e);
+        }
+    }
+
     public void createTask(Task task) {
         //It works but should probably add validation and exception handling
         try {
             taskRepository.createTask(task);
         } catch (DataAccessException e) {
             throw new DatabaseOperationException("Database error during task creation", e);
+        }
+    }
+
+    public void updateTask(Task task) {
+        try{
+            taskRepository.updateTask(task);
+        } catch (DataAccessException e) {
+            throw new DatabaseOperationException("Database error during task update", e);
         }
     }
 

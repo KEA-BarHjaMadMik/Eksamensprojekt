@@ -1,6 +1,7 @@
 package com.example.eksamensprojekt.repository;
 
 import com.example.eksamensprojekt.model.Task;
+import com.example.eksamensprojekt.model.TaskStatus;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Repository;
@@ -15,25 +16,26 @@ import java.util.List;
 @Repository
 public class TaskRepository {
     private static final String BASE_TASK_SQL = """
-                SELECT
-                    t.task_id,
-                    t.parent_task_id,
-                    t.project_id,
-                    t.title,
-                    t.start_date,
-                    t.end_date,
-                    t.description,
-                    t.estimated_hours,
-                    COALESCE(te.total_hours, 0) AS actual_hours,
-                    ts.status_name
-                FROM task t
-                LEFT JOIN (
-                    SELECT task_id, SUM(hours_worked) AS total_hours
-                    FROM time_entry
-                    GROUP BY task_id
-                ) te ON t.task_id = te.task_id
-                JOIN task_status ts ON t.status_id = ts.status_id
-                """;
+            SELECT
+                t.task_id,
+                t.parent_task_id,
+                t.project_id,
+                t.title,
+                t.start_date,
+                t.end_date,
+                t.description,
+                t.estimated_hours,
+                COALESCE(te.total_hours, 0) AS actual_hours,
+                t.status_id,
+                ts.status_name
+            FROM task t
+            LEFT JOIN (
+                SELECT task_id, SUM(hours_worked) AS total_hours
+                FROM time_entry
+                GROUP BY task_id
+            ) te ON t.task_id = te.task_id
+            JOIN task_status ts ON t.status_id = ts.status_id
+            """;
 
     private final JdbcTemplate jdbcTemplate;
 
@@ -59,6 +61,15 @@ public class TaskRepository {
         String sql = BASE_TASK_SQL + "WHERE t.parent_task_id = ?";
 
         return jdbcTemplate.query(sql, getTaskRowMapper(), parentId);
+    }
+
+    public List<TaskStatus> getAllTaskStatuses() {
+        String sql = """
+                SELECT ts.status_id, ts.status_name
+                FROM task_status ts
+                """;
+
+        return jdbcTemplate.query(sql, getTaskStatusRowMapper());
     }
 
     public void createTask(Task task) {
@@ -98,10 +109,38 @@ public class TaskRepository {
             }
 
             ps.setDouble(7, task.getEstimatedHours());
-            ps.setInt(8, 1);
+            ps.setInt(8, 1); // status default to 1
 
             return ps;
         });
+    }
+
+    public void updateTask(Task task) {
+        String sql = """
+                UPDATE task
+                SET
+                    parent_task_id = ?,
+                    project_id = ?,
+                    title = ?,
+                    start_date = ?,
+                    end_date = ?,
+                    description = ?,
+                    estimated_hours = ?,
+                    status_id = ?
+                WHERE task_id = ?
+                """;
+
+        jdbcTemplate.update(sql,
+                task.getParentTaskId(),
+                task.getProjectId(),
+                task.getTitle(),
+                Date.valueOf(task.getStartDate()),
+                Date.valueOf(task.getEndDate()),
+                task.getDescription(),
+                task.getEstimatedHours(),
+                task.getStatus().getStatusId(),
+                task.getTaskId()
+        );
     }
 
     public int deleteTask(int taskId){
@@ -117,7 +156,7 @@ public class TaskRepository {
 
             return new Task(
                     rs.getInt("task_id"),
-                    rs.getInt("parent_task_id"),
+                    rs.getObject("parent_task_id", Integer.class),
                     rs.getInt("project_id"),
                     rs.getString("title"),
                     startDate != null ? startDate.toLocalDate() : null,
@@ -125,9 +164,19 @@ public class TaskRepository {
                     rs.getString("description"),
                     rs.getDouble("estimated_hours"),
                     rs.getDouble("actual_hours"),
-                    rs.getString("status_name"),
+                    new TaskStatus(
+                            rs.getInt("status_id"),
+                            rs.getString("status_name")
+                    ),
                     new ArrayList<>()
             );
         });
+    }
+
+    private RowMapper<TaskStatus> getTaskStatusRowMapper() {
+        return ((rs, rowNum) -> new TaskStatus(
+                rs.getInt("status_id"),
+                rs.getString("status_name")
+        ));
     }
 }

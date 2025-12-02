@@ -164,7 +164,7 @@ public class ProjectRepository {
         return ((rs, rowNum) -> new Project(
                 rs.getInt("project_id"),
                 rs.getInt("owner_id"),
-                rs.getInt("parent_project_id"),
+                rs.getObject("parent_project_id", Integer.class),
                 rs.getString("title"),
                 rs.getString("description"),
                 rs.getDate("start_date") != null ? rs.getDate("start_date").toLocalDate() : null,
