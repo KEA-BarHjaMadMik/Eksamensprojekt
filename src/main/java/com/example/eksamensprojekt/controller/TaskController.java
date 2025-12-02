@@ -145,7 +145,7 @@ public class TaskController {
 
         // Verify role is not READ_ONLY
         String currentUserProjectRole = projectService.getUserRole(projectId, currentUserId).getRole();
-        if("READ_ONLY".equals(currentUserProjectRole)) {
+        if ("READ_ONLY".equals(currentUserProjectRole)) {
             return "redirect:/tasks/" + taskId;
         }
 
@@ -156,5 +156,43 @@ public class TaskController {
         model.addAttribute("taskStatusList", taskStatusList);
 
         return "task_edit_form";
+    }
+
+    @PostMapping("/edit")
+    public String editTask(@Valid @ModelAttribute Task task,
+                           @RequestParam int statusId,
+                           BindingResult bindingResult,
+                           HttpSession session,
+                           Model model) {
+        if (!SessionUtil.isLoggedIn(session)) return "redirect:/login";
+
+        // Check if the user has access to the task
+        int currentUserId = SessionUtil.getCurrentUserId(session);
+        int projectId = task.getProjectId();
+        if (!projectService.hasAccessToProject(projectId, currentUserId)) {
+            return "redirect:/projects";
+        }
+
+        // Verify role is not READ_ONLY
+        String currentUserProjectRole = projectService.getUserRole(projectId, currentUserId).getRole();
+        if ("READ_ONLY".equals(currentUserProjectRole)) {
+            return "redirect:/tasks/" + task.getTaskId();
+        }
+
+        // Bean validation errors?
+        if (bindingResult.hasErrors()) {
+            List<TaskStatus> taskStatusList = taskService.getAllTaskStatuses();
+            model.addAttribute("taskStatusList", taskStatusList);
+            return "task_edit_form";
+        }
+
+        // set status
+        TaskStatus status = new TaskStatus(statusId, null); // status name matching id is loaded on task retrieval from DB
+        task.setStatus(status);
+
+        // update
+        taskService.updateTask(task);
+
+        return "redirect:/tasks/" + task.getTaskId();
     }
 }

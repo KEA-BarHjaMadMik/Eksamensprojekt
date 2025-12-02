@@ -16,26 +16,26 @@ import java.util.List;
 @Repository
 public class TaskRepository {
     private static final String BASE_TASK_SQL = """
-                SELECT
-                    t.task_id,
-                    t.parent_task_id,
-                    t.project_id,
-                    t.title,
-                    t.start_date,
-                    t.end_date,
-                    t.description,
-                    t.estimated_hours,
-                    COALESCE(te.total_hours, 0) AS actual_hours,
-                    t.status_id,
-                    ts.status_name
-                FROM task t
-                LEFT JOIN (
-                    SELECT task_id, SUM(hours_worked) AS total_hours
-                    FROM time_entry
-                    GROUP BY task_id
-                ) te ON t.task_id = te.task_id
-                JOIN task_status ts ON t.status_id = ts.status_id
-                """;
+            SELECT
+                t.task_id,
+                t.parent_task_id,
+                t.project_id,
+                t.title,
+                t.start_date,
+                t.end_date,
+                t.description,
+                t.estimated_hours,
+                COALESCE(te.total_hours, 0) AS actual_hours,
+                t.status_id,
+                ts.status_name
+            FROM task t
+            LEFT JOIN (
+                SELECT task_id, SUM(hours_worked) AS total_hours
+                FROM time_entry
+                GROUP BY task_id
+            ) te ON t.task_id = te.task_id
+            JOIN task_status ts ON t.status_id = ts.status_id
+            """;
 
     private final JdbcTemplate jdbcTemplate;
 
@@ -61,6 +61,15 @@ public class TaskRepository {
         String sql = BASE_TASK_SQL + "WHERE t.parent_task_id = ?";
 
         return jdbcTemplate.query(sql, getTaskRowMapper(), parentId);
+    }
+
+    public List<TaskStatus> getAllTaskStatuses() {
+        String sql = """
+                SELECT ts.status_id, ts.status_name
+                FROM task_status ts
+                """;
+
+        return jdbcTemplate.query(sql, getTaskStatusRowMapper());
     }
 
     public void createTask(Task task) {
@@ -106,13 +115,32 @@ public class TaskRepository {
         });
     }
 
-    public List<TaskStatus> getAllTaskStatuses(){
+    public void updateTask(Task task) {
         String sql = """
-                SELECT ts.status_id, ts.status_name
-                FROM task_status ts
+                UPDATE task
+                SET
+                    parent_task_id = ?,
+                    project_id = ?,
+                    title = ?,
+                    start_date = ?,
+                    end_date = ?,
+                    description = ?,
+                    estimated_hours = ?,
+                    status_id = ?
+                WHERE task_id = ?
                 """;
 
-        return jdbcTemplate.query(sql, getTaskStatusRowMapper());
+        jdbcTemplate.update(sql,
+                task.getParentTaskId(),
+                task.getProjectId(),
+                task.getTitle(),
+                Date.valueOf(task.getStartDate()),
+                Date.valueOf(task.getEndDate()),
+                task.getDescription(),
+                task.getEstimatedHours(),
+                task.getStatus().getStatusId(),
+                task.getTaskId()
+        );
     }
 
     private RowMapper<Task> getTaskRowMapper() {

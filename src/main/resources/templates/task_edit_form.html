@@ -20,6 +20,7 @@
 
             <form method="post" th:action="@{/tasks/edit}" th:object="${task}">
 
+                <input type="hidden" th:field="*{taskId}"/>
                 <input type="hidden" th:field="*{projectId}"/>
                 <input type="hidden" th:field="*{parentTaskId}"/>
 
@@ -55,10 +56,12 @@
 
                 <div>
                     <label for="status">Status:</label>
-                    <select id="status" th:field="*{status}">
+                    <select id="status" name="statusId" required>
                         <option th:each="taskStatus: ${taskStatusList}"
-                        th:value="${taskStatus}"
-                        th:text="${taskStatus}"></option>
+                                th:value="${taskStatus.statusId}"
+                                th:text="${taskStatus.statusName}"
+                                th:selected="${taskStatus.statusId == task.status.statusId}">
+                        </option>
                     </select>
                 </div>
 

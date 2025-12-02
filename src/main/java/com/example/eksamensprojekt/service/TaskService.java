@@ -71,12 +71,28 @@ public class TaskService {
         }
     }
 
+    public List<TaskStatus> getAllTaskStatuses() {
+        try{
+            return taskRepository.getAllTaskStatuses();
+        }catch (DataAccessException e){
+            throw new DatabaseOperationException("failed to retrieve all task statuses", e);
+        }
+    }
+
     public void createTask(Task task) {
         //It works but should probably add validation and exception handling
         try {
             taskRepository.createTask(task);
         } catch (DataAccessException e) {
             throw new DatabaseOperationException("Database error during task creation", e);
+        }
+    }
+
+    public void updateTask(Task task) {
+        try{
+            taskRepository.updateTask(task);
+        } catch (DataAccessException e) {
+            throw new DatabaseOperationException("Database error during task update", e);
         }
     }
 
@@ -101,14 +117,6 @@ public class TaskService {
             }
         } catch (DataAccessException e) {
             throw new DatabaseOperationException("failed to retrieve subtasks for task with id " + task.getTaskId(), e);
-        }
-    }
-
-    public List<TaskStatus> getAllTaskStatuses() {
-        try{
-            return taskRepository.getAllTaskStatuses();
-        }catch (DataAccessException e){
-            throw new DatabaseOperationException("failed to retrieve all task statuses", e);
         }
     }
 }
