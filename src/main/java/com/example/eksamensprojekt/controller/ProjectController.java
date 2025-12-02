@@ -55,7 +55,7 @@ public class ProjectController {
         }
 
         Project project = projectService.getProjectWithTree(projectId);
-        ProjectRole userRole = projectService.getUserRole(projectId, currentUserId);
+        String userRole = projectService.getUserRole(projectId, currentUserId).getRole();
 
         model.addAttribute("project", project);
         model.addAttribute("userRole", userRole);
