@@ -1,6 +1,7 @@
 package com.example.eksamensprojekt.repository;
 
 import com.example.eksamensprojekt.model.Task;
+import com.example.eksamensprojekt.model.TaskStatus;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Repository;
@@ -25,6 +26,7 @@ public class TaskRepository {
                     t.description,
                     t.estimated_hours,
                     COALESCE(te.total_hours, 0) AS actual_hours,
+                    t.status_id,
                     ts.status_name
                 FROM task t
                 LEFT JOIN (
@@ -98,10 +100,19 @@ public class TaskRepository {
             }
 
             ps.setDouble(7, task.getEstimatedHours());
-            ps.setInt(8, 1);
+            ps.setInt(8, 1); // status default to 1
 
             return ps;
         });
+    }
+
+    public List<TaskStatus> getAllTaskStatuses(){
+        String sql = """
+                SELECT ts.status_id, ts.status_name
+                FROM task_status ts
+                """;
+
+        return jdbcTemplate.query(sql, getTaskStatusRowMapper());
     }
 
     private RowMapper<Task> getTaskRowMapper() {
@@ -111,7 +122,7 @@ public class TaskRepository {
 
             return new Task(
                     rs.getInt("task_id"),
-                    rs.getInt("parent_task_id"),
+                    rs.getObject("parent_task_id", Integer.class),
                     rs.getInt("project_id"),
                     rs.getString("title"),
                     startDate != null ? startDate.toLocalDate() : null,
@@ -119,9 +130,19 @@ public class TaskRepository {
                     rs.getString("description"),
                     rs.getDouble("estimated_hours"),
                     rs.getDouble("actual_hours"),
-                    rs.getString("status_name"),
+                    new TaskStatus(
+                            rs.getInt("status_id"),
+                            rs.getString("status_name")
+                    ),
                     new ArrayList<>()
             );
         });
+    }
+
+    private RowMapper<TaskStatus> getTaskStatusRowMapper() {
+        return ((rs, rowNum) -> new TaskStatus(
+                rs.getInt("status_id"),
+                rs.getString("status_name")
+        ));
     }
 }

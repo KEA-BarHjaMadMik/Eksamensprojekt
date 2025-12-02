@@ -3,6 +3,7 @@ package com.example.eksamensprojekt.service;
 import com.example.eksamensprojekt.exceptions.DatabaseOperationException;
 import com.example.eksamensprojekt.exceptions.TaskNotFoundException;
 import com.example.eksamensprojekt.model.Task;
+import com.example.eksamensprojekt.model.TaskStatus;
 import com.example.eksamensprojekt.repository.TaskRepository;
 import org.springframework.dao.DataAccessException;
 import org.springframework.stereotype.Service;
@@ -100,6 +101,14 @@ public class TaskService {
             }
         } catch (DataAccessException e) {
             throw new DatabaseOperationException("failed to retrieve subtasks for task with id " + task.getTaskId(), e);
+        }
+    }
+
+    public List<TaskStatus> getAllTaskStatuses() {
+        try{
+            return taskRepository.getAllTaskStatuses();
+        }catch (DataAccessException e){
+            throw new DatabaseOperationException("failed to retrieve all task statuses", e);
         }
     }
 }

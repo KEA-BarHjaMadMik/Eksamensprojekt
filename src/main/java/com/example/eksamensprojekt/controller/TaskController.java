@@ -2,6 +2,7 @@ package com.example.eksamensprojekt.controller;
 
 import com.example.eksamensprojekt.model.ProjectRole;
 import com.example.eksamensprojekt.model.Task;
+import com.example.eksamensprojekt.model.TaskStatus;
 import com.example.eksamensprojekt.service.ProjectService;
 import com.example.eksamensprojekt.service.TaskService;
 import com.example.eksamensprojekt.utils.SessionUtil;
@@ -13,6 +14,7 @@ import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
+import java.util.List;
 
 @Controller
 @RequestMapping("tasks")
@@ -32,7 +34,7 @@ public class TaskController {
         // Check if the user has access to the task
         int currentUserId = SessionUtil.getCurrentUserId(session);
         int projectId = taskService.getTask(taskId).getProjectId();
-        if(!projectService.hasAccessToProject(projectId, currentUserId)){
+        if (!projectService.hasAccessToProject(projectId, currentUserId)) {
             return "redirect:/projects";
         }
 
@@ -51,6 +53,7 @@ public class TaskController {
                                      HttpSession session,
                                      Model model) {
         if (!SessionUtil.isLoggedIn(session)) return "redirect:/login";
+
         // Verify ownership / access
         if (!projectService.hasAccessToProject(projectId, SessionUtil.getCurrentUserId(session))) return "redirect:/";
 
@@ -117,11 +120,41 @@ public class TaskController {
 
         //redirect depending on if it's a parent task or subtask
         if (task.isSubtask()) {
-            //creates a subtask if parentId is not 0 and shows the parent task page
+            //creates a subtask if parentId is not null and shows the parent task page
             return "redirect:/tasks/" + task.getParentTaskId();
         } else {
             //creates a parent task and shows the project page
-                return "redirect:/projects/" + task.getProjectId();
+            return "redirect:/projects/" + task.getProjectId();
         }
+    }
+
+    @GetMapping("/{taskId}/edit")
+    public String showEditTaskForm(@PathVariable int taskId,
+                                   Model model,
+                                   HttpSession session) {
+        if (!SessionUtil.isLoggedIn(session)) return "redirect:/login";
+
+        Task task = taskService.getTask(taskId);
+
+        // Check if the user has access to the task
+        int currentUserId = SessionUtil.getCurrentUserId(session);
+        int projectId = task.getProjectId();
+        if (!projectService.hasAccessToProject(projectId, currentUserId)) {
+            return "redirect:/projects";
+        }
+
+        // Verify role is not READ_ONLY
+        String currentUserProjectRole = projectService.getUserRole(projectId, currentUserId).getRole();
+        if("READ_ONLY".equals(currentUserProjectRole)) {
+            return "redirect:/tasks/" + taskId;
+        }
+
+        List<TaskStatus> taskStatusList = taskService.getAllTaskStatuses();
+
+        model.addAttribute("task", task);
+        model.addAttribute("currentUserProjectRole", currentUserProjectRole);
+        model.addAttribute("taskStatusList", taskStatusList);
+
+        return "task_edit_form";
     }
 }
