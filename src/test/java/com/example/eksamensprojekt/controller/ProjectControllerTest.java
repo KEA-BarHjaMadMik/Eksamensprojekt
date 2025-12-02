@@ -2,6 +2,7 @@ package com.example.eksamensprojekt.controller;
 
 import com.example.eksamensprojekt.model.Project;
 import com.example.eksamensprojekt.service.ProjectService;
+import com.example.eksamensprojekt.service.UserService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
@@ -27,6 +28,10 @@ public class ProjectControllerTest {
 
     @MockitoBean
     private ProjectService projectService;
+
+    @MockitoBean
+    private UserService userService;
+
     private MockHttpSession session;
 
     @BeforeEach

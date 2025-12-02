@@ -22,6 +22,8 @@
         <ul>
             <li>
                 <div role="group">
+                    <a role="button" class="secondary"
+                       th:href="@{/projects/{projectId}/team(projectId=${project.projectId})}">Team</a>
                     <a role="button" th:href="@{/tasks/{projectId}/create(projectId=${project.projectId})}">+ Opgave</a>
                     <a role="button" th:href="@{/projects/{parentId}/create(parentId=${project.projectId})}">+
                         Delprojekt</a>

@@ -1,6 +1,7 @@
 package com.example.eksamensprojekt.repository;
 
 import com.example.eksamensprojekt.model.Project;
+import com.example.eksamensprojekt.model.ProjectRole;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
@@ -101,17 +102,59 @@ public class ProjectRepository {
         return count != null && count > 0;
     }
 
-    public String getProjectUserRole(int projectId, int userId) {
+    public ProjectRole getProjectUserRole(int projectId, int userId) {
         String sql = """
-                SELECT role
-                FROM project_users
+                SELECT
+                    r.role,
+                    r.role_name
+                FROM project_role r
+                JOIN project_users pu ON r.role = pu.role
+                WHERE pu.project_id = ? AND pu.user_id = ?
+                """;
+
+        List<ProjectRole> result = jdbcTemplate.query(sql, getProjectRoleRowMapper(), projectId, userId);
+        return result.isEmpty() ? null : result.get(0);
+    }
+
+    public List<ProjectRole> getAllProjectRoles() {
+        String sql = """
+                SELECT
+                    r.role,
+                    r.role_name
+                FROM project_role r
+                """;
+
+        return jdbcTemplate.query(sql, getProjectRoleRowMapper());
+    }
+
+    public void addUserToProject(int projectId, int userId, String role) {
+        String sql = """
+                INSERT INTO project_users (project_id, user_id, role)
+                VALUES (?,?,?)
+                """;
+
+        jdbcTemplate.update(sql, projectId, userId, role);
+    }
+
+    public void updateUserRole(int projectId, int userId, String role) {
+        String sql = """
+                UPDATE project_users
+                SET role = ?
                 WHERE project_id = ? AND user_id = ?
                 """;
 
-        return jdbcTemplate.queryForObject(sql, String.class, projectId, userId);
+        jdbcTemplate.update(sql, role, projectId, userId);
     }
 
-    public int deleteProject(int projectId){
+    public void removeUserFromProject(int projectId, int userId) {
+        String sql = """
+                        DELETE FROM project_users WHERE project_id = ? AND user_id = ?
+                """;
+
+        jdbcTemplate.update(sql, projectId, userId);
+    }
+
+    public int deleteProject(int projectId) {
         String sql = "DELETE FROM project WHERE project_id = ?";
 
         return jdbcTemplate.update(sql, projectId);
@@ -129,5 +172,12 @@ public class ProjectRepository {
                 new ArrayList<>(),
                 new ArrayList<>())
         );
+    }
+
+    private RowMapper<ProjectRole> getProjectRoleRowMapper() {
+        return ((rs, rowNum) -> new ProjectRole(
+                rs.getString("role"),
+                rs.getString("role_name")
+        ));
     }
 }

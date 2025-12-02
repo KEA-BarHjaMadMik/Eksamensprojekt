@@ -1,5 +1,6 @@
 package com.example.eksamensprojekt.controller;
 
+import com.example.eksamensprojekt.model.ProjectRole;
 import com.example.eksamensprojekt.model.Task;
 import com.example.eksamensprojekt.service.ProjectService;
 import com.example.eksamensprojekt.service.TaskService;
@@ -56,7 +57,7 @@ public class TaskControllerTest {
         when(projectService.hasAccessToProject(1, 1)).thenReturn(true);
         when(taskService.getTask(2)).thenReturn(shownTask);
         when(taskService.getTaskWithTree(2)).thenReturn(shownTask);
-        when(projectService.getUserRole(1, 1)).thenReturn("OWNER");
+        when(projectService.getUserRole(1, 1)).thenReturn(new ProjectRole("OWNER", "Ejer"));
 
         mockMvc.perform(get("/tasks/2").session(session))
                 .andExpect(status().isOk())

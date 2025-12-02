@@ -1,5 +1,7 @@
 package com.example.eksamensprojekt.controller;
 
+import com.example.eksamensprojekt.utils.SessionUtil;
+import jakarta.servlet.http.HttpSession;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 
@@ -7,7 +9,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 public class HomeController {
 
     @GetMapping("/")
-    public String showHomePage() {
-        return "index";
+    public String showHomePage(HttpSession session) {
+        return !SessionUtil.isLoggedIn(session) ? "index" : "redirect:/projects";
     }
 }
