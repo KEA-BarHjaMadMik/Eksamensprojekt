@@ -83,7 +83,10 @@
 
         <button type="submit">Gem ændringer</button>
     </form>
-    <a th:href="@{/tasks/{id}(id=${task.taskId})}">Tilbage til opgave</a>
+
+    <div>
+        <a th:href="@{/tasks/{id}(id=${task.taskId})}">Tilbage til opgave</a>
+    </div>
 </main>
 
 <div th:replace="~{fragments/footer :: footer}">...</div>
