@@ -113,6 +113,14 @@ public class UserService {
             throw new DatabaseOperationException("Failed to delete user", e);
         }
     }
+
+    public List<User> getAllUsers() {
+        try {
+            return userRepository.getAllUsers();
+        } catch (DataAccessException e) {
+            throw new DatabaseOperationException("Failed to retrieve all users", e);
+        }
+    }
 }
 
 
