@@ -22,6 +22,7 @@
         <ul>
             <li>
                 <div role="group">
+                    <a role="button" class="secondary" th:href="@{/tasks/{taskId}/edit(taskId=${task.taskId})}">Rediger</a>
                     <a role="button" th:href="@{/tasks/{parentId}/subtask/create(parentId=${task.taskId})}">+ Underopgave</a>
                 </div>
             </li>
