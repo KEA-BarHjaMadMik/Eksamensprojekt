@@ -58,4 +58,23 @@ public class TaskRepositoryTest {
 
         assertThat(task).isNull();
     }
+
+    @Test
+    void shouldGetSubTasks(){
+        int parentTaskId = 1;
+        List<Task> subTasks = taskRepository.getSubTasks(parentTaskId);
+
+        assertThat(subTasks).isNotNull();
+        assertThat(subTasks).isNotEmpty();
+        assertThat(subTasks.size()).isEqualTo(2);
+    }
+
+    @Test
+    void shouldGetNoSubTasks(){
+        int parentTaskId = 999999;
+        List<Task> subTasks = taskRepository.getSubTasks(parentTaskId);
+
+        assertThat(subTasks).isNotNull();
+        assertThat(subTasks).isEmpty();
+    }
 }
