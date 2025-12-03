@@ -7,10 +7,7 @@ import org.springframework.format.annotation.DateTimeFormat;
 import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 public class Project {
     private int projectId;
@@ -167,7 +164,7 @@ public class Project {
     // Returns a map of LocalDate -> estimated hours for the entire project,
     // including all tasks and subprojects, excluding weekends.
     public Map<LocalDate, Double> getDistributedHours() {
-        Map<LocalDate, Double> map = new HashMap<>();
+        Map<LocalDate, Double> map = new TreeMap<>();
         distributeHours(map);
         return map;
     }

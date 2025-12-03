@@ -8,6 +8,7 @@ import java.time.temporal.ChronoUnit;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.TreeMap;
 
 public class Task {
     private int taskId;
@@ -183,7 +184,7 @@ public class Task {
     // Returns a map of LocalDate -> estimated hours for the task,
     // including all subtasks, excluding weekends.
     public Map<LocalDate, Double> getDistributedTaskHours () {
-        Map<LocalDate, Double> map = new HashMap<>();
+        Map<LocalDate, Double> map = new TreeMap<>();
         distributeTaskHours(map);
         return map;
     }

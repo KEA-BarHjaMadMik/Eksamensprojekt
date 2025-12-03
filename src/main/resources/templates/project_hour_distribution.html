@@ -20,7 +20,10 @@
         </tr>
         </thead>
         <tbody>
-
+        <tr th:each="entry : ${hourDistributionMap}">
+            <td th:text="${#temporals.format(entry.key)}"></td>
+            <td th:text="${#numbers.formatDecimal(entry.value, 1, 2)}"></td>
+        </tr>
         </tbody>
     </table>
 </main>
