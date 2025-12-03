@@ -107,4 +107,36 @@ public class TaskRepositoryTest {
         assertThat(createdTask.getDescription()).isEqualTo("Testing");
         assertThat(createdTask.getEstimatedHours()).isEqualTo(1);
     }
+
+    @Test
+    void shouldCreateSubTask(){
+        int parentTaskId = 1;
+        int projectId = 1;
+        String title = "Test task";
+        LocalDate startDate = LocalDate.of(2026,1,1);
+        LocalDate endDate = LocalDate.of(2026,2,1);
+        String description = "Testing";
+        double estimatedHours = 1;
+
+        Task testTask = new Task();
+        testTask.setParentTaskId(parentTaskId);
+        testTask.setProjectId(projectId);
+        testTask.setTitle(title);
+        testTask.setStartDate(startDate);
+        testTask.setEndDate(endDate);
+        testTask.setDescription(description);
+        testTask.setEstimatedHours(estimatedHours);
+
+        taskRepository.createTask(testTask);
+
+        Task createdTask = taskRepository.getTask(19); //19 should be the test task id
+        assertThat(createdTask).isNotNull();
+        assertThat(createdTask.getParentTaskId()).isEqualTo(1);
+        assertThat(createdTask.getProjectId()).isEqualTo(1);
+        assertThat(createdTask.getTitle()).isEqualTo("Test task");
+        assertThat(createdTask.getStartDate()).isEqualTo(LocalDate.of(2026, 1, 1));
+        assertThat(createdTask.getEndDate()).isEqualTo(LocalDate.of(2026, 2, 1));
+        assertThat(createdTask.getDescription()).isEqualTo("Testing");
+        assertThat(createdTask.getEstimatedHours()).isEqualTo(1);
+    }
 }
