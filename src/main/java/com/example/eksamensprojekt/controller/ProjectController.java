@@ -77,6 +77,72 @@ public class ProjectController {
         return "project_registration_form";
     }
 
+    @GetMapping("/{projectId}/edit")
+    public String showEditProjectForm(@PathVariable("projectId") int projectId,
+                                      HttpSession session,
+                                      Model model) {
+        if (!SessionUtil.isLoggedIn(session)) return "redirect:/login";
+        int currentUserId = SessionUtil.getCurrentUserId(session);
+        if (!projectService.hasAccessToProject(projectId, currentUserId)) {
+            return "redirect:/projects";
+        }
+
+        Project project = projectService.getProject(projectId);
+        ProjectRole userRole = projectService.getUserRole(projectId, currentUserId);
+
+        boolean isOwner = project.getOwnerId() == currentUserId;
+        boolean hasFullAccess = userRole != null && userRole.getRole().equals("FULL_ACCESS");
+
+        // Only owner and full access can edit
+        if (!isOwner && !hasFullAccess) {
+            return "redirect:/projects/" + projectId;
+        }
+
+        model.addAttribute("project", project);
+        return "project_edit_form";
+    }
+
+    @PostMapping("/{projectId}/edit")
+    public String updateProject(@PathVariable("projectId") int projectId,
+                                @Valid @ModelAttribute("project") Project project,
+                                BindingResult bindingResult,
+                                HttpSession session,
+                                RedirectAttributes redirectAttributes) {
+
+        if (!SessionUtil.isLoggedIn(session)) { return "redirect:/login"; }
+        int currentUserId = SessionUtil.getCurrentUserId(session);
+
+        project.setProjectId(projectId);
+
+        // Check access
+        if (!projectService.hasAccessToProject(projectId, currentUserId)) {
+            return "redirect:/projects";
+        }
+
+        Project existingProject = projectService.getProject(projectId);
+        ProjectRole userRole = projectService.getUserRole(projectId, currentUserId);
+
+        // Only owner and full access can edit
+        boolean isOwner = existingProject.getOwnerId() == currentUserId;
+        boolean hasFullAccess = userRole != null && userRole.getRole().equals("FULL_ACCESS");
+
+        if (!isOwner && !hasFullAccess) { return "redirect:/projects/" + projectId;}
+
+        // Keep owner ID and parent project ID unchanged
+        project.setOwnerId(existingProject.getOwnerId());
+        project.setParentProjectId(existingProject.getParentProjectId());
+
+        if (bindingResult.hasErrors()) {
+            return "project_edit_form";
+        }
+
+        if (projectService.updateProject(project)) {
+            redirectAttributes.addFlashAttribute("updateSuccess", true);
+        }
+
+        return "redirect:/projects/" + projectId;
+    }
+
     @PostMapping("/create")
     public String createProject(HttpSession session,
                                 @Valid @ModelAttribute Project newProject,
