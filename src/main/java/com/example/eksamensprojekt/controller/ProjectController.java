@@ -77,26 +77,6 @@ public class ProjectController {
         return "project_registration_form";
     }
 
-    @PostMapping("/create")
-    public String createProject(HttpSession session,
-                                @Valid @ModelAttribute Project newProject,
-                                BindingResult bindingResult,
-                                Model model) {
-
-        if (!SessionUtil.isLoggedIn(session)) return "redirect:/login";
-
-        boolean fieldsHaveErrors = bindingResult.hasErrors();
-
-        //if validation failed, return to form
-        if (fieldsHaveErrors) {
-            model.addAttribute("newProject", newProject);
-            return "project_registration_form";
-        }
-
-        int projectId = projectService.createProject(newProject);
-
-        return "redirect:/projects/" + projectId;
-    }
 
     @GetMapping("/{parentId}/create")
     public String showCreateSubProjectForm(@PathVariable("parentId") int parentId, HttpSession session, Model model) {
@@ -150,7 +130,7 @@ public class ProjectController {
         return "project_team";
     }
 
-    @GetMapping("/projects/{projectId}/edit")
+    @GetMapping("/{projectId}/edit")
     public String showEditProjectForm(@PathVariable("projectId") int projectId,
                                       HttpSession session,
                                       Model model) {
@@ -175,7 +155,7 @@ public class ProjectController {
         return "project_edit_form";
     }
 
-    @PostMapping("/projects/{projectId}/edit")
+    @PostMapping("/{projectId}/edit")
     public String updateProject(@PathVariable("projectId") int projectId,
                                 @Valid @ModelAttribute("project") Project project,
                                 BindingResult bindingResult,
