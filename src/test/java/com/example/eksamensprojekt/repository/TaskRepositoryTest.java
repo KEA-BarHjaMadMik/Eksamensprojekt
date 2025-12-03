@@ -10,6 +10,7 @@ import org.springframework.test.context.jdbc.Sql;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.test.context.jdbc.Sql.ExecutionPhase.BEFORE_TEST_METHOD;
 
+import java.time.LocalDate;
 import java.util.List;
 
 @SpringBootTest
@@ -39,5 +40,136 @@ public class TaskRepositoryTest {
         assertThat(tasks).isNotNull();
 
         assertThat(tasks).isEmpty();
+    }
+
+    @Test
+    void shouldGetTask(){
+        int taskId = 1;
+        Task task = taskRepository.getTask(taskId);
+
+        assertThat(task).isNotNull();
+        assertThat(task.getTitle()).isEqualTo("Design Mockups");
+        assertThat(task.getParentTaskId()).isNull();
+    }
+
+    @Test
+    void shouldGetNullTask(){
+        int taskId = 999999;
+        Task task = taskRepository.getTask(taskId);
+
+        assertThat(task).isNull();
+    }
+
+    @Test
+    void shouldGetSubTasks(){
+        int parentTaskId = 1;
+        List<Task> subTasks = taskRepository.getSubTasks(parentTaskId);
+
+        assertThat(subTasks).isNotNull();
+        assertThat(subTasks).isNotEmpty();
+        assertThat(subTasks.size()).isEqualTo(2);
+    }
+
+    @Test
+    void shouldGetNoSubTasks(){
+        int parentTaskId = 999999;
+        List<Task> subTasks = taskRepository.getSubTasks(parentTaskId);
+
+        assertThat(subTasks).isNotNull();
+        assertThat(subTasks).isEmpty();
+    }
+
+    @Test
+    void shouldCreateTask(){
+        int projectId = 1;
+        String title = "Test task";
+        LocalDate startDate = LocalDate.of(2026,1,1);
+        LocalDate endDate = LocalDate.of(2026,2,1);
+        String description = "Testing";
+        double estimatedHours = 1;
+
+        Task testTask = new Task();
+        testTask.setProjectId(projectId);
+        testTask.setTitle(title);
+        testTask.setStartDate(startDate);
+        testTask.setEndDate(endDate);
+        testTask.setDescription(description);
+        testTask.setEstimatedHours(estimatedHours);
+
+        taskRepository.createTask(testTask);
+
+        Task createdTask = taskRepository.getTask(19); //19 should be the test task id
+        assertThat(createdTask).isNotNull();
+        assertThat(createdTask.getProjectId()).isEqualTo(1);
+        assertThat(createdTask.getTitle()).isEqualTo("Test task");
+        assertThat(createdTask.getStartDate()).isEqualTo(LocalDate.of(2026, 1, 1));
+        assertThat(createdTask.getEndDate()).isEqualTo(LocalDate.of(2026, 2, 1));
+        assertThat(createdTask.getDescription()).isEqualTo("Testing");
+        assertThat(createdTask.getEstimatedHours()).isEqualTo(1);
+    }
+
+    @Test
+    void shouldCreateSubTask(){
+        int parentTaskId = 1;
+        int projectId = 1;
+        String title = "Test task";
+        LocalDate startDate = LocalDate.of(2026,1,1);
+        LocalDate endDate = LocalDate.of(2026,2,1);
+        String description = "Testing";
+        double estimatedHours = 1;
+
+        Task testTask = new Task();
+        testTask.setParentTaskId(parentTaskId);
+        testTask.setProjectId(projectId);
+        testTask.setTitle(title);
+        testTask.setStartDate(startDate);
+        testTask.setEndDate(endDate);
+        testTask.setDescription(description);
+        testTask.setEstimatedHours(estimatedHours);
+
+        taskRepository.createTask(testTask);
+
+        Task createdTask = taskRepository.getTask(19); //19 should be the test task id, if h2 is changed, this needs to change as well
+        assertThat(createdTask).isNotNull();
+        assertThat(createdTask.getParentTaskId()).isEqualTo(1);
+        assertThat(createdTask.getProjectId()).isEqualTo(1);
+        assertThat(createdTask.getTitle()).isEqualTo("Test task");
+        assertThat(createdTask.getStartDate()).isEqualTo(LocalDate.of(2026, 1, 1));
+        assertThat(createdTask.getEndDate()).isEqualTo(LocalDate.of(2026, 2, 1));
+        assertThat(createdTask.getDescription()).isEqualTo("Testing");
+        assertThat(createdTask.getEstimatedHours()).isEqualTo(1);
+    }
+
+    @Test
+    void shouldUpdateTask(){
+        Task taskToBeUpdated = taskRepository.getTask(18);
+        int updatedParentTaskId = 17;
+
+        assertThat(taskToBeUpdated.getParentTaskId()).isNull();
+        assertThat(taskToBeUpdated.getTitle()).isEqualTo("Invitationer");
+
+        taskToBeUpdated.setParentTaskId(updatedParentTaskId);
+        taskToBeUpdated.setTitle("Updated task");
+        taskRepository.updateTask(taskToBeUpdated);
+
+        assertThat(taskToBeUpdated).isNotNull();
+        assertThat(taskToBeUpdated.getParentTaskId()).isEqualTo(17);
+        assertThat(taskToBeUpdated.getTitle()).isEqualTo("Updated task");
+    }
+
+    @Test
+    void shouldDeleteTask(){
+        int taskToBeDeleted = 1; //Id of task to be deleted
+
+        int taskDeleted = taskRepository.deleteTask(taskToBeDeleted);
+        assertThat(taskDeleted).isGreaterThanOrEqualTo(1);
+    }
+
+    @Test
+    void shouldDeleteNoTask(){
+        int taskToBeDeleted = 999999; //Id of task to be deleted, should do nothing as Id doesn't exist
+
+        int taskDeleted = taskRepository.deleteTask(taskToBeDeleted);
+        assertThat(taskDeleted).isEqualTo(0);
     }
 }

@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Rediger projekt</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="color-scheme" content="light dark">
+    <link th:href="@{/css/pico.pink.min.css}" rel="stylesheet">
+    <link th:href="@{/css/main.css}" rel="stylesheet">
+</head>
+<body>
+<div th:replace="~{fragments/header :: header}">...</div>
+
+<main class="container-fluid">
+    <div>
+        <div>
+            <h1>Rediger projekt</h1>
+        </div>
+
+        <form method="post" th:action="@{/projects/{parentId}/edit(parentId=${project.projectId})}"
+              th:object="${project}">
+            <input type="hidden" th:field="*{projectId}"/>
+            <input type="hidden" th:field="*{ownerId}"/>
+            <input type="hidden" th:field="*{parentProjectId}"/>
+
+            <div>
+                <label for="title">Titel</label>
+                <input id="title" type="text" th:field="*{title}" placeholder="Indtast projekttitel" required/>
+                <div th:if="${#fields.hasErrors('title')}" th:errors="*{title}">
+                </div>
+            </div>
+
+            <div>
+                <label for="description">Beskrivelse</label>
+                <textarea id="description" th:field="*{description}"
+                          placeholder="Indtast beskrivelse"></textarea>
+                <div th:if="${#fields.hasErrors('description')}"
+                     th:errors="*{description}"></div>
+            </div>
+
+            <div>
+                <label for="startDate">Startdato</label>
+                <input id="startDate" type="date" th:field="*{startDate}"
+                       required/>
+                <div th:if="${#fields.hasErrors('startDate')}"
+                     th:errors="*{startDate}"></div>
+            </div>
+
+            <div>
+                <label for="endDate">Slutdato</label>
+                <input id="endDate" type="date" th:field="*{endDate}"
+                       required/>
+                <div th:if="${#fields.hasErrors('endDate')}"
+                     th:errors="*{endDate}"></div>
+            </div>
+
+            <button type="submit">Gem ændringer</button>
+
+            <div>
+                <p><a
+                        th:href="@{/projects/{id}(id=${project.projectId})}">Tilbage til projekt</a></p>
+            </div>
+        </form>
+    </div>
+</main>
+<div th:replace="~{fragments/footer :: footer}">...</div>
+</body>
+</html>

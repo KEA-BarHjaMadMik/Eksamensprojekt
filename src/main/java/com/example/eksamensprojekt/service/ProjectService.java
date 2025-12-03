@@ -137,7 +137,7 @@ public class ProjectService {
     private void loadProjectTree(Project project, Set<Integer> visitedProjects) {
 
         // Prevent endless recursion by tracking visited project Ids.
-        // visitedProjects.add(...) returns false if the Id was already added,
+        // visitedProjects.add(...) returns false if the ID was already added,
         // meaning we've already processed this project, so we stop recursing.
         if (!visitedProjects.add(project.getProjectId())) {
             return;
@@ -191,6 +191,16 @@ public class ProjectService {
             projectRepository.removeUserFromProject(projectId,userId);
         } catch (DataAccessException e) {
             throw new DatabaseOperationException("Failed to remove user from project", e);
+        }
+    }
+
+    public boolean updateProject(Project updatedProject) {
+        try {
+            int rowsAffected = projectRepository.updateProject(updatedProject);
+            if (rowsAffected == 0) throw new ProjectNotFoundException(updatedProject.getProjectId());
+            return true; // project updated
+        } catch (DataAccessException e) {
+            throw new DatabaseOperationException("Failed to update project", e);
         }
     }
 }
