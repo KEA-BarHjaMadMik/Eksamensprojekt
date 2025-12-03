@@ -12,60 +12,58 @@
 <div th:replace="~{fragments/header :: header}">...</div>
 
 <main class="container-fluid">
+
     <div>
-        <div>
-            <div>
-                <h1>Opret din konto</h1>
-            </div>
-
-            <form method="post" th:action="@{/register_user}" th:object="${newUser}">
-                <div>
-                    <label for="email">E-mail</label>
-                    <input id="email" type="email" th:field="*{email}" placeholder="din@email.dk" required/>
-                    <div th:if="${#fields.hasErrors('email')}" th:errors="*{email}"></div>
-                </div>
-
-                <div>
-                    <label for="pw">Password</label>
-                    <input id="pw" type="password" th:field="*{passwordHash}" placeholder="Vælg et sikkert password"
-                           required/>
-                    <div th:if="${#fields.hasErrors('passwordHash')}" th:errors="*{passwordHash}"></div>
-                </div>
-
-                <div>
-                    <label for="confirmPw">Gentag password</label>
-                    <input id="confirmPw" type="password" name="confirmPassword" placeholder="Gentag dit password"
-                           required/>
-                </div>
-
-                <div>
-                    <label for="name">Navn</label>
-                    <input id="name" type="text" th:field="*{name}" placeholder="Indtast dit navn" required/>
-                    <div th:if="${#fields.hasErrors('name')}" th:errors="*{name}"></div>
-                </div>
-
-                <div>
-                    <label for="title">Titel (valgfri)</label>
-                    <input id="title" type="text" th:field="*{title}" placeholder="Indtast jobtitel"/>
-                    <div th:if="${#fields.hasErrors('title')}" th:errors="*{title}"></div>
-                </div>
-
-                <div>
-                    <label for="external">Intern eller ekstern?</label>
-                    <select id="external" th:field="*{external}">
-                        <option th:value="false">Intern</option>
-                        <option th:value="true">Ekstern</option>
-                    </select>
-                </div>
-
-                <button type="submit">Opret konto</button>
-            </form>
-
-            <div>
-                <p>Har du allerede en konto? <a th:href="@{/login}">Log ind her</a></p>
-            </div>
-        </div>
+        <h1>Opret din konto</h1>
     </div>
+
+    <form method="post" th:action="@{/register_user}" th:object="${newUser}">
+        <div>
+            <label for="email">E-mail</label>
+            <input id="email" type="email" th:field="*{email}" placeholder="din@email.dk" required/>
+            <div th:if="${#fields.hasErrors('email')}" th:errors="*{email}"></div>
+        </div>
+
+        <div>
+            <label for="pw">Password</label>
+            <input id="pw" type="password" th:field="*{passwordHash}" placeholder="Vælg et sikkert password"
+                   required/>
+            <div th:if="${#fields.hasErrors('passwordHash')}" th:errors="*{passwordHash}"></div>
+        </div>
+
+        <div>
+            <label for="confirmPw">Gentag password</label>
+            <input id="confirmPw" type="password" name="confirmPassword" placeholder="Gentag dit password"
+                   required/>
+        </div>
+
+        <div>
+            <label for="name">Navn</label>
+            <input id="name" type="text" th:field="*{name}" placeholder="Indtast dit navn" required/>
+            <div th:if="${#fields.hasErrors('name')}" th:errors="*{name}"></div>
+        </div>
+
+        <div>
+            <label for="title">Titel (valgfri)</label>
+            <input id="title" type="text" th:field="*{title}" placeholder="Indtast jobtitel"/>
+            <div th:if="${#fields.hasErrors('title')}" th:errors="*{title}"></div>
+        </div>
+
+        <div>
+            <label for="external">Intern eller ekstern?</label>
+            <select id="external" th:field="*{external}">
+                <option th:value="false">Intern</option>
+                <option th:value="true">Ekstern</option>
+            </select>
+        </div>
+
+        <button type="submit">Opret konto</button>
+    </form>
+
+    <div>
+        <p>Har du allerede en konto? <a th:href="@{/login}">Log ind her</a></p>
+    </div>
+
 </main>
 
 <div th:replace="~{fragments/footer :: footer}">...</div>

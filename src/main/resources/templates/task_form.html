@@ -12,54 +12,52 @@
 <div th:replace="~{fragments/header :: header}">...</div>
 
 <main class="container-fluid">
+
     <div>
+        <h1>Opret opgave</h1>
+    </div>
+
+    <form method="post" th:action="@{/tasks/create}" th:object="${task}">
+
+        <input type="hidden" th:field="*{projectId}"/>
+        <input type="hidden" th:field="*{parentTaskId}"/>
+
         <div>
-            <div>
-                <h1>Opret opgave</h1>
-            </div>
-
-            <form method="post" th:action="@{/tasks/create}" th:object="${task}">
-
-                <input type="hidden" th:field="*{projectId}"/>
-                <input type="hidden" th:field="*{parentTaskId}"/>
-
-                <div>
-                    <label for="title">Titel</label>
-                    <input id="title" type="text" th:field="*{title}" placeholder="Indtast opgavetitel" required/>
-                    <div th:if="${#fields.hasErrors('title')}" th:errors="*{title}"></div>
-                </div>
-
-                <div>
-                    <label for="description">Beskrivelse</label>
-                    <textarea id="description" th:field="*{description}" placeholder="Indtast beskrivelse"></textarea>
-                    <div th:if="${#fields.hasErrors('description')}" th:errors="*{description}"></div>
-                </div>
-
-                <div>
-                    <label for="startDate">Startdato</label>
-                    <input id="startDate" type="date" th:field="*{startDate}"/>
-                    <div th:if="${#fields.hasErrors('startDate')}" th:errors="*{startDate}"></div>
-                </div>
-
-                <div>
-                    <label for="endDate">Slutdato</label>
-                    <input id="endDate" type="date" th:field="*{endDate}"/>
-                    <div th:if="${#fields.hasErrors('endDate')}" th:errors="*{endDate}"></div>
-                </div>
-
-                <div>
-                    <label for="estimatedHours">Estimerede timer</label>
-                    <input id="estimatedHours" type="number" th:field="*{estimatedHours}" step="0.01" min="0" value="0" placeholder="0.00"/>
-                    <div th:if="${#fields.hasErrors('estimatedHours')}" th:errors="*{estimatedHours}"></div>
-                </div>
-
-                <button type="submit">Opret opgave</button>
-            </form>
-
-            <div>
-                <p><a th:href="@{/projects/{id}(id=${task.projectId})}">Tilbage til projekt</a></p>
-            </div>
+            <label for="title">Titel:</label>
+            <input id="title" type="text" th:field="*{title}" placeholder="Indtast opgavetitel" required/>
+            <div th:if="${#fields.hasErrors('title')}" th:errors="*{title}"></div>
         </div>
+
+        <div>
+            <label for="description">Beskrivelse (valgfri):</label>
+            <textarea id="description" th:field="*{description}" placeholder="Indtast beskrivelse"></textarea>
+            <div th:if="${#fields.hasErrors('description')}" th:errors="*{description}"></div>
+        </div>
+
+        <div>
+            <label for="startDate">Startdato:</label>
+            <input id="startDate" type="date" th:field="*{startDate}"/>
+            <div th:if="${#fields.hasErrors('startDate')}" th:errors="*{startDate}"></div>
+        </div>
+
+        <div>
+            <label for="endDate">Slutdato:</label>
+            <input id="endDate" type="date" th:field="*{endDate}"/>
+            <div th:if="${#fields.hasErrors('endDate')}" th:errors="*{endDate}"></div>
+        </div>
+
+        <div>
+            <label for="estimatedHours">Estimerede timer:</label>
+            <input id="estimatedHours" type="number" th:field="*{estimatedHours}" step="0.01" min="0" value="0"
+                   placeholder="0.00"/>
+            <div th:if="${#fields.hasErrors('estimatedHours')}" th:errors="*{estimatedHours}"></div>
+        </div>
+
+        <button type="submit">Opret opgave</button>
+    </form>
+
+    <div>
+        <a th:href="@{/projects/{id}(id=${task.projectId})}">Tilbage til projekt</a>
     </div>
 </main>
 

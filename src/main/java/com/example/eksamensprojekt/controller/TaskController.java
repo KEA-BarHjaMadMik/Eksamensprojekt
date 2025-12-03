@@ -144,15 +144,15 @@ public class TaskController {
         }
 
         // Verify role is not READ_ONLY
-        String currentUserProjectRole = projectService.getUserRole(projectId, currentUserId).getRole();
-        if ("READ_ONLY".equals(currentUserProjectRole)) {
+        String userRole = projectService.getUserRole(projectId, currentUserId).getRole();
+        if ("READ_ONLY".equals(userRole)) {
             return "redirect:/tasks/" + taskId;
         }
 
         List<TaskStatus> taskStatusList = taskService.getAllTaskStatuses();
 
         model.addAttribute("task", task);
-        model.addAttribute("currentUserProjectRole", currentUserProjectRole);
+        model.addAttribute("userRole", userRole);
         model.addAttribute("taskStatusList", taskStatusList);
 
         return "task_edit_form";

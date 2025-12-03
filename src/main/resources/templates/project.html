@@ -22,21 +22,14 @@
         <ul>
             <li>
                 <div role="group">
-                    <a role="button" class="secondary"
+                    <a role="button" class="contrast"
                        th:href="@{/projects/{projectId}/team(projectId=${project.projectId})}">Team</a>
+                    <a role="button" class="secondary"
+                       th:href="@{/projects/{projectId}/edit(projectId=${project.projectId})}">Rediger projekt</a>
                     <a role="button" th:href="@{/tasks/{projectId}/create(projectId=${project.projectId})}">+ Opgave</a>
                     <a role="button" th:href="@{/projects/{parentId}/create(parentId=${project.projectId})}">+
                         Delprojekt</a>
                 </div>
-            </li>
-        </ul>
-        <ul th:if="${userRole.equals('OWNER')}">
-            <li>
-                <form th:action="@{/projects/{projectId}/delete(projectId = ${project.projectId})}" method="post">
-                    <button type="submit" onclick="return confirm('Er du sikker?')">
-                        Slet projekt
-                    </button>
-                </form>
             </li>
         </ul>
     </nav>
@@ -47,17 +40,12 @@
     <p th:text="${'Estimerede/faktiske timer: ' + project.estimatedHours + '/' + project.actualHours}"></p>
 
     <section th:unless="${project.subProjects.isEmpty()}">
-        <h2>Delprojekter</h2>
+        <h3>Delprojekter</h3>
         <div th:replace="~{fragments/project_list :: recursiveList(${project.subProjects})}">...</div>
     </section>
 
-    <!--    <section th:unless="${project.tasks.isEmpty()}">-->
-    <!--        <h2>Projektopgaver</h2>-->
-    <!--        <div th:replace="fragments/task_list :: recursiveList(${project.tasks})">...</div>-->
-    <!--    </section>-->
-
     <section th:unless="${project.tasks.isEmpty()}">
-        <h2>Projektopgaver</h2>
+        <h3>Projektopgaver</h3>
         <div class="overflow-auto">
             <table>
                 <thead>
@@ -74,8 +62,17 @@
                 <div th:replace="~{fragments/task_table :: recursiveTableRows(taskList=${project.tasks}, currentDepth=0)}"></div>
                 </tbody>
             </table>
+
         </div>
     </section>
+
+    <form th:action="@{/projects/{projectId}/delete(projectId = ${project.projectId})}" method="post">
+        <button role=button
+                type="submit"
+                onclick="return confirm('Er du sikker på at du vil slette dette projekt?')">
+            Slet projekt
+        </button>
+    </form>
 </main>
 
 <div th:replace="~{fragments/footer :: footer}">...</div>

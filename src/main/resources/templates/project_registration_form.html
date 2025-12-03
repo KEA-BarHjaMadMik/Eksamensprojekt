@@ -23,25 +23,28 @@
             <input type="hidden" th:field="*{parentProjectId}"/>
         </div>
         <div>
-            <label for="title">Titel</label>
+            <label for="title">Titel:</label>
             <input id="title" type="text" th:field="*{title}" placeholder="Projektnavn her" required/>
         </div>
         <div>
-            <label for="description">Beskrivelse</label>
+            <label for="description">Beskrivelse (valgfri):</label>
             <textarea id="description" th:field="*{description}" placeholder="Projektbeskrivelse her"></textarea>
         </div>
         <div>
-            <label for="startdate">Start dato</label>
+            <label for="startdate">Start dato:</label>
             <input id="startdate" type="date" th:field="*{startDate}" required/>
         </div>
         <div>
-            <label for="enddate">Slut dato</label>
+            <label for="enddate">Slut dato:</label>
             <input id="enddate" type="date" th:field="*{endDate}" required/>
         </div>
 
         <button type="submit">Opret projekt</button>
     </form>
 
+    <div>
+        <a th:href="@{/projects}">Tilbage til projekter</a>
+    </div>
 </main>
 
 <div th:replace="~{fragments/footer :: footer}">...</div>
