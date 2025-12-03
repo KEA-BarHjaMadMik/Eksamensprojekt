@@ -10,6 +10,7 @@ import org.springframework.test.context.jdbc.Sql;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.test.context.jdbc.Sql.ExecutionPhase.BEFORE_TEST_METHOD;
 
+import java.time.LocalDate;
 import java.util.List;
 
 @SpringBootTest
@@ -76,5 +77,34 @@ public class TaskRepositoryTest {
 
         assertThat(subTasks).isNotNull();
         assertThat(subTasks).isEmpty();
+    }
+
+    @Test
+    void shouldCreateTask(){
+        int projectId = 1;
+        String title = "Test task";
+        LocalDate startDate = LocalDate.of(2026,1,1);
+        LocalDate endDate = LocalDate.of(2026,2,1);
+        String description = "Testing";
+        double estimatedHours = 1;
+
+        Task testTask = new Task();
+        testTask.setProjectId(projectId);
+        testTask.setTitle(title);
+        testTask.setStartDate(startDate);
+        testTask.setEndDate(endDate);
+        testTask.setDescription(description);
+        testTask.setEstimatedHours(estimatedHours);
+
+        taskRepository.createTask(testTask);
+
+        Task createdTask = taskRepository.getTask(19); //19 should be the test task id
+        assertThat(createdTask).isNotNull();
+        assertThat(createdTask.getProjectId()).isEqualTo(1);
+        assertThat(createdTask.getTitle()).isEqualTo("Test task");
+        assertThat(createdTask.getStartDate()).isEqualTo(LocalDate.of(2026, 1, 1));
+        assertThat(createdTask.getEndDate()).isEqualTo(LocalDate.of(2026, 2, 1));
+        assertThat(createdTask.getDescription()).isEqualTo("Testing");
+        assertThat(createdTask.getEstimatedHours()).isEqualTo(1);
     }
 }
