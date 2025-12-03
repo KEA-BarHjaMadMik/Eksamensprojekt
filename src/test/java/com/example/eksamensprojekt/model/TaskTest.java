@@ -58,6 +58,6 @@ class TaskTest {
         task.setStartDate(LocalDate.of(2025, 12, 1));
         task.setEndDate(LocalDate.of(2025, 12, 2));
 
-        assertEquals(2.5, task.getAvgDailyEstimatedHours());
+        assertEquals(2.5, task.getAvgEstimatedHoursPerBusinessDay());
     }
 }

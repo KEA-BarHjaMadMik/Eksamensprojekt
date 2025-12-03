@@ -8,7 +8,9 @@ import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class Project {
     private int projectId;
@@ -159,6 +161,29 @@ public class Project {
     }
 
     public double getAvgDailyEstimatedHours() {
-        return getEstimatedHours() / getDays();
+        return getEstimatedHours() / getBusinessDays();
+    }
+
+    // Returns a map of LocalDate -> estimated hours for the entire project,
+    // including all tasks and subprojects, excluding weekends.
+    public Map<LocalDate, Double> getDistributedHours() {
+        Map<LocalDate, Double> map = new HashMap<>();
+        distributeHours(map);
+        return map;
+    }
+
+    // Private helper that recursively distributes estimated hours across
+    // tasks and subprojects, summing into the provided map.
+    private void distributeHours(Map<LocalDate, Double> map) {
+        // Include hours from tasks
+        for (Task task : tasks) {
+            Map<LocalDate, Double> taskHours = task.getDistributedTaskHours();
+            taskHours.forEach((date, hours) -> map.merge(date, hours, Double::sum));
+        }
+
+        // Include hours from subprojects recursively
+        for (Project sub : subProjects) {
+            sub.distributeHours(map);
+        }
     }
 }

@@ -63,6 +63,27 @@ public class ProjectController {
         return "project";
     }
 
+    @GetMapping("/{projectId}/hour_distribution")
+    public String showHourDistribution(@PathVariable("projectId") int projectId,
+                                       HttpSession session,
+                                       Model model) {
+        if (!SessionUtil.isLoggedIn(session)) return "redirect:/login";
+        int currentUserId = SessionUtil.getCurrentUserId(session);
+
+        // Check if the user has access to the project
+        if (!projectService.hasAccessToProject(projectId, currentUserId)) {
+            return "redirect:/projects";
+        }
+
+        Project project = projectService.getProjectWithTree(projectId);
+        Map<LocalDate, Double> hourDistributionMap = project.getDistributedHours();
+
+        model.addAttribute("project", project);
+        model.addAttribute("hourDistributionMap", hourDistributionMap);
+
+        return "project_hour_distribution";
+    }
+
     @GetMapping("/create")
     public String showCreateProjectForm(HttpSession session, Model model) {
         //If user is not logged in, show login screen
@@ -114,11 +135,11 @@ public class ProjectController {
     }
 
     @PostMapping("/{projectId}/delete")
-    public String deleteProject(@PathVariable("projectId") int projectId, HttpSession session){
+    public String deleteProject(@PathVariable("projectId") int projectId, HttpSession session) {
         if (!SessionUtil.isLoggedIn(session)) return "redirect:/login";
 
         Project project = projectService.getProject(projectId);
-        if (SessionUtil.getCurrentUserId(session) != project.getOwnerId()){
+        if (SessionUtil.getCurrentUserId(session) != project.getOwnerId()) {
             return "redirect:/";
         }
 
