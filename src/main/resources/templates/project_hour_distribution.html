@@ -12,20 +12,58 @@
 <div th:replace="~{fragments/header :: header}">...</div>
 
 <main class="container-fluid">
-    <table>
-        <thead>
-        <tr>
-            <th>Dato:</th>
-            <th>Estimerede timer:</th>
-        </tr>
-        </thead>
-        <tbody>
-        <tr th:each="entry : ${hourDistributionMap}">
-            <td th:text="${#temporals.format(entry.key)}"></td>
-            <td th:text="${#numbers.formatDecimal(entry.value, 1, 2)}"></td>
-        </tr>
-        </tbody>
-    </table>
+    <nav>
+        <ul>
+            <li>
+                <h1 th:text="${project.title}">Project title</h1>
+            </li>
+        </ul>
+
+        <ul>
+            <li>
+                <div role="group">
+                    <a role="button" class="contrast"
+                       th:href="@{/projects/{projectId}/hour_distribution(projectId=${project.projectId})}">Timefordeling</a>
+                    <a role="button" class="contrast"
+                       th:href="@{/projects/{projectId}/team(projectId=${project.projectId})}">Team</a>
+                    <a role="button" class="secondary"
+                       th:href="@{/projects/{projectId}/edit(projectId=${project.projectId})}">Rediger projekt</a>
+                    <a role="button" th:href="@{/tasks/{projectId}/create(projectId=${project.projectId})}">+ Opgave</a>
+                    <a role="button" th:href="@{/projects/{parentId}/create(parentId=${project.projectId})}">+
+                        Delprojekt</a>
+                </div>
+            </li>
+        </ul>
+    </nav>
+
+    <div>
+        <canvas id="hoursChart" width="800" height="400"></canvas>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <script>
+        const ctx = document.getElementById('hoursChart')
+        const labels = [[${hourDistributionMap.keySet()}]]; // dates
+        const data = [[${hourDistributionMap.values()}]];   // hours
+
+        new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: labels,
+                datasets: [{
+                    label: 'Estimerede timer pr. arbejdsdag',
+                    data: data,
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                scales: {
+                    y: { beginAtZero: true }
+                }
+            }
+        });
+    </script>
 </main>
 
 <div th:replace="~{fragments/footer :: footer}">...</div>

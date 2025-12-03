@@ -23,6 +23,8 @@
             <li>
                 <div role="group">
                     <a role="button" class="contrast"
+                       th:href="@{/projects/{projectId}/hour_distribution(projectId=${project.projectId})}">Timefordeling</a>
+                    <a role="button" class="contrast"
                        th:href="@{/projects/{projectId}/team(projectId=${project.projectId})}">Team</a>
                     <a role="button" class="secondary"
                        th:href="@{/projects/{projectId}/edit(projectId=${project.projectId})}">Rediger projekt</a>
