@@ -160,6 +160,7 @@ public class ProjectController {
         }
 
         model.addAttribute("project", project);
+        model.addAttribute("userRole", userRole.getRole());
         return "project_edit_form";
     }
 

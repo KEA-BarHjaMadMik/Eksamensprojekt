@@ -13,9 +13,26 @@
 
 <main class="container-fluid">
     <div>
-        <div>
-            <h1>Rediger projekt</h1>
-        </div>
+        <nav>
+            <ul>
+                <li>
+                    <h1>Rediger projekt</h1>
+                </li>
+            </ul>
+
+            <ul>
+                <li>
+                    <form th:if="${userRole == 'OWNER'}"
+                          th:action="@{/projects/{projectId}/delete(projectId = ${project.projectId})}" method="post">
+                        <button role=button
+                                type="submit"
+                                onclick="return confirm('Er du sikker på at du vil slette dette projekt?')">
+                            Slet projekt
+                        </button>
+                    </form>
+                </li>
+            </ul>
+        </nav>
 
         <form method="post" th:action="@{/projects/{parentId}/edit(parentId=${project.projectId})}"
               th:object="${project}">
