@@ -29,6 +29,8 @@ public class ProjectController {
         this.userService = userService;
     }
 
+    // =========== PROJECT CRUD ===========
+
     @GetMapping
     public String projects(HttpSession session, Model model) {
         if (!SessionUtil.isLoggedIn(session)) return "redirect:/login";
@@ -65,7 +67,7 @@ public class ProjectController {
 
     @GetMapping("/create")
     public String showCreateProjectForm(HttpSession session, Model model) {
-        //If user is not logged in, show login screen
+        //If a user is not logged in, show a login screen
         if (!SessionUtil.isLoggedIn(session)) return "redirect:/login";
 
         Project newProject = new Project();
@@ -74,6 +76,42 @@ public class ProjectController {
         newProject.setEndDate(LocalDate.now());
 
         model.addAttribute("newProject", newProject);
+        return "project_registration_form";
+    }
+
+    @PostMapping("/create")
+    public String createProject(HttpSession session,
+                                @Valid @ModelAttribute Project newProject,
+                                BindingResult bindingResult,
+                                Model model) {
+
+        if (!SessionUtil.isLoggedIn(session)) return "redirect:/login";
+
+        boolean fieldsHaveErrors = bindingResult.hasErrors();
+
+        //if validation failed, return to form
+        if (fieldsHaveErrors) {
+            model.addAttribute("newProject", newProject);
+            return "project_registration_form";
+        }
+
+        int projectId = projectService.createProject(newProject);
+
+        return "redirect:/projects/" + projectId;
+    }
+
+    @GetMapping("/{parentId}/create")
+    public String showCreateSubProjectForm(@PathVariable("parentId") int parentId, HttpSession session, Model model) {
+        //If a user is not logged in, show a login screen
+        if (!SessionUtil.isLoggedIn(session)) return "redirect:/login";
+
+        Project subProject = new Project();
+        subProject.setOwnerId(projectService.getProject(parentId).getOwnerId());
+        subProject.setParentProjectId(parentId);
+        subProject.setStartDate(LocalDate.now());
+        subProject.setEndDate(LocalDate.now());
+
+        model.addAttribute("newProject", subProject);
         return "project_registration_form";
     }
 
@@ -143,42 +181,6 @@ public class ProjectController {
         return "redirect:/projects/" + projectId;
     }
 
-    @PostMapping("/create")
-    public String createProject(HttpSession session,
-                                @Valid @ModelAttribute Project newProject,
-                                BindingResult bindingResult,
-                                Model model) {
-
-        if (!SessionUtil.isLoggedIn(session)) return "redirect:/login";
-
-        boolean fieldsHaveErrors = bindingResult.hasErrors();
-
-        //if validation failed, return to form
-        if (fieldsHaveErrors) {
-            model.addAttribute("newProject", newProject);
-            return "project_registration_form";
-        }
-
-        int projectId = projectService.createProject(newProject);
-
-        return "redirect:/projects/" + projectId;
-    }
-
-    @GetMapping("/{parentId}/create")
-    public String showCreateSubProjectForm(@PathVariable("parentId") int parentId, HttpSession session, Model model) {
-        //If user is not logged in, show login screen
-        if (!SessionUtil.isLoggedIn(session)) return "redirect:/login";
-
-        Project subProject = new Project();
-        subProject.setOwnerId(projectService.getProject(parentId).getOwnerId());
-        subProject.setParentProjectId(parentId);
-        subProject.setStartDate(LocalDate.now());
-        subProject.setEndDate(LocalDate.now());
-
-        model.addAttribute("newProject", subProject);
-        return "project_registration_form";
-    }
-
     @PostMapping("/{projectId}/delete")
     public String deleteProject(@PathVariable("projectId") int projectId, HttpSession session){
         if (!SessionUtil.isLoggedIn(session)) return "redirect:/login";
@@ -191,6 +193,8 @@ public class ProjectController {
         projectService.deleteProject(projectId);
         return "redirect:/projects";
     }
+
+    // ===========TEAM MANAGEMENT===========
 
     @GetMapping("/{projectId}/team")
     public String showTeam(@PathVariable("projectId") int projectId, HttpSession session, Model model) {
