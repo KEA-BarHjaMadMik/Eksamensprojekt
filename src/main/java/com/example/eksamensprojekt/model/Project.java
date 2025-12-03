@@ -4,7 +4,9 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import org.springframework.format.annotation.DateTimeFormat;
 
+import java.time.DayOfWeek;
 import java.time.LocalDate;
+import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -134,5 +136,29 @@ public class Project {
     public double getActualHours() {
         return tasks.stream().mapToDouble(Task::getActualHours).sum()
                 + subProjects.stream().mapToDouble(Project::getActualHours).sum();
+    }
+
+    public long getDays() {
+        return ChronoUnit.DAYS.between(startDate, endDate) + 1; // add 1 to include start date
+    }
+
+    public long getBusinessDays() {
+        long days = 0;
+        LocalDate current = startDate;
+
+        // inclusive
+        while (!current.isAfter(endDate)) {
+            DayOfWeek dow = current.getDayOfWeek();
+            if (dow != DayOfWeek.SATURDAY && dow != DayOfWeek.SUNDAY) {
+                days++;
+            }
+            current = current.plusDays(1);
+        }
+
+        return days;
+    }
+
+    public double getAvgDailyEstimatedHours() {
+        return getEstimatedHours() / getDays();
     }
 }

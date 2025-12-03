@@ -2,7 +2,9 @@ package com.example.eksamensprojekt.model;
 
 import org.springframework.format.annotation.DateTimeFormat;
 
+import java.time.DayOfWeek;
 import java.time.LocalDate;
+import java.time.temporal.ChronoUnit;
 import java.util.List;
 
 public class Task {
@@ -149,6 +151,30 @@ public class Task {
 
     public boolean isSubtask() {
         return parentTaskId != null;
+    }
+
+    public long getDays() {
+        return ChronoUnit.DAYS.between(startDate, endDate) + 1; // add 1 to include start date
+    }
+
+    public long getBusinessDays() {
+        long days = 0;
+        LocalDate current = startDate;
+
+        // inclusive
+        while (!current.isAfter(endDate)) {
+            DayOfWeek dow = current.getDayOfWeek();
+            if (dow != DayOfWeek.SATURDAY && dow != DayOfWeek.SUNDAY) {
+                days++;
+            }
+            current = current.plusDays(1);
+        }
+
+        return days;
+    }
+
+    public double getAvgDailyEstimatedHours() {
+        return getEstimatedHours() / getDays();
     }
 }
 
