@@ -156,4 +156,20 @@ public class TaskRepositoryTest {
         assertThat(taskToBeUpdated.getParentTaskId()).isEqualTo(17);
         assertThat(taskToBeUpdated.getTitle()).isEqualTo("Updated task");
     }
+
+    @Test
+    void shouldDeleteTask(){
+        int taskToBeDeleted = 1; //Id of task to be deleted
+
+        int taskDeleted = taskRepository.deleteTask(taskToBeDeleted);
+        assertThat(taskDeleted).isGreaterThanOrEqualTo(1);
+    }
+
+    @Test
+    void shouldDeleteNoTask(){
+        int taskToBeDeleted = 999999; //Id of task to be deleted, should do nothing as Id doesn't exist
+
+        int taskDeleted = taskRepository.deleteTask(taskToBeDeleted);
+        assertThat(taskDeleted).isEqualTo(0);
+    }
 }
