@@ -2,7 +2,7 @@
 <html lang="en" xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
-    <title>Opret opgave</title>
+    <title>Rediger opgave</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="color-scheme" content="light dark">
     <link th:href="@{/css/pico.pink.min.css}" rel="stylesheet">
@@ -12,13 +12,30 @@
 <div th:replace="~{fragments/header :: header}">...</div>
 
 <main class="container-fluid">
+    <nav>
+        <ul>
+            <li>
+                <h1>Rediger opgave</h1>
+            </li>
+        </ul>
 
-    <div>
-        <h1>Opret opgave</h1>
-    </div>
+        <ul>
+            <li>
+                <form th:if="${userRole == 'OWNER' or userRole == 'FULL_ACCESS'}"
+                      th:action="@{/tasks/{taskId}/delete(taskId = ${task.taskId})}"
+                      method="post">
+                    <button type="submit"
+                            onclick="return confirm('Er du sikker på at du vil slette denne opgave? Når du sletter en opgave, vil opgaven og alle dens underopgaver blive slettet. Denne handling kan ikke fortrydes.')">
+                        Slet opgave
+                    </button>
+                </form>
+            </li>
+        </ul>
+    </nav>
 
-    <form method="post" th:action="@{/tasks/create}" th:object="${task}">
+    <form method="post" th:action="@{/tasks/edit}" th:object="${task}">
 
+        <input type="hidden" th:field="*{taskId}"/>
         <input type="hidden" th:field="*{projectId}"/>
         <input type="hidden" th:field="*{parentTaskId}"/>
 
@@ -29,7 +46,7 @@
         </div>
 
         <div>
-            <label for="description">Beskrivelse (valgfri):</label>
+            <label for="description">Beskrivelse:</label>
             <textarea id="description" th:field="*{description}" placeholder="Indtast beskrivelse"></textarea>
             <div th:if="${#fields.hasErrors('description')}" th:errors="*{description}"></div>
         </div>
@@ -53,11 +70,22 @@
             <div th:if="${#fields.hasErrors('estimatedHours')}" th:errors="*{estimatedHours}"></div>
         </div>
 
-        <button type="submit">Opret opgave</button>
+        <div>
+            <label for="status">Status:</label>
+            <select id="status" name="statusId" required>
+                <option th:each="taskStatus: ${taskStatusList}"
+                        th:value="${taskStatus.statusId}"
+                        th:text="${taskStatus.statusName}"
+                        th:selected="${taskStatus.statusId == task.status.statusId}">
+                </option>
+            </select>
+        </div>
+
+        <button type="submit">Gem ændringer</button>
     </form>
 
     <div>
-        <a th:href="@{/projects/{id}(id=${task.projectId})}">Tilbage til projekt</a>
+        <a th:href="@{/tasks/{id}(id=${task.taskId})}">Tilbage til opgave</a>
     </div>
 </main>
 

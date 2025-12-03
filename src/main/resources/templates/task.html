@@ -22,6 +22,7 @@
         <ul>
             <li>
                 <div role="group">
+                    <a role="button" class="secondary" th:href="@{/tasks/{taskId}/edit(taskId=${task.taskId})}">Rediger</a>
                     <a role="button" th:href="@{/tasks/{parentId}/subtask/create(parentId=${task.taskId})}">+ Underopgave</a>
                 </div>
             </li>
@@ -33,7 +34,7 @@
     </section>
 
     <section th:unless="${task.subTasks.isEmpty()}">
-        <h2>Underopgaver</h2>
+        <h3>Underopgaver</h3>
         <div th:replace="~{fragments/task_list :: recursiveList(${task.subTasks})}">...</div>
     </section>
 </main>

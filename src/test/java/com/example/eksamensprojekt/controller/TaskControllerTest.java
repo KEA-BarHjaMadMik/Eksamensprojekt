@@ -2,6 +2,7 @@ package com.example.eksamensprojekt.controller;
 
 import com.example.eksamensprojekt.model.ProjectRole;
 import com.example.eksamensprojekt.model.Task;
+import com.example.eksamensprojekt.model.TaskStatus;
 import com.example.eksamensprojekt.service.ProjectService;
 import com.example.eksamensprojekt.service.TaskService;
 import org.junit.jupiter.api.BeforeEach;
@@ -51,7 +52,7 @@ public class TaskControllerTest {
         shownTask.setEndDate(LocalDate.of(2025, 11, 11));
         shownTask.setEstimatedHours(3.6);
         shownTask.setActualHours(3.5);
-        shownTask.setStatus("Done");
+        shownTask.setStatus(new TaskStatus(1, "Færdig"));
         shownTask.setSubTasks(new ArrayList<>());
 
         when(projectService.hasAccessToProject(1, 1)).thenReturn(true);

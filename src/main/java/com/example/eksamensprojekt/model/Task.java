@@ -20,7 +20,7 @@ public class Task {
     private String description;
     private double estimatedHours;
     private double actualHours;
-    private String status;
+    private TaskStatus status;
     private List<Task> subTasks;
 
     public Task() {
@@ -35,7 +35,7 @@ public class Task {
                 String description,
                 double estimatedHours,
                 double actualHours,
-                String status,
+                TaskStatus status,
                 List<Task> subtasks) {
         this.taskId = taskId;
         this.parentTaskId = parentTaskId;
@@ -131,11 +131,11 @@ public class Task {
         this.actualHours = actualHours;
     }
 
-    public String getStatus() {
+    public TaskStatus getStatus() {
         return status;
     }
 
-    public void setStatus(String status) {
+    public void setStatus(TaskStatus status) {
         this.status = status;
     }
 
