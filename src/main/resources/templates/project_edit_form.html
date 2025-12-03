@@ -2,7 +2,7 @@
 <html lang="en" xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
-    <title>Rediget projekt</title>
+    <title>Rediger projekt</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="color-scheme" content="light dark">
     <link th:href="@{/css/pico.pink.min.css}" rel="stylesheet">
@@ -28,6 +28,37 @@
                 <input id="title" type="text" th:field="*{title}" placeholder="Indtast projekttitel" required/>
                 <div th:if="${#fields.hasErrors('title')}" th:errors="*{title}">
                 </div>
+            </div>
+
+            <div>
+                <label for="description">Beskrivelse</label>
+                <textarea id="description" th:field="*{description}"
+                          placeholder="Indtast beskrivelse"></textarea>
+                <div th:if="${#fields.hasErrors('description')}"
+                     th:errors="*{description}"></div>
+            </div>
+
+            <div>
+                <label for="startDate">Startdato</label>
+                <input id="startDate" type="date" th:field="*{startDate}"
+                       required/>
+                <div th:if="${#fields.hasErrors('startDate')}"
+                     th:errors="*{startDate}"></div>
+            </div>
+
+            <div>
+                <label for="endDate">Slutdato</label>
+                <input id="endDate" type="date" th:field="*{endDate}"
+                       required/>
+                <div th:if="${#fields.hasErrors('endDate')}"
+                     th:errors="*{endDate}"></div>
+            </div>
+
+            <button type="submit">Gem ændringer</button>
+
+            <div>
+                <p><a
+                        th:href="@{/projects/{id}(id=${project.projectId})}">Tilbage til projekt</a></p>
             </div>
         </form>
     </div>
