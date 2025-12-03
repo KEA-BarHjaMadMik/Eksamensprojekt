@@ -129,7 +129,7 @@ public class TaskRepositoryTest {
 
         taskRepository.createTask(testTask);
 
-        Task createdTask = taskRepository.getTask(19); //19 should be the test task id
+        Task createdTask = taskRepository.getTask(19); //19 should be the test task id, if h2 is changed, this needs to change as well
         assertThat(createdTask).isNotNull();
         assertThat(createdTask.getParentTaskId()).isEqualTo(1);
         assertThat(createdTask.getProjectId()).isEqualTo(1);
@@ -138,5 +138,22 @@ public class TaskRepositoryTest {
         assertThat(createdTask.getEndDate()).isEqualTo(LocalDate.of(2026, 2, 1));
         assertThat(createdTask.getDescription()).isEqualTo("Testing");
         assertThat(createdTask.getEstimatedHours()).isEqualTo(1);
+    }
+
+    @Test
+    void shouldUpdateTask(){
+        Task taskToBeUpdated = taskRepository.getTask(18);
+        int updatedParentTaskId = 17;
+
+        assertThat(taskToBeUpdated.getParentTaskId()).isNull();
+        assertThat(taskToBeUpdated.getTitle()).isEqualTo("Invitationer");
+
+        taskToBeUpdated.setParentTaskId(updatedParentTaskId);
+        taskToBeUpdated.setTitle("Updated task");
+        taskRepository.updateTask(taskToBeUpdated);
+
+        assertThat(taskToBeUpdated).isNotNull();
+        assertThat(taskToBeUpdated.getParentTaskId()).isEqualTo(17);
+        assertThat(taskToBeUpdated.getTitle()).isEqualTo("Updated task");
     }
 }
