@@ -40,4 +40,22 @@ public class TaskRepositoryTest {
 
         assertThat(tasks).isEmpty();
     }
+
+    @Test
+    void shouldGetTask(){
+        int taskId = 1;
+        Task task = taskRepository.getTask(taskId);
+
+        assertThat(task).isNotNull();
+        assertThat(task.getTitle()).isEqualTo("Design Mockups");
+        assertThat(task.getParentTaskId()).isNull();
+    }
+
+    @Test
+    void shouldGetNullTask(){
+        int taskId = 999999;
+        Task task = taskRepository.getTask(taskId);
+
+        assertThat(task).isNull();
+    }
 }
