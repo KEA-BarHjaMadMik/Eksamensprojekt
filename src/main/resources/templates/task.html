@@ -14,6 +14,12 @@
 <main class="container-fluid">
     <nav>
         <ul>
+            <li th:if="${task.parentTaskId == null}">
+                <a role="button" class="outline" th:href="@{/projects/{projectId}(projectId=${task.projectId})}"><</a>
+            </li>
+            <li th:unless="${task.parentTaskId == null}">
+                <a role="button" class="outline" th:href="@{/tasks/{taskId}(taskId=${task.parentTaskId})}"><</a>
+            </li>
             <li>
                 <h1 th:text="${task.title}">Task title</h1>
             </li>
