@@ -9,7 +9,6 @@ public class DateUtil {
         long days = 0;
         LocalDate current = startDate;
 
-        // inclusive
         while (!current.isAfter(endDate)) {
             DayOfWeek dow = current.getDayOfWeek();
             if (dow != DayOfWeek.SATURDAY && dow != DayOfWeek.SUNDAY) {
