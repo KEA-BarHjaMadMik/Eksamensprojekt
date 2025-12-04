@@ -108,8 +108,22 @@ class UserRepositoryTest {
 
         anna.setTitle("Testleder");
 
-        int update = userRepository.updateUser(anna);
+        int update = userRepository.updateUser(anna); //if update is 1 or greater, then user has been updated
         assertThat(update).isGreaterThanOrEqualTo(1);
         assertThat(anna.getTitle()).isEqualTo("Testleder");
+    }
+
+    @Test
+    void shouldChangePassword(){
+        int userId = 1;
+        String passwordHash = "$2a$10$2fiuXXXrshmlXie3QHLl0Oaa0tM1Suq9AJr3iYIZ5.CNFtZ55VmNS";
+        User anna = userRepository.getUserByUserId(userId);
+        assertThat(anna.getPasswordHash()).isEqualTo(passwordHash);
+
+        anna.setPasswordHash("$2a$10$tzNpfmbuFlp4q01pT3Ir1OkhfzxqFlPzkykHaXi5kZK0FeG7rTbfC");
+
+        int passwordHashChange = userRepository.changePassword(1, "$2a$10$tzNpfmbuFlp4q01pT3Ir1OkhfzxqFlPzkykHaXi5kZK0FeG7rTbfC");
+        assertThat(passwordHashChange).isEqualTo(1);
+        assertThat(anna.getPasswordHash()).isEqualTo("$2a$10$tzNpfmbuFlp4q01pT3Ir1OkhfzxqFlPzkykHaXi5kZK0FeG7rTbfC");
     }
 }
