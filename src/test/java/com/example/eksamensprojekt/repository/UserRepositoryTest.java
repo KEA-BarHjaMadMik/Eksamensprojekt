@@ -100,18 +100,16 @@ class UserRepositoryTest {
 
     @Test
     void shouldUpdateUser(){
-        User anna = userRepository.getUserByUserId(1);
+        int userId = 1;
+        String newTitle = "Testleder";
+        User user = userRepository.getUserByUserId(userId);
+        user.setTitle(newTitle);
 
-        assertThat(anna.getName()).isEqualTo("Anna Jensen");
-        assertThat(anna.getTitle()).isEqualTo("Teamleder");
-        assertThat(anna.getEmail()).isEqualTo("anna@example.dk");
-        assertThat(anna.getUserId()).isEqualTo(1);
+        int affectedRows = userRepository.updateUser(user);
+        assertThat(affectedRows).isEqualTo(1);
 
-        anna.setTitle("Testleder");
-
-        int update = userRepository.updateUser(anna); //if update is 1 or greater, then user has been updated
-        assertThat(update).isGreaterThanOrEqualTo(1);
-        assertThat(anna.getTitle()).isEqualTo("Testleder");
+        User updatedUser = userRepository.getUserByUserId(userId);
+        assertEquals(newTitle, updatedUser.getTitle());
     }
 
     @Test
