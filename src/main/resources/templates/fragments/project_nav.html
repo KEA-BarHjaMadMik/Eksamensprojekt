@@ -9,7 +9,7 @@
     <nav>
         <ul>
             <li th:if="${project.parentProjectId != null}">
-                <a role="button" class="outline" th:href="@{/projects/{projectId}(projectId=${project.parentProjectId})}"><-</a>
+                <a role="button" class="outline" th:href="@{/projects/{projectId}(projectId=${project.parentProjectId})}"><</a>
             </li>
             <li>
                 <a th:href="@{/projects/{projectId}(projectId=${project.projectId})}"><h1 th:text="${project.title}">Project title</h1></a>
