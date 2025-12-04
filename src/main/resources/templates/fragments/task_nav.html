@@ -9,10 +9,10 @@
     <nav>
         <ul>
             <li th:if="${task.parentTaskId == null}">
-                <a role="button" class="outline" th:href="@{/projects/{projectId}(projectId=${task.projectId})}"><</a>
+                <a role="button" class="outline" th:href="@{/projects/{projectId}(projectId=${task.projectId})}">🡐</a>
             </li>
             <li th:unless="${task.parentTaskId == null}">
-                <a role="button" class="outline" th:href="@{/tasks/{taskId}(taskId=${task.parentTaskId})}"><</a>
+                <a role="button" class="outline" th:href="@{/tasks/{taskId}(taskId=${task.parentTaskId})}">🡐</a>
             </li>
             <li>
                 <a th:href="@{/tasks/{taskId}(taskId=${task.taskId})}">
