@@ -37,4 +37,22 @@ class UserRepositoryTest {
         assertThat(userList).isNotNull();
         assertThat(userList).isEmpty();
     }
+
+    @Test
+    void shouldGetUserByEmail(){
+        String email = "anna@example.dk";
+
+        User anna = userRepository.getUserByEmail(email);
+        assertThat(anna).isNotNull();
+        assertThat(anna.getUserId()).isEqualTo(1);
+        assertThat(anna.getName()).isEqualTo("Anna Jensen");
+    }
+
+    @Test
+    void shouldGetNullUserByEmail(){
+        String email = "blank@test.dk";
+
+        User blank = userRepository.getUserByEmail(email);
+        assertThat(blank).isNull();
+    }
 }
