@@ -15,8 +15,6 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
@@ -59,7 +57,8 @@ public class ProjectController {
         }
 
         Project project = projectService.getProjectWithTree(projectId);
-        String userRole = projectService.getUserRole(projectId, currentUserId).getRole();
+        ProjectRole projectRole = projectService.getUserRole(projectId, currentUserId);
+        String userRole = projectRole != null ? projectRole.getRole() : "OWNER";
 
         model.addAttribute("project", project);
         model.addAttribute("userRole", userRole);
@@ -160,7 +159,7 @@ public class ProjectController {
         }
 
         model.addAttribute("project", project);
-        model.addAttribute("userRole", userRole.getRole());
+        model.addAttribute("userRole", userRole != null ? userRole.getRole() : "OWNER");
         return "project_edit_form";
     }
 
