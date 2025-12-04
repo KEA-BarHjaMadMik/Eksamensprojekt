@@ -18,11 +18,10 @@
 }
 
 details > summary[role="button"] {
-    display: inline-block;   /* shrink to content width */
-    width: stretch;             /* stretch full width */
-    padding: 0.5rem 1rem;    /* adjust padding */
+    width: stretch; /* stretch full width */
+    padding: 0.5rem 1rem; /* adjust padding */
 }
 
 details > table {
-    width: stretch;             /* stretch full width */
+    width: stretch; /* stretch full width */
 }
