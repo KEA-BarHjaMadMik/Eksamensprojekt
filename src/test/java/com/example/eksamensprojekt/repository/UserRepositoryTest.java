@@ -96,4 +96,20 @@ class UserRepositoryTest {
         int emailTaken = userRepository.countByEmail(email);
         assertThat(emailTaken).isGreaterThanOrEqualTo(1);
     }
+
+    @Test
+    void shouldUpdateUser(){
+        User anna = userRepository.getUserByUserId(1);
+
+        assertThat(anna.getName()).isEqualTo("Anna Jensen");
+        assertThat(anna.getTitle()).isEqualTo("Teamleder");
+        assertThat(anna.getEmail()).isEqualTo("anna@example.dk");
+        assertThat(anna.getUserId()).isEqualTo(1);
+
+        anna.setTitle("Testleder");
+
+        int update = userRepository.updateUser(anna);
+        assertThat(update).isGreaterThanOrEqualTo(1);
+        assertThat(anna.getTitle()).isEqualTo("Testleder");
+    }
 }
