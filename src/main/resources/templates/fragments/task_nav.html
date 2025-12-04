@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+<th:block th:fragment="taskNav(task)">
+    <nav>
+        <ul>
+            <li th:if="${task.parentTaskId == null}">
+                <a role="button" class="outline" th:href="@{/projects/{projectId}(projectId=${task.projectId})}"><</a>
+            </li>
+            <li th:unless="${task.parentTaskId == null}">
+                <a role="button" class="outline" th:href="@{/tasks/{taskId}(taskId=${task.parentTaskId})}"><</a>
+            </li>
+            <li>
+                <a th:href="@{/tasks/{taskId}(taskId=${task.taskId})}">
+                    <h1 th:text="${task.title}">Task title</h1>
+                </a>
+            </li>
+        </ul>
+
+        <ul>
+            <li>
+                <div role="group">
+                    <a role="button" class="secondary" th:href="@{/tasks/{taskId}/time_entries(taskId=${task.taskId})}">Timeregistrering</a>
+                    <a role="button" class="secondary" th:href="@{/tasks/{taskId}/edit(taskId=${task.taskId})}">Rediger</a>
+                    <a role="button" th:href="@{/tasks/{parentId}/subtask/create(parentId=${task.taskId})}">+ Underopgave</a>
+                </div>
+            </li>
+        </ul>
+    </nav>
+</th:block>
+</body>
+</html>

@@ -2,6 +2,7 @@ package com.example.eksamensprojekt.repository;
 
 import com.example.eksamensprojekt.model.Task;
 import com.example.eksamensprojekt.model.TaskStatus;
+import com.example.eksamensprojekt.model.TimeEntry;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Repository;
@@ -143,10 +144,39 @@ public class TaskRepository {
         );
     }
 
-    public int deleteTask(int taskId){
+    public int deleteTask(int taskId) {
         String sql = "DELETE FROM task WHERE task_id = ?";
 
         return jdbcTemplate.update(sql, taskId);
+    }
+
+    public List<TimeEntry> getTimeEntriesByTaskId(int taskId) {
+        String sql = """
+                SELECT
+                    te.time_entry_id,
+                    te.task_id,
+                    te.user_id,
+                    u.email,
+                    te.hours_worked,
+                    te.description
+                FROM time_entry te
+                JOIN user_account u ON te.user_id = u.user_id
+                WHERE te.task_id = ?""";
+
+        return jdbcTemplate.query(sql, getTimeEntryRowMapper(), taskId);
+    }
+
+    public void createTimeEntry(TimeEntry newTimeEntry) {
+        String sql = """
+                INSERT INTO time_entry (task_id, user_id, hours_worked, description)
+                VALUES (?, ?, ?, ?)
+                """;
+
+        jdbcTemplate.update(sql,
+                newTimeEntry.getTaskId(),
+                newTimeEntry.getUserId(),
+                newTimeEntry.getHoursWorked(),
+                newTimeEntry.getDescription());
     }
 
     private RowMapper<Task> getTaskRowMapper() {
@@ -177,6 +207,18 @@ public class TaskRepository {
         return ((rs, rowNum) -> new TaskStatus(
                 rs.getInt("status_id"),
                 rs.getString("status_name")
+        ));
+    }
+
+    private RowMapper<TimeEntry> getTimeEntryRowMapper() {
+        return (((rs, rowNum) -> new TimeEntry(
+                rs.getInt("time_entry_id"),
+                rs.getInt("task_id"),
+                rs.getInt("user_id"),
+                rs.getString("email"),
+                rs.getDouble("hours_worked"),
+                rs.getString("description")
+        )
         ));
     }
 }

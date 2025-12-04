@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Timeregistrering</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="color-scheme" content="light dark">
+    <link th:href="@{/css/pico.pink.min.css}" rel="stylesheet">
+    <link th:href="@{/css/main.css}" rel="stylesheet">
+</head>
+<body>
+<div th:replace="~{fragments/header :: header}">...</div>
+
+<main class="container-fluid">
+    <th:block th:replace="~{fragments/task_nav :: taskNav(${task})}">...</th:block>
+
+    <form th:action="@{/tasks/{taskId}/time_entries/add(taskId=${task.taskId})}" th:method="post" th:object="${newTimeEntry}">
+        <div class="error" th:if="${#fields.hasErrors()}" th:errors="*">Errors</div>
+        <table>
+            <thead>
+            <tr>
+                <th>Bruger</th>
+                <th>Beskrivelse</th>
+                <th>Timer</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr>
+                <td>
+                    <select th:field="*{userId}" required>
+                        <option th:each="user: ${projectUsers}"
+                                th:value="${user.userId}"
+                                th:text="${user.email}">User
+                        </option>
+                    </select>
+                </td>
+                <td>
+                    <input type="text" th:field="*{description}" placeholder="Beskrivelse" required/>
+                </td>
+                <td>
+                    <input type="number" step="0.01" min="0.1" value="0" th:field="*{hoursWorked}" required/>
+                </td>
+                <td>
+                    <button type="submit">Tilføj</button>
+                </td>
+            </tr>
+            <tr th:each="timeEntry: ${timeEntries}">
+                <td th:text="${timeEntry.userEmail}">User</td>
+                <td th:text="${timeEntry.description}">Description</td>
+                <td th:text="${#numbers.formatDecimal(timeEntry.hoursWorked, 1, 2)}">Hours</td>
+            </tr>
+            </tbody>
+        </table>
+    </form>
+</main>
+
+<div th:replace="~{fragments/footer :: footer}">...</div>
+</body>
+</html>

@@ -4,6 +4,7 @@ import com.example.eksamensprojekt.exceptions.DatabaseOperationException;
 import com.example.eksamensprojekt.exceptions.TaskNotFoundException;
 import com.example.eksamensprojekt.model.Task;
 import com.example.eksamensprojekt.model.TaskStatus;
+import com.example.eksamensprojekt.model.TimeEntry;
 import com.example.eksamensprojekt.repository.TaskRepository;
 import org.springframework.dao.DataAccessException;
 import org.springframework.stereotype.Service;
@@ -127,6 +128,22 @@ public class TaskService {
             //task deleted if at least 1 row is affected
         }catch (DataAccessException e){
             throw new DatabaseOperationException("Failed to delete task with id " + taskId, e);
+        }
+    }
+
+    public List<TimeEntry> getTimeEntriesByTaskId(int taskId) {
+        try {
+            return taskRepository.getTimeEntriesByTaskId(taskId);
+        } catch (DataAccessException e) {
+            throw new DatabaseOperationException("Failed to retrieve task entries for task with id " + taskId, e);
+        }
+    }
+
+    public void addTimeEntry(TimeEntry newTimeEntry){
+        try {
+            taskRepository.createTimeEntry(newTimeEntry);
+        } catch (DataAccessException e) {
+            throw new DatabaseOperationException("Failed to insert new time entry", e);
         }
     }
 }

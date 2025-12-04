@@ -5,7 +5,7 @@
     <title>Title</title>
 </head>
 <body>
-<div th:fragment="projectNav(project)" th:remove="tag">
+<th:block th:fragment="projectNav(project)">
     <nav>
         <ul>
             <li th:if="${project.parentProjectId != null}">
@@ -32,6 +32,6 @@
             </li>
         </ul>
     </nav>
-</div>
+</th:block>
 </body>
 </html>

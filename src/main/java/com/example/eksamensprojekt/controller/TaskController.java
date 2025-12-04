@@ -1,10 +1,9 @@
 package com.example.eksamensprojekt.controller;
 
-import com.example.eksamensprojekt.model.ProjectRole;
-import com.example.eksamensprojekt.model.Task;
-import com.example.eksamensprojekt.model.TaskStatus;
+import com.example.eksamensprojekt.model.*;
 import com.example.eksamensprojekt.service.ProjectService;
 import com.example.eksamensprojekt.service.TaskService;
+import com.example.eksamensprojekt.service.UserService;
 import com.example.eksamensprojekt.utils.SessionUtil;
 import jakarta.servlet.http.HttpSession;
 import jakarta.validation.Valid;
@@ -21,10 +20,12 @@ import java.util.List;
 public class TaskController {
     private final TaskService taskService;
     private final ProjectService projectService;
+    private final UserService userService;
 
-    public TaskController(TaskService taskService, ProjectService projectService) {
+    public TaskController(TaskService taskService, ProjectService projectService, UserService userService) {
         this.taskService = taskService;
         this.projectService = projectService;
+        this.userService = userService;
     }
 
     //
@@ -217,5 +218,64 @@ public class TaskController {
         }else{
             return "redirect:/projects/" + projectId;
         }
+    }
+
+
+    // ===========TIME ENTRY MANAGEMENT===========
+
+    @GetMapping("/{taskId}/time_entries")
+    public String showTimeEntries(@PathVariable("taskId") int taskId,
+                                  HttpSession session,
+                                  Model model) {
+        if (!SessionUtil.isLoggedIn(session)) return "redirect:/login";
+        int currentUserId = SessionUtil.getCurrentUserId(session);
+        Task task = taskService.getTask(taskId);
+        int projectId = task.getProjectId();
+        // Access check
+        if (!projectService.hasAccessToProject(projectId, currentUserId)) {
+            return "redirect:/projects";
+        }
+
+        List<TimeEntry> timeEntries = taskService.getTimeEntriesByTaskId(taskId);
+        List<User> projectUsers = userService.getUsersByProjectId(projectId);
+
+        TimeEntry newTimeEntry = new TimeEntry();
+        newTimeEntry.setUserId(SessionUtil.getCurrentUserId(session));
+
+        model.addAttribute("task", task);
+        model.addAttribute("timeEntries", timeEntries);
+        model.addAttribute("projectUsers", projectUsers);
+        model.addAttribute("newTimeEntry", newTimeEntry);
+
+        return "task_time_entries";
+    }
+
+    @PostMapping("/{taskId}/time_entries/add")
+    public String addTimeEntry(@PathVariable("taskId") int taskId,
+                               @Valid @ModelAttribute("newTimeEntry") TimeEntry newTimeEntry,
+                               BindingResult bindingResult,
+                               HttpSession session,
+                               Model model) {
+        if (!SessionUtil.isLoggedIn(session)) return "redirect:/login";
+        int currentUserId = SessionUtil.getCurrentUserId(session);
+        Task task = taskService.getTask(taskId);
+        int projectId = task.getProjectId();
+        // Access check
+        if (!projectService.hasAccessToProject(projectId, currentUserId)) {
+            return "redirect:/projects";
+        }
+
+        if (bindingResult.hasErrors()) {
+            // Rebuild the model
+            model.addAttribute("task", task);
+            model.addAttribute("timeEntries", taskService.getTimeEntriesByTaskId(taskId));
+            model.addAttribute("projectUsers", userService.getUsersByProjectId(projectId));
+
+            return "task_time_entries";
+        }
+
+        taskService.addTimeEntry(newTimeEntry);
+
+        return String.format("redirect:/tasks/%s/time_entries", taskId);
     }
 }

@@ -2,7 +2,7 @@
 <html lang="en" xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
-    <title>Title</title>
+    <title th:text="'Opgave | ' + ${task.title}">Opgave</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="color-scheme" content="light dark">
     <link th:href="@{/css/pico.pink.min.css}" rel="stylesheet">
@@ -12,28 +12,7 @@
 <div th:replace="~{fragments/header :: header}">...</div>
 
 <main class="container-fluid">
-    <nav>
-        <ul>
-            <li th:if="${task.parentTaskId == null}">
-                <a role="button" class="outline" th:href="@{/projects/{projectId}(projectId=${task.projectId})}"><</a>
-            </li>
-            <li th:unless="${task.parentTaskId == null}">
-                <a role="button" class="outline" th:href="@{/tasks/{taskId}(taskId=${task.parentTaskId})}"><</a>
-            </li>
-            <li>
-                <h1 th:text="${task.title}">Task title</h1>
-            </li>
-        </ul>
-
-        <ul>
-            <li>
-                <div role="group">
-                    <a role="button" class="secondary" th:href="@{/tasks/{taskId}/edit(taskId=${task.taskId})}">Rediger</a>
-                    <a role="button" th:href="@{/tasks/{parentId}/subtask/create(parentId=${task.taskId})}">+ Underopgave</a>
-                </div>
-            </li>
-        </ul>
-    </nav>
+    <th:block th:replace="~{fragments/task_nav :: taskNav(${task})}">...</th:block>
 
     <section>
         <article th:text="${task.description}"></article>

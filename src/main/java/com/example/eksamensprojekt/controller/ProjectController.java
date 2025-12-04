@@ -224,7 +224,9 @@ public class ProjectController {
     // ===========TEAM MANAGEMENT===========
 
     @GetMapping("/{projectId}/team")
-    public String showTeam(@PathVariable("projectId") int projectId, HttpSession session, Model model) {
+    public String showTeam(@PathVariable("projectId") int projectId,
+                           HttpSession session,
+                           Model model) {
         if (!SessionUtil.isLoggedIn(session)) return "redirect:/login";
         int currentUserId = SessionUtil.getCurrentUserId(session);
         if (!projectService.hasAccessToProject(projectId, currentUserId)) {
@@ -278,8 +280,7 @@ public class ProjectController {
     public String updateTeamMemberRole(@PathVariable("projectId") int projectId,
                                        @PathVariable("userId") int userId,
                                        @RequestParam("role") String role,
-                                       HttpSession session,
-                                       RedirectAttributes redirectAttributes) {
+                                       HttpSession session) {
         if (!SessionUtil.isLoggedIn(session)) return "redirect:/login";
         int currentUserId = SessionUtil.getCurrentUserId(session);
 
@@ -303,8 +304,8 @@ public class ProjectController {
     @PostMapping("/{projectId}/team/{userId}/remove")
     public String removeTeamMember(@PathVariable("projectId") int projectId,
                                    @PathVariable("userId") int userId,
-                                   HttpSession session,
-                                   RedirectAttributes redirectAttributes) {
+                                   HttpSession session) {
+
         if (!SessionUtil.isLoggedIn(session)) return "redirect:/login";
         int currentUserId = SessionUtil.getCurrentUserId(session);
 
