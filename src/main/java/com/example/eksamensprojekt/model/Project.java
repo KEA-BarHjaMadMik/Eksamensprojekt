@@ -1,10 +1,10 @@
 package com.example.eksamensprojekt.model;
 
+import com.example.eksamensprojekt.utils.DateUtil;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import org.springframework.format.annotation.DateTimeFormat;
 
-import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;
 import java.util.*;
@@ -142,19 +142,7 @@ public class Project {
     }
 
     public long getBusinessDays() {
-        long days = 0;
-        LocalDate current = startDate;
-
-        // inclusive
-        while (!current.isAfter(endDate)) {
-            DayOfWeek dow = current.getDayOfWeek();
-            if (dow != DayOfWeek.SATURDAY && dow != DayOfWeek.SUNDAY) {
-                days++;
-            }
-            current = current.plusDays(1);
-        }
-
-        return days;
+        return DateUtil.businessDaysBetween(startDate,endDate);
     }
 
     public double getAvgDailyEstimatedHours() {
