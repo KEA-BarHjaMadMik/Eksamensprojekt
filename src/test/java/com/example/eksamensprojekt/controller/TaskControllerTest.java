@@ -5,6 +5,7 @@ import com.example.eksamensprojekt.model.Task;
 import com.example.eksamensprojekt.model.TaskStatus;
 import com.example.eksamensprojekt.service.ProjectService;
 import com.example.eksamensprojekt.service.TaskService;
+import com.example.eksamensprojekt.service.UserService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
@@ -34,6 +35,10 @@ public class TaskControllerTest {
 
     @MockitoBean
     private ProjectService projectService;
+
+    @MockitoBean
+    private UserService userService;
+
     private MockHttpSession session;
 
     @BeforeEach
