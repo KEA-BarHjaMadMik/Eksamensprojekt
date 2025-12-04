@@ -55,4 +55,22 @@ class UserRepositoryTest {
         User blank = userRepository.getUserByEmail(email);
         assertThat(blank).isNull();
     }
+
+    @Test
+    void shouldGetUserById(){
+        int userId = 1;
+
+        User anna = userRepository.getUserByUserId(userId);
+        assertThat(anna).isNotNull();
+        assertThat(anna.getEmail()).isEqualTo("anna@example.dk");
+        assertThat(anna.getName()).isEqualTo("Anna Jensen");
+    }
+
+    @Test
+    void shouldGetNullUserById(){
+        int userId = 999999;
+
+        User blank = userRepository.getUserByUserId(userId);
+        assertThat(blank).isNull();
+    }
 }
