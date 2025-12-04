@@ -51,7 +51,7 @@ class ProjectRepositoryTest {
     }
 
     @Test
-    void shouldNotGetAssignedProjectsByUserId(){
+    void shouldGetNoAssignedProjectsByUserId(){
         int userId = 999999;
         List<Project> assignedProjects = projectRepository.getAssignedProjectsByUserId(userId);
 
@@ -88,7 +88,7 @@ class ProjectRepositoryTest {
     }
 
     @Test
-    void shouldNotGetNoSubProjects(){
+    void shouldGetNoDirectSubProjects(){
         int parentProjectId = 999999;
         List<Project> subProjects = projectRepository.getDirectSubProjects(parentProjectId);
 

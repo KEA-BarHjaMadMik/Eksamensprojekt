@@ -102,8 +102,33 @@ public class ProjectControllerTest {
     }
 
     @Test
+    void shouldCreateSubProjectSuccessfully() throws Exception {
+        // Arrange mock service call
+        when(projectService.createProject(any(Project.class))).thenReturn(6);
+
+        //act & Assert
+        mockMvc.perform(post("/projects/create")
+                        .session(session)
+                        .param("ownerId", "1")
+                        .param("parentProjectId", "1")
+                        .param("title", "Test Subproject")
+                        .param("description", "Test Description")
+                        .param("startDate", "2025-01-01")
+                        .param("endDate", "2025-12-31"))
+                .andExpect(status().is3xxRedirection())
+                .andExpect(redirectedUrl("/projects/6"));
+
+        ArgumentCaptor<Project> captor = ArgumentCaptor.forClass(Project.class);
+        verify(projectService).createProject(captor.capture());
+
+        Project captured = captor.getValue();
+        assertThat(captured.getParentProjectId()).isEqualTo(1);
+        assertThat(captured.getTitle()).isEqualTo("Test Subproject");
+    }
+
+    @Test
     void shouldDenyAccessWhenUserNotAssignedToProject() throws Exception {
-        // Arrange
+        // Arrange mock service call
         when(projectService.hasAccessToProject(1, 1)).thenReturn(false);
 
         // Act & Assert
