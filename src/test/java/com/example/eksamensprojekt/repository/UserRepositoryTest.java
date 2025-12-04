@@ -73,4 +73,27 @@ class UserRepositoryTest {
         User blank = userRepository.getUserByUserId(userId);
         assertThat(blank).isNull();
     }
+
+    @Test
+    void shouldReturn0CountByEmail(){
+        //This test checks if an email is already taken.
+        //If count is 0 then there are no registered emails in the database, so account can be created with that email
+
+        String email = "new@example.dk";
+
+        int emailTaken = userRepository.countByEmail(email);
+        assertThat(emailTaken).isEqualTo(0);
+    }
+
+    @Test
+    void shouldReturn1CountByEmail(){
+        //This test checks if an email is already taken.
+        //If count is 1 or more then there is already an email in the database with that signature,
+        //so account cannot be created
+
+        String email = "anna@example.dk";
+
+        int emailTaken = userRepository.countByEmail(email);
+        assertThat(emailTaken).isGreaterThanOrEqualTo(1);
+    }
 }
