@@ -16,3 +16,9 @@
         grid-template-columns: 1fr;
     }
 }
+
+details > summary[role="button"] {
+    display: inline-block;   /* shrink to content width */
+    width: stretch;             /* stretch full width */
+    padding: 0.5rem 1rem;    /* adjust padding */
+}
