@@ -15,6 +15,8 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
@@ -28,6 +30,8 @@ public class ProjectController {
         this.projectService = projectService;
         this.userService = userService;
     }
+
+    // =========== PROJECT CRUD ===========
 
     @GetMapping
     public String projects(HttpSession session, Model model) {
@@ -63,9 +67,30 @@ public class ProjectController {
         return "project";
     }
 
+    @GetMapping("/{projectId}/hour_distribution")
+    public String showHourDistribution(@PathVariable("projectId") int projectId,
+                                       HttpSession session,
+                                       Model model) {
+        if (!SessionUtil.isLoggedIn(session)) return "redirect:/login";
+        int currentUserId = SessionUtil.getCurrentUserId(session);
+
+        // Check if the user has access to the project
+        if (!projectService.hasAccessToProject(projectId, currentUserId)) {
+            return "redirect:/projects";
+        }
+
+        Project project = projectService.getProjectWithTree(projectId);
+        Map<LocalDate, Double> hourDistributionMap = project.getDistributedHours();
+
+        model.addAttribute("project", project);
+        model.addAttribute("hourDistributionMap", hourDistributionMap);
+
+        return "project_hour_distribution";
+    }
+
     @GetMapping("/create")
     public String showCreateProjectForm(HttpSession session, Model model) {
-        //If user is not logged in, show login screen
+        //If a user is not logged in, show a login screen
         if (!SessionUtil.isLoggedIn(session)) return "redirect:/login";
 
         Project newProject = new Project();
@@ -100,7 +125,7 @@ public class ProjectController {
 
     @GetMapping("/{parentId}/create")
     public String showCreateSubProjectForm(@PathVariable("parentId") int parentId, HttpSession session, Model model) {
-        //If user is not logged in, show login screen
+        //If a user is not logged in, show a login screen
         if (!SessionUtil.isLoggedIn(session)) return "redirect:/login";
 
         Project subProject = new Project();
@@ -113,18 +138,87 @@ public class ProjectController {
         return "project_registration_form";
     }
 
+    @GetMapping("/{projectId}/edit")
+    public String showEditProjectForm(@PathVariable("projectId") int projectId,
+                                      HttpSession session,
+                                      Model model) {
+        if (!SessionUtil.isLoggedIn(session)) return "redirect:/login";
+        int currentUserId = SessionUtil.getCurrentUserId(session);
+        if (!projectService.hasAccessToProject(projectId, currentUserId)) {
+            return "redirect:/projects";
+        }
+
+        Project project = projectService.getProject(projectId);
+        ProjectRole userRole = projectService.getUserRole(projectId, currentUserId);
+
+        boolean isOwner = project.getOwnerId() == currentUserId;
+        boolean hasFullAccess = userRole != null && userRole.getRole().equals("FULL_ACCESS");
+
+        // Only owner and full access can edit
+        if (!isOwner && !hasFullAccess) {
+            return "redirect:/projects/" + projectId;
+        }
+
+        model.addAttribute("project", project);
+        model.addAttribute("userRole", userRole.getRole());
+        return "project_edit_form";
+    }
+
+    @PostMapping("/{projectId}/edit")
+    public String updateProject(@PathVariable("projectId") int projectId,
+                                @Valid @ModelAttribute("project") Project project,
+                                BindingResult bindingResult,
+                                HttpSession session,
+                                RedirectAttributes redirectAttributes) {
+
+        if (!SessionUtil.isLoggedIn(session)) { return "redirect:/login"; }
+        int currentUserId = SessionUtil.getCurrentUserId(session);
+
+        project.setProjectId(projectId);
+
+        // Check access
+        if (!projectService.hasAccessToProject(projectId, currentUserId)) {
+            return "redirect:/projects";
+        }
+
+        Project existingProject = projectService.getProject(projectId);
+        ProjectRole userRole = projectService.getUserRole(projectId, currentUserId);
+
+        // Only owner and full access can edit
+        boolean isOwner = existingProject.getOwnerId() == currentUserId;
+        boolean hasFullAccess = userRole != null && userRole.getRole().equals("FULL_ACCESS");
+
+        if (!isOwner && !hasFullAccess) { return "redirect:/projects/" + projectId;}
+
+        // Keep owner ID and parent project ID unchanged
+        project.setOwnerId(existingProject.getOwnerId());
+        project.setParentProjectId(existingProject.getParentProjectId());
+
+        if (bindingResult.hasErrors()) {
+            return "project_edit_form";
+        }
+
+        if (projectService.updateProject(project)) {
+            redirectAttributes.addFlashAttribute("updateSuccess", true);
+        }
+
+        return "redirect:/projects/" + projectId;
+    }
+
     @PostMapping("/{projectId}/delete")
-    public String deleteProject(@PathVariable("projectId") int projectId, HttpSession session){
+    public String deleteProject(@PathVariable("projectId") int projectId, HttpSession session) {
         if (!SessionUtil.isLoggedIn(session)) return "redirect:/login";
 
         Project project = projectService.getProject(projectId);
-        if (SessionUtil.getCurrentUserId(session) != project.getOwnerId()){
+        if (SessionUtil.getCurrentUserId(session) != project.getOwnerId()) {
             return "redirect:/";
         }
 
         projectService.deleteProject(projectId);
         return "redirect:/projects";
     }
+
+    // ===========TEAM MANAGEMENT===========
 
     @GetMapping("/{projectId}/team")
     public String showTeam(@PathVariable("projectId") int projectId, HttpSession session, Model model) {

@@ -27,6 +27,9 @@ public class TaskController {
         this.projectService = projectService;
     }
 
+    //
+    // =========== TASK CRUD===========
+
     @GetMapping("/{taskId}")
     public String showTask(@PathVariable("taskId") int taskId, Model model, HttpSession session) {
         if (!SessionUtil.isLoggedIn(session)) return "redirect:/login";

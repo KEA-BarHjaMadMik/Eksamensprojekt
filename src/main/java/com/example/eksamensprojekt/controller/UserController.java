@@ -22,6 +22,8 @@ public class UserController {
         this.userService = userService;
     }
 
+    // =========== AUTHENTICATION ===========
+
     @GetMapping("/login")
     public String showLoginForm(HttpSession session) {
         // if already logged in, return to front page, else proceed to form
@@ -57,6 +59,8 @@ public class UserController {
         session.invalidate();
         return "redirect:/";
     }
+
+    // =========== REGISTRATION ===========
 
     @GetMapping("/register_user")
     public String showRegistrationForm(HttpSession session, Model model) {
@@ -98,6 +102,8 @@ public class UserController {
         userService.registerUser(newUser);
         return "redirect:/login";
     }
+
+    // =========== USER PROFILE MANAGEMENT ===========
 
     @GetMapping("/user_admin")
     public String showUserAdminPage(HttpSession session, Model model) {
@@ -236,4 +242,3 @@ public class UserController {
         }
     }
 }
-
