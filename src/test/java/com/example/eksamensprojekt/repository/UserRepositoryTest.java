@@ -10,6 +10,7 @@ import org.springframework.test.context.jdbc.Sql;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.springframework.test.context.jdbc.Sql.ExecutionPhase.BEFORE_TEST_METHOD;
 
 @SpringBootTest
@@ -116,14 +117,12 @@ class UserRepositoryTest {
     @Test
     void shouldChangePassword(){
         int userId = 1;
-        String passwordHash = "$2a$10$2fiuXXXrshmlXie3QHLl0Oaa0tM1Suq9AJr3iYIZ5.CNFtZ55VmNS";
-        User anna = userRepository.getUserByUserId(userId);
-        assertThat(anna.getPasswordHash()).isEqualTo(passwordHash);
+        String newPasswordHash = "$2a$10$tzNpfmbuFlp4q01pT3Ir1OkhfzxqFlPzkykHaXi5kZK0FeG7rTbfC";
 
-        anna.setPasswordHash("$2a$10$tzNpfmbuFlp4q01pT3Ir1OkhfzxqFlPzkykHaXi5kZK0FeG7rTbfC");
+        int affectedRows = userRepository.changePassword(userId, newPasswordHash);
+        assertThat(affectedRows).isEqualTo(1);
 
-        int passwordHashChange = userRepository.changePassword(1, "$2a$10$tzNpfmbuFlp4q01pT3Ir1OkhfzxqFlPzkykHaXi5kZK0FeG7rTbfC");
-        assertThat(passwordHashChange).isEqualTo(1);
-        assertThat(anna.getPasswordHash()).isEqualTo("$2a$10$tzNpfmbuFlp4q01pT3Ir1OkhfzxqFlPzkykHaXi5kZK0FeG7rTbfC");
+        User updatedUser = userRepository.getUserByUserId(userId);
+        assertEquals(newPasswordHash, updatedUser.getPasswordHash());
     }
 }
