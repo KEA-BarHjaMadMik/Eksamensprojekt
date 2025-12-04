@@ -142,7 +142,7 @@ public class Project {
     }
 
     public long getBusinessDays() {
-        return DateUtil.businessDaysBetween(startDate,endDate);
+        return DateUtil.businessDaysBetween(startDate, endDate);
     }
 
     public double getAvgDailyEstimatedHours() {
@@ -153,6 +153,13 @@ public class Project {
     // including all tasks and subprojects, excluding weekends.
     public Map<LocalDate, Double> getDistributedHours() {
         Map<LocalDate, Double> map = new TreeMap<>();
+
+        LocalDate current = startDate;
+        while (!current.isAfter(endDate)) {
+            map.put(current, 0.0);
+            current = current.plusDays(1);
+        }
+
         distributeHours(map);
         return map;
     }
