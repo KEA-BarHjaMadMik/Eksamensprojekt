@@ -212,7 +212,11 @@ public class ProjectController {
         if (SessionUtil.getCurrentUserId(session) != project.getOwnerId()) {
             return "redirect:/";
         }
-
+        if (project.getParentProjectId() != null){
+            int parentProjectId = project.getParentProjectId();
+            projectService.deleteProject(projectId);
+            return "redirect:/projects/" + parentProjectId;
+        }
         projectService.deleteProject(projectId);
         return "redirect:/projects";
     }
