@@ -22,3 +22,7 @@ details > summary[role="button"] {
     width: stretch;             /* stretch full width */
     padding: 0.5rem 1rem;    /* adjust padding */
 }
+
+details > table {
+    width: stretch;             /* stretch full width */
+}

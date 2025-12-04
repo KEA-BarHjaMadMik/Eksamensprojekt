@@ -8,13 +8,14 @@
 <th:block th:fragment="recursiveList(projectList, currentDepth)">
     <th:block th:unless="${projectList.isEmpty()}">
         <th:block th:each="project : ${projectList}">
+
             <details>
                 <summary role="button" class="outline" th:style="'margin-left: ' + (${currentDepth} * 20) + 'px;'">
                     <a th:href="@{/projects/{projectId}(projectId=${project.projectId})}"
                        th:text="${project.title}">Project Title</a>
                 </summary>
 
-                <table>
+                <table th:style="'margin-left: ' + (${currentDepth} * 20) + 'px;'">
                     <thead>
                     <tr>
                         <th>Opgave</th>
