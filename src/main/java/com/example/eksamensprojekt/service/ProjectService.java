@@ -78,10 +78,11 @@ public class ProjectService {
                 // Skip owner (Automatically added on project creation)
                 if (user.getUserId() == project.getOwnerId()) continue;
 
-                addUserToProject(
+                addUserToProject( // Internal call: no new transaction, executes inside createProject transaction
                         project.getProjectId(),
                         user.getEmail(),
-                        entry.getValue().getRole()
+                        entry.getValue().getRole(),
+                        false
                 );
             }
         }
@@ -213,13 +214,30 @@ public class ProjectService {
         }
     }
 
-    public void addUserToProject(int projectId, String email, String role) {
+    @Transactional
+    public void addUserToProject(int projectId, String email, String role, boolean addToSub) {
         try {
             int userId = userService.getUserByEmail(email).getUserId();
 
+            // Add to project
             projectRepository.addUserToProject(projectId, userId, role);
+
+            // Add to subprojects if requested
+            if(addToSub){
+               Project project = getProjectWithTree(projectId);
+               addUserToSubProjects(project, userId, role);
+            }
         } catch (DataAccessException e) {
             throw new DatabaseOperationException("Failed to add user to project", e);
+        }
+    }
+
+    private void addUserToSubProjects(Project project, int userId, String role) {
+        for(Project sub: project.getSubProjects()) {
+            if (!projectRepository.isUserAssignedToProject(sub.getProjectId(), userId)) {
+                projectRepository.addUserToProject(sub.getProjectId(), userId, role);
+            }
+            addUserToSubProjects(sub, userId, role);
         }
     }
 

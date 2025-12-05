@@ -258,6 +258,7 @@ public class ProjectController {
     public String addTeamMember(@PathVariable("projectId") int projectId,
                                 @RequestParam("email") String email,
                                 @RequestParam("role") String role,
+                                @RequestParam(required = false) boolean addToSub,
                                 HttpSession session,
                                 RedirectAttributes redirectAttributes) {
         if (!SessionUtil.isLoggedIn(session)) return "redirect:/login";
@@ -275,7 +276,7 @@ public class ProjectController {
                 .anyMatch(u -> u.getEmail().equalsIgnoreCase(email))) {
             redirectAttributes.addFlashAttribute("addErrorMessage", "Bruger med e-mail, " + email + ", er allerede tilknyttet projektet");
         } else {
-            projectService.addUserToProject(projectId, email, role);
+            projectService.addUserToProject(projectId, email, role, addToSub);
         }
 
         return String.format("redirect:/projects/%s/team", projectId);
