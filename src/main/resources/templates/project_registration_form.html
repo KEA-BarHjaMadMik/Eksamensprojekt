@@ -18,32 +18,46 @@
     </div>
 
     <form method="post" th:action="@{/projects/create}" th:object="${newProject}">
-        <div>
-            <input type="hidden" th:field="*{ownerId}"/>
-            <input type="hidden" th:field="*{parentProjectId}"/>
-        </div>
-        <div>
-            <label for="title">Titel:</label>
-            <input id="title" type="text" th:field="*{title}" placeholder="Projektnavn her" required/>
-        </div>
-        <div>
-            <label for="description">Beskrivelse (valgfri):</label>
-            <textarea id="description" th:field="*{description}" placeholder="Projektbeskrivelse her"></textarea>
-        </div>
-        <div>
-            <label for="startdate">Start dato:</label>
-            <input id="startdate" type="date" th:field="*{startDate}" required/>
-        </div>
-        <div>
-            <label for="enddate">Slut dato:</label>
-            <input id="enddate" type="date" th:field="*{endDate}" required/>
-        </div>
+        <fieldset>
+            <div>
+                <input type="hidden" th:field="*{ownerId}"/>
+                <input type="hidden" th:field="*{parentProjectId}"/>
+            </div>
+            <div>
+                <label for="title">Titel:</label>
+                <input id="title" type="text" th:field="*{title}" placeholder="Projektnavn her" required/>
+            </div>
+            <div>
+                <label for="description">Beskrivelse (valgfri):</label>
+                <textarea id="description" th:field="*{description}" placeholder="Projektbeskrivelse her"></textarea>
+            </div>
+            <div>
+                <label for="startdate">Start dato:</label>
+                <input id="startdate" type="date" th:field="*{startDate}" required/>
+            </div>
+            <div>
+                <label for="enddate">Slut dato:</label>
+                <input id="enddate" type="date" th:field="*{endDate}" required/>
+            </div>
+            <div th:if="${newProject.parentProjectId != null}">
+                <label for="copyTeam">
+                    <input id="copyTeam"
+                           type="checkbox"
+                           name="copyTeam" value="true"
+                           checked/>
+                    Tilknyt teammedlemmer fra det overordnede projekt.
+                </label>
+            </div>
+        </fieldset>
 
         <button type="submit">Opret projekt</button>
     </form>
 
     <div>
-        <a th:href="@{/projects}">Tilbage til projekter</a>
+        <a th:if="${newProject.parentProjectId == null}"
+           th:href="@{/projects}">Tilbage</a>
+        <a th:unless="${newProject.parentProjectId == null}"
+           th:href="@{/projects/{projectId}(projectId=${newProject.parentProjectId})}">Tilbage</a>
     </div>
 </main>
 

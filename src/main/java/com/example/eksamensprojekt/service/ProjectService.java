@@ -9,6 +9,7 @@ import com.example.eksamensprojekt.model.User;
 import com.example.eksamensprojekt.repository.ProjectRepository;
 import org.springframework.dao.DataAccessException;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.*;
 
@@ -38,11 +39,51 @@ public class ProjectService {
         }
     }
 
-    public int createProject(Project project) {
+    @Transactional
+    public int createProject(Project project, boolean copyTeam, int creatorId) {
         try {
-            return projectRepository.createProject(project);
+            // Create project
+            int projectId = projectRepository.createProject(project);
+
+            // Set project ID on object for later use
+            project.setProjectId(projectId);
+
+            // Copy team from parent if requested
+            if (copyTeam) {
+                copyTeamFromParent(project);
+            }
+            // If not copying team, but creator is not owner, add them with their role from parent
+            else if (creatorId != project.getOwnerId()) {
+                ProjectRole role = getUserRole(project.getParentProjectId(), creatorId);
+                projectRepository.addUserToProject(projectId, creatorId, role.getRole());
+            }
+
+            return projectId;
+
         } catch (DataAccessException e) {
+            // Any exception rolls back transaction
             throw new DatabaseOperationException("Failed to create new project", e);
+        }
+    }
+
+    private void copyTeamFromParent(Project project) {
+        Integer parentId = project.getParentProjectId();
+
+        if(parentId != null) {
+            Map<User, ProjectRole> usersWithRoles = getProjectUsersWithRoles(parentId);
+
+            for (var entry : usersWithRoles.entrySet()) {
+                User user = entry.getKey();
+
+                // Skip owner (Automatically added on project creation)
+                if (user.getUserId() == project.getOwnerId()) continue;
+
+                addUserToProject(
+                        project.getProjectId(),
+                        user.getEmail(),
+                        entry.getValue().getRole()
+                );
+            }
         }
     }
 
@@ -112,16 +153,16 @@ public class ProjectService {
         return userService.getUsersByProjectId(projectId);
     }
 
-    public Map<User,ProjectRole> getProjectUsersWithRoles(int projectId) {
+    public Map<User, ProjectRole> getProjectUsersWithRoles(int projectId) {
         try {
-            Map<User,ProjectRole> projectUsersWithRoles = new HashMap<>();
+            Map<User, ProjectRole> projectUsersWithRoles = new HashMap<>();
             List<User> projectUsers = userService.getUsersByProjectId(projectId);
-            for(User user : projectUsers) {
+            for (User user : projectUsers) {
                 ProjectRole projectRole = projectRepository.getProjectUserRole(projectId, user.getUserId());
-                projectUsersWithRoles.put(user,projectRole);
+                projectUsersWithRoles.put(user, projectRole);
             }
             return projectUsersWithRoles;
-        }catch (DataAccessException e) {
+        } catch (DataAccessException e) {
             throw new DatabaseOperationException("Failed to retrieve users with projectId=" + projectId, e);
         }
     }
@@ -162,12 +203,12 @@ public class ProjectService {
         project.setTasks(tasks);
     }
 
-    public void deleteProject(int projectId){
+    public void deleteProject(int projectId) {
         try {
             int rowsAffected = projectRepository.deleteProject(projectId);
             if (rowsAffected == 0) throw new ProjectNotFoundException(projectId);
             //project deleted if at least 1 row is affected
-        } catch (DataAccessException e){
+        } catch (DataAccessException e) {
             throw new DatabaseOperationException("Failed to delete project", e);
         }
     }
@@ -177,7 +218,7 @@ public class ProjectService {
             int userId = userService.getUserByEmail(email).getUserId();
 
             projectRepository.addUserToProject(projectId, userId, role);
-        }catch (DataAccessException e) {
+        } catch (DataAccessException e) {
             throw new DatabaseOperationException("Failed to add user to project", e);
         }
     }
@@ -188,7 +229,7 @@ public class ProjectService {
 
     public void removeUserFromProject(int projectId, int userId) {
         try {
-            projectRepository.removeUserFromProject(projectId,userId);
+            projectRepository.removeUserFromProject(projectId, userId);
         } catch (DataAccessException e) {
             throw new DatabaseOperationException("Failed to remove user from project", e);
         }

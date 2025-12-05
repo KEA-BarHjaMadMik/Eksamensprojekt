@@ -104,6 +104,7 @@ public class ProjectController {
     @PostMapping("/create")
     public String createProject(HttpSession session,
                                 @Valid @ModelAttribute Project newProject,
+                                @RequestParam(required = false) boolean copyTeam,
                                 BindingResult bindingResult,
                                 Model model) {
 
@@ -117,7 +118,7 @@ public class ProjectController {
             return "project_registration_form";
         }
 
-        int projectId = projectService.createProject(newProject);
+        int projectId = projectService.createProject(newProject, copyTeam, SessionUtil.getCurrentUserId(session));
 
         return "redirect:/projects/" + projectId;
     }
@@ -170,7 +171,9 @@ public class ProjectController {
                                 HttpSession session,
                                 RedirectAttributes redirectAttributes) {
 
-        if (!SessionUtil.isLoggedIn(session)) { return "redirect:/login"; }
+        if (!SessionUtil.isLoggedIn(session)) {
+            return "redirect:/login";
+        }
         int currentUserId = SessionUtil.getCurrentUserId(session);
 
         project.setProjectId(projectId);
@@ -187,7 +190,9 @@ public class ProjectController {
         boolean isOwner = existingProject.getOwnerId() == currentUserId;
         boolean hasFullAccess = userRole != null && userRole.getRole().equals("FULL_ACCESS");
 
-        if (!isOwner && !hasFullAccess) { return "redirect:/projects/" + projectId;}
+        if (!isOwner && !hasFullAccess) {
+            return "redirect:/projects/" + projectId;
+        }
 
         // Keep owner ID and parent project ID unchanged
         project.setOwnerId(existingProject.getOwnerId());
@@ -212,7 +217,7 @@ public class ProjectController {
         if (SessionUtil.getCurrentUserId(session) != project.getOwnerId()) {
             return "redirect:/";
         }
-        if (project.getParentProjectId() != null){
+        if (project.getParentProjectId() != null) {
             int parentProjectId = project.getParentProjectId();
             projectService.deleteProject(projectId);
             return "redirect:/projects/" + parentProjectId;
