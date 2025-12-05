@@ -11,6 +11,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -28,7 +29,6 @@ public class TaskController {
         this.userService = userService;
     }
 
-    //
     // =========== TASK CRUD===========
 
     @GetMapping("/{taskId}")
@@ -147,7 +147,7 @@ public class TaskController {
             return "redirect:/projects";
         }
 
-        // Verify role is not READ_ONLY
+        // Verify the role is not READ_ONLY
         String userRole = projectService.getUserRole(projectId, currentUserId).getRole();
         if ("READ_ONLY".equals(userRole)) {
             return "redirect:/tasks/" + taskId;
@@ -177,7 +177,7 @@ public class TaskController {
             return "redirect:/projects";
         }
 
-        // Verify role is not READ_ONLY
+        // Verify the role is not READ_ONLY
         String currentUserProjectRole = projectService.getUserRole(projectId, currentUserId).getRole();
         if ("READ_ONLY".equals(currentUserProjectRole)) {
             return "redirect:/tasks/" + task.getTaskId();
@@ -218,6 +218,90 @@ public class TaskController {
         }else{
             return "redirect:/projects/" + projectId;
         }
+    }
+
+    @GetMapping("/{taskId}/move")
+    public String showMoveTaskForm(@PathVariable int taskId,
+                                   Model model,
+                                   HttpSession session){
+        if (!SessionUtil.isLoggedIn(session)) return "redirect:/projects";
+
+        Task task = taskService.getTask(taskId);
+        int currentUserId = SessionUtil.getCurrentUserId(session);
+
+        if (projectService.hasAccessToProject(task.getProjectId(), SessionUtil.getCurrentUserId(session))) return "redirect:/";
+
+        ProjectRole userRole = projectService.getUserRole(task.getProjectId(), currentUserId);
+
+        if (userRole != null && userRole.getRole().equals("READ_ONLY")) {
+            return "redirect:/tasks/" + taskId;
+        }
+
+        List<Project> moveTargets = projectService.getValidMoveTargets(task.getProjectId());
+
+        Task taskWithTree = taskService.getTaskWithTree(taskId);
+        int subtaskCount = countSubTasks(taskWithTree);
+
+        model.addAttribute("task", task);
+        model.addAttribute("moveTargets", moveTargets);
+        model.addAttribute("subtaskCount", subtaskCount);
+
+        return "task_move_form";
+    }
+
+    @PostMapping("/{taskId}/move")
+    public String moveTask(@PathVariable int taskId,
+                           @RequestParam int targetProjectId,
+                           HttpSession session,
+                           RedirectAttributes redirectAttributes){
+        if (!SessionUtil.isLoggedIn(session)) return "redirect:/login";
+
+        Task task = taskService.getTask(taskId);
+        int currentUserId = SessionUtil.getCurrentUserId(session);
+
+        if (!projectService.hasAccessToProject(task.getProjectId(), currentUserId)) {
+            return "redirect:/projects";
+        }
+
+        //Role check on the source project
+        ProjectRole userRole = projectService.getUserRole(task.getProjectId(), currentUserId);
+        if (userRole != null && userRole.getRole().equals("READ_ONLY")) {
+            return "redirect:/tasks/" + taskId;
+        }
+
+        //Check if the user has access to the target project
+        if (!projectService.hasAccessToProject(targetProjectId, currentUserId)) {
+            redirectAttributes.addFlashAttribute("moveErrorMessage", "Du har ikke adgang til projektet du prøver of flytte til.");
+            return "redirect:/tasks/" + taskId;
+        }
+
+        //validate that the target project is different from the current project
+        if (task.getProjectId() == targetProjectId) {
+            redirectAttributes.addFlashAttribute("moveErrorMessage", "Opgaven er allerede i dette projekt.");
+            return "redirect:/tasks/" + taskId;
+        }
+
+        //If all checks are successful, make the move
+        try {
+            taskService.moveTaskToProject(taskId, targetProjectId);
+            redirectAttributes.addFlashAttribute("moveSuccessMessage", "Opgaven er flyttet til det nye projekt.");
+        } catch (Exception e) {
+            redirectAttributes.addFlashAttribute("moveErrorMessage", "Der skete en fejl under flytningen af opgaven. " + e.getMessage());
+        }
+
+        return "redirect:/tasks/" + taskId;
+    }
+
+    //Helper method for subtask counting
+    private int countSubTasks(Task task) {
+        if (task.getSubTasks() == null || task.getSubTasks().isEmpty()) {
+            return 0;
+        }
+        int count = task.getSubTasks().size();
+        for (Task subTask : task.getSubTasks()) {
+            count += countSubTasks(subTask);
+        }
+        return count;
     }
 
 
