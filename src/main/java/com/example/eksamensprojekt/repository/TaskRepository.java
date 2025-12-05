@@ -51,6 +51,16 @@ public class TaskRepository {
         return jdbcTemplate.query(sql, getTaskRowMapper(), projectId);
     }
 
+    public List<Task> getAllTasksInProject(int projectId) {
+        String sql = BASE_TASK_SQL + "WHERE t.project_id = ?";
+        return jdbcTemplate.query(sql, getTaskRowMapper(), projectId);
+    }
+
+    public void updateTaskProjectId(int taskId, int newProjectId) {
+        String sql = "UPDATE task SET project_id = ? WHERE task_id = ?";
+        jdbcTemplate.update(sql, newProjectId, taskId);
+    }
+
     public Task getTask(int taskId) {
         String sql = BASE_TASK_SQL + "WHERE t.task_id = ?";
 

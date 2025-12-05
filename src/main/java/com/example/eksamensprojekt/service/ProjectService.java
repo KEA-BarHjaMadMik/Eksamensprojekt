@@ -203,4 +203,34 @@ public class ProjectService {
             throw new DatabaseOperationException("Failed to update project", e);
         }
     }
+
+    public List<Project> getValidMoveTargets(int currentProjectId) {
+        try {
+            //Empty list
+            List<Project> targets = new ArrayList<>();
+            //Get current project
+            Project currentProject = projectRepository.getProject(currentProjectId);
+            //Add parent project if it exsits
+            Integer parentProjectId = currentProject.getParentProjectId();
+            if(parentProjectId != null) {
+                Project parent = projectRepository.getProject(parentProjectId);
+                if (parent != null) {
+                    targets.add(parent);
+                }
+                //add sibling projects
+                List<Project> siblings = projectRepository.getDirectSubProjects(parentProjectId);
+                for (Project sibling : siblings) {
+                    if (sibling.getProjectId() != currentProjectId) {
+                        targets.add(sibling);
+                    }
+                }
+            }
+            //add direct children (subprojects of current project)
+            List<Project> children = projectRepository.getDirectSubProjects(currentProjectId);
+                targets.addAll(children);
+            return targets;
+        } catch (DataAccessException e) {
+            throw new DatabaseOperationException("Failed to retrieve valid move targets for project with id=" + currentProjectId, e);
+        }
+    }
 }
