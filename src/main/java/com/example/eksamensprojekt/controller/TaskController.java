@@ -159,6 +159,11 @@ public class TaskController {
         model.addAttribute("userRole", userRole);
         model.addAttribute("taskStatusList", taskStatusList);
 
+        //Get all parent tasks in the project for the dropdown
+        List<Task> availableParentTasks = taskService.getAllTasksInProject(projectId);
+        model.addAttribute("availableParentTasks", availableParentTasks);
+        model.addAttribute("currentTaskId", taskId); // Filters out(in thymeleaf) the current task
+                                                                  // from the dropdown menu
         return "task_edit_form";
     }
 
@@ -183,7 +188,7 @@ public class TaskController {
             return "redirect:/tasks/" + task.getTaskId();
         }
 
-        // Bean validation errors?
+        // Bean validation errors
         if (bindingResult.hasErrors()) {
             List<TaskStatus> taskStatusList = taskService.getAllTaskStatuses();
             model.addAttribute("taskStatusList", taskStatusList);
@@ -229,7 +234,9 @@ public class TaskController {
         Task task = taskService.getTask(taskId);
         int currentUserId = SessionUtil.getCurrentUserId(session);
 
-        if (projectService.hasAccessToProject(task.getProjectId(), SessionUtil.getCurrentUserId(session))) return "redirect:/";
+        if (!projectService.hasAccessToProject(task.getProjectId(), SessionUtil.getCurrentUserId(session))) {
+            return "redirect:/projects";
+        }
 
         ProjectRole userRole = projectService.getUserRole(task.getProjectId(), currentUserId);
 
