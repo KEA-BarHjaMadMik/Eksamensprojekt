@@ -145,30 +145,21 @@ public class ProjectService {
 
     public ProjectRole getUserRole(int projectId, int userId) {
         try {
-            return getUserRoleRecursive(projectId, userId);
+            // 1. Check direct role
+            ProjectRole directRole = projectRepository.getProjectUserRole(projectId, userId);
+            if (directRole != null) {
+                return directRole;
+            }
+
+            // 2. Otherwise, check for an inherited role
+            return getInheritedRole(projectId, userId);
+
         } catch (DataAccessException e) {
             throw new DatabaseOperationException(
                     "Failed to retrieve user role for projectId=" + projectId + " and userId=" + userId,
                     e
             );
         }
-    }
-
-    private ProjectRole getUserRoleRecursive(int projectId, int userId) {
-        // 1. Check direct role
-        ProjectRole directRole = projectRepository.getProjectUserRole(projectId, userId);
-        if (directRole != null) {
-            return directRole; // Direct > inherited
-        }
-
-        // 2. Load project to move upward
-        Project project = projectRepository.getProject(projectId);
-        if (project == null || project.getParentProjectId() == null) {
-            return null; // No more ancestors
-        }
-
-        // 3. Recurse upward
-        return getUserRoleRecursive(project.getParentProjectId(), userId);
     }
 
     public List<User> getDirectProjectUsers(int projectId) {
