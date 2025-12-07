@@ -3,7 +3,6 @@ package com.example.eksamensprojekt.controller;
 import com.example.eksamensprojekt.model.Project;
 import com.example.eksamensprojekt.service.ProjectService;
 import com.example.eksamensprojekt.service.UserService;
-import com.example.eksamensprojekt.utils.SessionUtil;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
@@ -80,7 +79,7 @@ public class ProjectControllerTest {
     @Test
     void shouldCreateProjectSuccessfully() throws Exception {
         // Arrange mock service call
-        when(projectService.createProject(any(Project.class), anyBoolean(), anyInt())).thenReturn(1);
+        when(projectService.createProject(any(Project.class))).thenReturn(1);
 
         // Act & Assert
         mockMvc.perform(post("/projects/create")
@@ -95,28 +94,18 @@ public class ProjectControllerTest {
 
         // Verify service was called with correct data
         ArgumentCaptor<Project> projectCaptor = ArgumentCaptor.forClass(Project.class);
-        ArgumentCaptor<Boolean> booleanCaptor = ArgumentCaptor.forClass(Boolean.class);
-        ArgumentCaptor<Integer> intCaptor = ArgumentCaptor.forClass(Integer.class);
 
-        verify(projectService).createProject(
-                projectCaptor.capture(),
-                booleanCaptor.capture(),
-                intCaptor.capture()
-        );
+        verify(projectService).createProject(projectCaptor.capture());
 
         Project captured = projectCaptor.getValue();
         assertThat(captured.getTitle()).isEqualTo("Test Project");
         assertThat(captured.getDescription()).isEqualTo("Test Description");
-
-        // assert default values
-        assertThat(booleanCaptor.getValue()).isFalse(); // copyTeam defaults to false
-        assertThat(intCaptor.getValue()).isEqualTo(SessionUtil.getCurrentUserId(session));   // matches session userId
     }
 
     @Test
     void shouldCreateSubProjectSuccessfully() throws Exception {
         // Arrange mock service call
-        when(projectService.createProject(any(Project.class), anyBoolean(), anyInt())).thenReturn(6);
+        when(projectService.createProject(any(Project.class))).thenReturn(6);
 
         // Act & Assert
         mockMvc.perform(post("/projects/create")
@@ -132,22 +121,12 @@ public class ProjectControllerTest {
 
         // Verify service was called with correct arguments
         ArgumentCaptor<Project> projectCaptor = ArgumentCaptor.forClass(Project.class);
-        ArgumentCaptor<Boolean> copyTeamCaptor = ArgumentCaptor.forClass(Boolean.class);
-        ArgumentCaptor<Integer> creatorIdCaptor = ArgumentCaptor.forClass(Integer.class);
 
-        verify(projectService).createProject(
-                projectCaptor.capture(),
-                copyTeamCaptor.capture(),
-                creatorIdCaptor.capture()
-        );
+        verify(projectService).createProject(projectCaptor.capture());
 
         Project captured = projectCaptor.getValue();
         assertThat(captured.getParentProjectId()).isEqualTo(1);
         assertThat(captured.getTitle()).isEqualTo("Test Subproject");
-
-        // assert default parameters passed correctly
-        assertThat(copyTeamCaptor.getValue()).isFalse(); // defaults to false in controller if not provided
-        assertThat(creatorIdCaptor.getValue()).isEqualTo(SessionUtil.getCurrentUserId(session)); // matches session userId
     }
 
     @Test

@@ -104,7 +104,6 @@ public class ProjectController {
     @PostMapping("/create")
     public String createProject(HttpSession session,
                                 @Valid @ModelAttribute Project newProject,
-                                @RequestParam(required = false) boolean copyTeam,
                                 BindingResult bindingResult,
                                 Model model) {
 
@@ -118,7 +117,7 @@ public class ProjectController {
             return "project_registration_form";
         }
 
-        int projectId = projectService.createProject(newProject, copyTeam, SessionUtil.getCurrentUserId(session));
+        int projectId = projectService.createProject(newProject);
 
         return "redirect:/projects/" + projectId;
     }
@@ -240,7 +239,8 @@ public class ProjectController {
 
         Project project = projectService.getProject(projectId);
 
-        Map<User, ProjectRole> projectUsersWithRoles = projectService.getProjectUsersWithRoles(projectId);
+        Map<User, ProjectRole> projectUsersWithDirectRoles = projectService.getProjectUsersWithDirectRoles(projectId);
+        Map<User, ProjectRole> projectUsersWithInheritedRoles = projectService.getProjectUsersWithInheritedRoles(projectId);
 
         List<ProjectRole> projectRoles = projectService.getAllProjectRoles();
 
@@ -248,7 +248,8 @@ public class ProjectController {
         List<User> allUsers = userService.getAllUsers();
 
         model.addAttribute("project", project);
-        model.addAttribute("team", projectUsersWithRoles);
+        model.addAttribute("directProjectUsers", projectUsersWithDirectRoles);
+        model.addAttribute("inheritedProjectUsers", projectUsersWithInheritedRoles);
         model.addAttribute("projectRoles", projectRoles);
         model.addAttribute("allUsers", allUsers);
         return "project_team";
@@ -258,7 +259,6 @@ public class ProjectController {
     public String addTeamMember(@PathVariable("projectId") int projectId,
                                 @RequestParam("email") String email,
                                 @RequestParam("role") String role,
-                                @RequestParam(required = false) boolean addToSub,
                                 HttpSession session,
                                 RedirectAttributes redirectAttributes) {
         if (!SessionUtil.isLoggedIn(session)) return "redirect:/login";
@@ -271,12 +271,12 @@ public class ProjectController {
         if (!userService.emailExists(email)) {
             redirectAttributes.addFlashAttribute("addErrorMessage", "Bruger med e-mail, " + email + ", ikke fundet");
         } else if (projectService
-                .getProjectUsers(projectId)
+                .getDirectProjectUsers(projectId)
                 .stream()
                 .anyMatch(u -> u.getEmail().equalsIgnoreCase(email))) {
             redirectAttributes.addFlashAttribute("addErrorMessage", "Bruger med e-mail, " + email + ", er allerede tilknyttet projektet");
         } else {
-            projectService.addUserToProject(projectId, email, role, addToSub);
+            projectService.addUserToProject(projectId, email, role);
         }
 
         return String.format("redirect:/projects/%s/team", projectId);

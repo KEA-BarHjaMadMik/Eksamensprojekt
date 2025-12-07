@@ -14,8 +14,8 @@
 <main class="container-fluid">
     <th:block th:replace="~{fragments/project_nav :: projectNav(${project})}"></th:block>
 
-    <section>
-        <h3>Teammedlemmer</h3>
+    <section th:if="${!directProjectUsers.isEmpty()}">
+        <h3>Direkte Teammedlemmer</h3>
 
         <div class="overflow-auto">
             <table>
@@ -28,12 +28,12 @@
                 </tr>
                 </thead>
                 <tbody>
-                <th:block th:each="user: ${team.keySet()}">
+                <th:block th:each="user: ${directProjectUsers.keySet()}">
                     <tr>
                         <td th:text="${user.name}">Name</td>
                         <td th:text="${user.title}">Title</td>
                         <td th:text="${user.email}">Email</td>
-                        <td th:if="${user.userId == project.ownerId}" th:text="${team.get(user)}">Role</td>
+                        <td th:if="${user.userId == project.ownerId}" th:text="${directProjectUsers.get(user)}">Role</td>
                         <td th:unless="${user.userId == project.ownerId}">
                             <form th:action="@{/projects/{projectId}/team/{userId}/update_role(projectId=${project.projectId}, userId=${user.userId})}"
                                   method="post">
@@ -42,7 +42,7 @@
                                         <option th:each="projectRole: ${projectRoles}"
                                                 th:value="${projectRole.role}"
                                                 th:text="${projectRole.roleName}"
-                                                th:selected="${projectRole.role == team.get(user).role}">
+                                                th:selected="${projectRole.role == directProjectUsers.get(user).role}">
                                         </option>
                                     </select>
                                     <button type="submit">Opdater</button>
@@ -65,17 +65,37 @@
         </div>
     </section>
 
+    <section th:if="${!inheritedProjectUsers.isEmpty()}">
+        <h3>Nedarvede Teammedlemmer</h3>
+
+        <div class="overflow-auto">
+            <table>
+                <thead>
+                <tr>
+                    <th>Navn</th>
+                    <th>Titel</th>
+                    <th>E-mail</th>
+                    <th>Rolle</th>
+                </tr>
+                </thead>
+                <tbody>
+                <th:block th:each="user: ${inheritedProjectUsers.keySet()}">
+                    <tr>
+                        <td th:text="${user.name}">Name</td>
+                        <td th:text="${user.title}">Title</td>
+                        <td th:text="${user.email}">Email</td>
+                        <td th:text="${inheritedProjectUsers.get(user)}">Role</td>
+                    </tr>
+                </th:block>
+                </tbody>
+            </table>
+        </div>
+    </section>
+
     <section>
         <h3>Tilføj medlem til projekt:</h3>
         <div th:if="${addErrorMessage}" th:text="${addErrorMessage}"></div>
         <form th:action="@{/projects/{projectId}/team/add(projectId=${project.projectId})}" th:method="post">
-            <label for="addToSub">
-                <input id="addToSub"
-                       type="checkbox"
-                       name="addToSub" value="true"
-                       checked/>
-                Tilføj også medlem til delprojekter
-            </label>
             <fieldset role="group">
                 <input name="email" type="email" placeholder="E-mail" list="email-list" required/>
                 <datalist id="email-list">

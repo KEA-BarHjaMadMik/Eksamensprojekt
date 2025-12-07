@@ -9,7 +9,6 @@ import com.example.eksamensprojekt.model.User;
 import com.example.eksamensprojekt.repository.ProjectRepository;
 import org.springframework.dao.DataAccessException;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.util.*;
 
@@ -28,35 +27,38 @@ public class ProjectService {
 
     public boolean hasAccessToProject(int projectId, int userId) {
         try {
-            Project project = projectRepository.getProject(projectId);
-            if (project == null) {
-                return false;
-            }
-            // Access granted if user is Owner OR is assigned to the project
-            return project.getOwnerId() == userId || projectRepository.isUserAssignedToProject(projectId, userId);
+            return hasAccessRecursive(projectId, userId);
         } catch (DataAccessException e) {
             throw new DatabaseOperationException("Failed to verify project access", e);
         }
     }
 
-    @Transactional
-    public int createProject(Project project, boolean copyTeam, int creatorId) {
+    private boolean hasAccessRecursive(int projectId, int userId) {
+        Project project = projectRepository.getProject(projectId);
+        if (project == null) {
+            return false;
+        }
+
+        // Direct access?
+        if (project.getOwnerId() == userId ||
+                projectRepository.isUserAssignedToProject(projectId, userId)) {
+            return true;
+        }
+
+        // No parent?
+        if (project.getParentProjectId() == null) {
+            return false;
+        }
+
+        // Check parent access recursively
+        return hasAccessRecursive(project.getParentProjectId(), userId);
+    }
+
+    public int createProject(Project project) {
         try {
-            // Create project
+            // Create the project
             int projectId = projectRepository.createProject(project);
-
-            // Set project ID on object for later use
             project.setProjectId(projectId);
-
-            // Copy team from parent if requested
-            if (copyTeam) {
-                copyTeamFromParent(project);
-            }
-            // If not copying team, but creator is not owner, add them with their role from parent
-            else if (creatorId != project.getOwnerId()) {
-                ProjectRole role = getUserRole(project.getParentProjectId(), creatorId);
-                projectRepository.addUserToProject(projectId, creatorId, role.getRole());
-            }
 
             return projectId;
 
@@ -70,7 +72,7 @@ public class ProjectService {
         Integer parentId = project.getParentProjectId();
 
         if(parentId != null) {
-            Map<User, ProjectRole> usersWithRoles = getProjectUsersWithRoles(parentId);
+            Map<User, ProjectRole> usersWithRoles = getProjectUsersWithDirectRoles(parentId);
 
             for (var entry : usersWithRoles.entrySet()) {
                 User user = entry.getKey();
@@ -81,8 +83,7 @@ public class ProjectService {
                 addUserToProject( // Internal call: no new transaction, executes inside createProject transaction
                         project.getProjectId(),
                         user.getEmail(),
-                        entry.getValue().getRole(),
-                        false
+                        entry.getValue().getRole()
                 );
             }
         }
@@ -144,28 +145,133 @@ public class ProjectService {
 
     public ProjectRole getUserRole(int projectId, int userId) {
         try {
-            return projectRepository.getProjectUserRole(projectId, userId);
+            return getUserRoleRecursive(projectId, userId);
         } catch (DataAccessException e) {
-            throw new DatabaseOperationException("Failed to retrieve user role for project with id=" + projectId + "and user with id=" + userId, e);
+            throw new DatabaseOperationException(
+                    "Failed to retrieve user role for projectId=" + projectId + " and userId=" + userId,
+                    e
+            );
         }
     }
 
-    public List<User> getProjectUsers(int projectId) {
+    private ProjectRole getUserRoleRecursive(int projectId, int userId) {
+        // 1. Check direct role
+        ProjectRole directRole = projectRepository.getProjectUserRole(projectId, userId);
+        if (directRole != null) {
+            return directRole; // Direct > inherited
+        }
+
+        // 2. Load project to move upward
+        Project project = projectRepository.getProject(projectId);
+        if (project == null || project.getParentProjectId() == null) {
+            return null; // No more ancestors
+        }
+
+        // 3. Recurse upward
+        return getUserRoleRecursive(project.getParentProjectId(), userId);
+    }
+
+    public List<User> getDirectProjectUsers(int projectId) {
         return userService.getUsersByProjectId(projectId);
     }
 
-    public Map<User, ProjectRole> getProjectUsersWithRoles(int projectId) {
-        try {
-            Map<User, ProjectRole> projectUsersWithRoles = new HashMap<>();
-            List<User> projectUsers = userService.getUsersByProjectId(projectId);
-            for (User user : projectUsers) {
-                ProjectRole projectRole = projectRepository.getProjectUserRole(projectId, user.getUserId());
-                projectUsersWithRoles.put(user, projectRole);
-            }
-            return projectUsersWithRoles;
-        } catch (DataAccessException e) {
-            throw new DatabaseOperationException("Failed to retrieve users with projectId=" + projectId, e);
+    public List<User> getInheritedProjectUsers(int projectId) {
+        Set<Integer> seenUsers = new HashSet<>();
+        List<User> inheritedUsers = new ArrayList<>();
+
+        // Add direct users to seenUsers so they are skipped in inheritance
+        List<User> directUsers = userService.getUsersByProjectId(projectId);
+        for (User user : directUsers) {
+            seenUsers.add(user.getUserId());
         }
+
+        collectInheritedProjectUsers(projectId, seenUsers, inheritedUsers);
+
+        return inheritedUsers;
+    }
+
+    private void collectInheritedProjectUsers(int projectId, Set<Integer> seenUsers, List<User> result) {
+        Project project = projectRepository.getProject(projectId);
+        if (project == null || project.getParentProjectId() == null) {
+            return; // no more ancestors
+        }
+
+        int parentId = project.getParentProjectId();
+
+        // Add users from parent who are not in seenUsers
+        for (User user : getDirectProjectUsers(parentId)) {
+            if (seenUsers.add(user.getUserId())) {
+                result.add(user);
+            }
+        }
+
+        // Recurse upward
+        collectInheritedProjectUsers(parentId, seenUsers, result);
+    }
+
+    public Map<User, ProjectRole> getProjectUsersWithDirectRoles(int projectId) {
+        try {
+            Map<User, ProjectRole> result = new HashMap<>();
+
+            List<User> projectUsers = getDirectProjectUsers(projectId);
+
+            for (User user : projectUsers) {
+                ProjectRole directRole = projectRepository.getProjectUserRole(projectId, user.getUserId());
+                if (directRole != null) {
+                    result.put(user, directRole);
+                }
+            }
+
+            return result;
+
+        } catch (DataAccessException e) {
+            throw new DatabaseOperationException(
+                    "Failed to retrieve direct roles for projectId=" + projectId, e
+            );
+        }
+    }
+
+    public Map<User, ProjectRole> getProjectUsersWithInheritedRoles(int projectId) {
+        try {
+            Map<User, ProjectRole> result = new HashMap<>();
+
+            // 1. Get all users from ancestors, skipping direct users
+            List<User> inheritedUsers = getInheritedProjectUsers(projectId);
+
+            // 2. Resolve inherited roles for each user
+            for (User user : inheritedUsers) {
+                int userId = user.getUserId();
+                ProjectRole inheritedRole = getInheritedRole(projectId, userId);
+                if (inheritedRole != null) {
+                    result.put(user, inheritedRole);
+                }
+            }
+
+            return result;
+
+        } catch (DataAccessException e) {
+            throw new DatabaseOperationException(
+                    "Failed to retrieve inherited roles for projectId=" + projectId, e
+            );
+        }
+    }
+
+    private ProjectRole getInheritedRole(int projectId, int userId) {
+        Project project = projectRepository.getProject(projectId);
+        if (project == null || project.getParentProjectId() == null) {
+            return null;
+        }
+
+        int parentId = project.getParentProjectId();
+
+        // direct role on parent?
+        ProjectRole parentRole = projectRepository.getProjectUserRole(parentId, userId);
+        if (parentRole != null) {
+            return parentRole;
+        }
+
+        // continue up
+        return getInheritedRole(parentId, userId);
     }
 
     public List<ProjectRole> getAllProjectRoles() {
@@ -214,19 +320,10 @@ public class ProjectService {
         }
     }
 
-    @Transactional
-    public void addUserToProject(int projectId, String email, String role, boolean addToSub) {
+    public void addUserToProject(int projectId, String email, String role) {
         try {
             int userId = userService.getUserByEmail(email).getUserId();
-
-            // Add to project
             projectRepository.addUserToProject(projectId, userId, role);
-
-            // Add to subprojects if requested
-            if(addToSub){
-               Project project = getProjectWithTree(projectId);
-               addUserToSubProjects(project, userId, role);
-            }
         } catch (DataAccessException e) {
             throw new DatabaseOperationException("Failed to add user to project", e);
         }
@@ -242,7 +339,11 @@ public class ProjectService {
     }
 
     public void updateUserRole(int projectId, int userId, String role) {
-        projectRepository.updateUserRole(projectId, userId, role);
+        try {
+            projectRepository.updateUserRole(projectId, userId, role);
+        } catch (DataAccessException e) {
+            throw new DatabaseOperationException("Failed to update user's project role", e);
+        }
     }
 
     public void removeUserFromProject(int projectId, int userId) {
