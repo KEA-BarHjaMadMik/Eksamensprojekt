@@ -29,19 +29,23 @@ VALUES (1, 'Planlægning'),
 -- Project Roles
 -- ===============================
 INSERT INTO project_role (role, role_name)
-VALUES ('OWNER','Ejer'),
-       ('FULL_ACCESS','Komplet'),
+VALUES ('OWNER', 'Ejer'),
+       ('FULL_ACCESS', 'Komplet'),
        ('EDIT', 'Rediger'),
-       ('READ_ONLY','Se kun');
+       ('READ_ONLY', 'Se kun');
 
 -- ===============================
 -- Users (password set to hash value of 'test123')
 -- ===============================
 INSERT INTO user_account (email, password_hash, name, title, external)
-VALUES ('anna@example.dk', '$2a$10$2fiuXXXrshmlXie3QHLl0Oaa0tM1Suq9AJr3iYIZ5.CNFtZ55VmNS', 'Anna Jensen', 'Teamleder', FALSE),
-       ('bjorn@example.dk', '$2a$10$2fiuXXXrshmlXie3QHLl0Oaa0tM1Suq9AJr3iYIZ5.CNFtZ55VmNS', 'Bjørn Nielsen', 'Udvikler', FALSE),
-       ('carina@example.dk', '$2a$10$2fiuXXXrshmlXie3QHLl0Oaa0tM1Suq9AJr3iYIZ5.CNFtZ55VmNS', 'Carina Hansen', 'Testleder', FALSE),
-       ('dan@example.dk', '$2a$10$2fiuXXXrshmlXie3QHLl0Oaa0tM1Suq9AJr3iYIZ5.CNFtZ55VmNS', 'Dan Sørensen', 'Designer', TRUE),
+VALUES ('anna@example.dk', '$2a$10$2fiuXXXrshmlXie3QHLl0Oaa0tM1Suq9AJr3iYIZ5.CNFtZ55VmNS', 'Anna Jensen', 'Teamleder',
+        FALSE),
+       ('bjorn@example.dk', '$2a$10$2fiuXXXrshmlXie3QHLl0Oaa0tM1Suq9AJr3iYIZ5.CNFtZ55VmNS', 'Bjørn Nielsen', 'Udvikler',
+        FALSE),
+       ('carina@example.dk', '$2a$10$2fiuXXXrshmlXie3QHLl0Oaa0tM1Suq9AJr3iYIZ5.CNFtZ55VmNS', 'Carina Hansen',
+        'Testleder', FALSE),
+       ('dan@example.dk', '$2a$10$2fiuXXXrshmlXie3QHLl0Oaa0tM1Suq9AJr3iYIZ5.CNFtZ55VmNS', 'Dan Sørensen', 'Designer',
+        TRUE),
        ('eva@example.dk', '$2a$10$2fiuXXXrshmlXie3QHLl0Oaa0tM1Suq9AJr3iYIZ5.CNFtZ55VmNS', 'Eva Kristensen', NULL, TRUE);
 
 -- ===============================
@@ -51,7 +55,7 @@ INSERT INTO project (owner_id, parent_project_id, title, description, start_date
 VALUES (1, NULL, 'Website Redesign', 'Komplet redesign af virksomhedens hjemmeside', '2025-01-01', '2025-06-30'),
        (2, NULL, 'Mobilapp Udvikling', 'Udvikling af ny mobilapplikation', '2025-02-01', '2025-08-31'),
        (1, 1, 'Forside Redesign', 'Redesign af virksomhedens forside', '2025-01-10', '2025-03-15'),
-       (3, 2, 'Login Modul', 'Implementering af sikker login-funktion', '2025-02-05', '2025-04-20'),
+       (2, 2, 'Login Modul', 'Implementering af sikker login-funktion', '2025-02-05', '2025-04-20'),
        (1, NULL, 'Firmajulefrokost', 'Planlægning af årets julefrokost', '2025-11-12', '2025-12-17');
 
 -- ===============================
@@ -88,20 +92,29 @@ VALUES
 (NULL, 5, 'Invitationer', '2025-11-15', '2025-11-30', 'Send invitationer til medarbejdere', 5, 1);
 
 -- ===============================
--- Project Users (simplified roles)
+-- Project Users
 -- ===============================
+
+-- Automatically assign OWNER role to project owners
 INSERT INTO project_users (project_id, user_id, role)
-VALUES (1, 1, 'OWNER'), -- Anna Projektleder
-       (1, 2, 'EDIT'), -- Bjørn Teammedlem
-       (1, 4, 'EDIT'), -- Dan Teammedlem
-       (2, 2, 'EDIT'), -- Bjørn Teammedlem
-       (2, 3, 'EDIT'), -- Carina Teammedlem
-       (2, 5, 'EDIT'), -- Eva Teammedlem
-       (3, 1, 'OWNER'), -- Anna Projektleder
-       (3, 2, 'EDIT'), -- Bjørn Teammedlem
-       (4, 3, 'EDIT'), -- Carina Teammedlem
-       (4, 2, 'EDIT'), -- Bjørn Teammedlem
-       (5, 1, 'OWNER'); -- Anna Projektleder
+SELECT project_id, owner_id, 'OWNER'
+FROM project;
+
+-- 2. Assign team members with EDIT/READ_ONLY roles
+INSERT INTO project_users (project_id, user_id, role)
+VALUES
+    -- Website Redesign (OWNER is Anna)
+    (1, 2, 'EDIT'), -- Bjørn
+    (1, 4, 'EDIT'), -- Dan
+
+    -- Mobilapp Udvikling (OWNER is Bjørn)
+    (2, 3, 'EDIT'), -- Carina
+    (2, 5, 'EDIT'), -- Eva
+
+    -- Forside Redesign (subproject of Website Redesign) (OWNER is Anna)
+    (3, 4, 'EDIT'); -- Dan
+
+    -- Login Modul (subproject of Mobilapp Udvikling) (OWNER is Bjørn)
 
 -- ===============================
 -- Task Users

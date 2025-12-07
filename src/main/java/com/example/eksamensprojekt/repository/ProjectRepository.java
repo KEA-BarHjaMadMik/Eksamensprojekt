@@ -48,7 +48,6 @@ public class ProjectRepository {
                     project_users pu ON p.project_id = pu.project_id
                 WHERE
                     pu.user_id = ? AND p.owner_id != ?
-                        AND p.parent_project_id IS NULL
                 """;
 
         return jdbcTemplate.query(sql, getProjectRowMapper(), userId, userId);
