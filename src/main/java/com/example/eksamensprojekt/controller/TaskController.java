@@ -211,7 +211,6 @@ public class TaskController {
         if (!projectService.hasAccessToProject(projectId, SessionUtil.getCurrentUserId(session))){
             return "redirect:/";
         }
-
             taskService.deleteTask(taskId);
         if (parentId != 0) {
             return "redirect:/tasks/" + parentId;
