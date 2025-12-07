@@ -33,8 +33,8 @@
                         <td th:text="${user.name}">Name</td>
                         <td th:text="${user.title}">Title</td>
                         <td th:text="${user.email}">Email</td>
-                        <td th:if="${user.userId == project.ownerId}" th:text="${directProjectUsers.get(user)}">Role</td>
-                        <td th:unless="${user.userId == project.ownerId}">
+                        <td th:if="${user.userId == project.ownerId || userRole != 'OWNER'}" th:text="${directProjectUsers.get(user)}">Role</td>
+                        <td th:unless="${user.userId == project.ownerId || userRole != 'OWNER'}">
                             <form th:action="@{/projects/{projectId}/team/{userId}/update_role(projectId=${project.projectId}, userId=${user.userId})}"
                                   method="post">
                                 <fieldset role="group">
@@ -50,7 +50,8 @@
                             </form>
                         </td>
                         <td th:if="${user.userId != project.ownerId}">
-                            <form th:action="@{/projects/{projectId}/team/{userId}/remove(projectId=${project.projectId}, userId=${user.userId})}"
+                            <form th:if="${userRole == 'OWNER'}"
+                                  th:action="@{/projects/{projectId}/team/{userId}/remove(projectId=${project.projectId}, userId=${user.userId})}"
                                   method="post">
                                 <button type="submit"
                                         onclick="return confirm('Er du sikker på at du fjerne denne bruger fra projektet?')">
@@ -92,7 +93,7 @@
         </div>
     </section>
 
-    <section>
+    <section th:if="${userRole == 'OWNER'}">
         <h3>Tilføj medlem til projekt:</h3>
         <div th:if="${addErrorMessage}" th:text="${addErrorMessage}"></div>
         <form th:action="@{/projects/{projectId}/team/add(projectId=${project.projectId})}" th:method="post">

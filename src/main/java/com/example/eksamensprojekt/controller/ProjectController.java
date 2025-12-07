@@ -55,7 +55,7 @@ public class ProjectController {
 
         Project project = projectService.getProjectWithTree(projectId);
         ProjectRole projectRole = projectService.getUserRole(projectId, currentUserId);
-        String userRole = projectRole != null ? projectRole.getRole() : "OWNER";
+        String userRole = projectRole != null ? projectRole.getRole() : "";
 
         model.addAttribute("project", project);
         model.addAttribute("userRole", userRole);
@@ -144,7 +144,7 @@ public class ProjectController {
         }
 
         model.addAttribute("project", project);
-        model.addAttribute("userRole", userRole != null ? userRole.getRole() : "OWNER");
+        model.addAttribute("userRole", userRole != null ? userRole.getRole() : "");
         return "project_edit_form";
     }
 
@@ -232,6 +232,9 @@ public class ProjectController {
             return "redirect:/projects";
         }
 
+        ProjectRole projectRole = projectService.getUserRole(projectId, currentUserId);
+        String userRole = projectRole != null ? projectRole.getRole() : "";
+
         Project project = projectService.getProject(projectId);
 
         Map<User, ProjectRole> projectUsersWithDirectRoles = projectService.getProjectUsersWithDirectRoles(projectId);
@@ -242,6 +245,7 @@ public class ProjectController {
         //Get all users for the datalist
         List<User> allUsers = userService.getAllUsers();
 
+        model.addAttribute("userRole", userRole);
         model.addAttribute("project", project);
         model.addAttribute("directProjectUsers", projectUsersWithDirectRoles);
         model.addAttribute("inheritedProjectUsers", projectUsersWithInheritedRoles);
