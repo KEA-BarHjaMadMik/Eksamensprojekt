@@ -14,14 +14,33 @@
 <main class="container-fluid">
     <th:block th:replace="~{fragments/project_nav :: projectNav(${project})}"></th:block>
 
-    <p th:text="${project.description}"></p>
-    <p th:text="${'Periode: '+ #temporals.format(project.startDate) + ' - ' + #temporals.format(project.endDate)}">
-        Period</p>
-    <p th:text="${'Estimerede/faktiske timer: ' + project.estimatedHours + '/' + project.actualHours}"></p>
+    <section>
+        <div>
+            <article>
+                <p>
+                    <strong>Beskrivelse: </strong><span th:text="${project.description}"></span>
+                </p>
+                <p>
+                    <strong>Periode: </strong><span th:text="${#temporals.format(project.startDate) + ' – ' + #temporals.format(project.endDate)}"></span>
+                </p>
+
+                <p>
+                    <strong>Estimerede / faktiske timer: </strong><span th:text="${project.estimatedHours + ' / ' + project.actualHours}"></span>
+                </p>
+
+                <p>
+                    <strong>Varighed: </strong><span th:text="${project.businessDays + ' arbejdsdage'}"></span>
+                </p>
+            </article>
+        </div>
+    </section>
 
     <section th:unless="${project.subProjects.isEmpty()}">
         <h3>Delprojekter</h3>
-        <th:block th:replace="~{fragments/project_accordion :: recursiveList(projectList=${project.subProjects}, currentDepth=0)}">...</th:block>
+        <th:block
+                th:replace="~{fragments/project_accordion :: recursiveList(projectList=${project.subProjects}, currentDepth=0)}">
+            ...
+        </th:block>
     </section>
 
     <section th:unless="${project.tasks.isEmpty()}">
@@ -40,7 +59,8 @@
                 </tr>
                 </thead>
                 <tbody>
-                <th:block th:replace="~{fragments/task_table :: recursiveTableRows(taskList=${project.tasks}, currentDepth=0)}"></th:block>
+                <th:block
+                        th:replace="~{fragments/task_table :: recursiveTableRows(taskList=${project.tasks}, currentDepth=0)}"></th:block>
                 </tbody>
             </table>
 

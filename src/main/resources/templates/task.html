@@ -18,7 +18,7 @@
         <p><strong>Status:</strong> <span th:text="${task.status.statusName}">Status</span></p>
         <p><strong>Startdato:</strong> <span th:text="${#temporals.format(task.startDate)}">Start</span></p>
         <p><strong>Slutdato:</strong> <span th:text="${#temporals.format(task.endDate)}">End</span></p>
-        <p><strong>Varighed (dage):</strong> <span th:text="${task.getDays()}">Days</span> (Arbejd: <span th:text="${task.getBusinessDays()}">Business Days</span>)</p>
+        <p><strong>Varighed:</strong> <span th:text="${task.getBusinessDays()  + ' arbejdsdage'}">Business Days</span></p>
         <p><strong>Estimerede timer:</strong> <span th:text="${task.getEstimatedHours()}">Estimated</span></p>
         <p><strong>Faktiske timer:</strong> <span th:text="${task.getActualHours()}">Actual</span></p>
 

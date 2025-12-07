@@ -44,7 +44,7 @@ public class TaskController {
 
         // Add task and role to the model
         Task task = taskService.getTaskWithTree(taskId);
-        ProjectRole userRole = projectService.getUserRole(projectId, currentUserId);
+        String userRole = projectService.getUserRole(projectId, currentUserId).getRole();
 
         model.addAttribute("task", task);
         model.addAttribute("userRole", userRole);
@@ -236,6 +236,8 @@ public class TaskController {
             return "redirect:/projects";
         }
 
+        String userRole = projectService.getUserRole(projectId,currentUserId).getRole();
+
         List<TimeEntry> timeEntries = taskService.getTimeEntriesByTaskId(taskId);
         List<User> projectUsers = userService.getUsersByProjectId(projectId);
 
@@ -243,6 +245,7 @@ public class TaskController {
         newTimeEntry.setUserId(SessionUtil.getCurrentUserId(session));
 
         model.addAttribute("task", task);
+        model.addAttribute("userRole", userRole);
         model.addAttribute("timeEntries", timeEntries);
         model.addAttribute("projectUsers", projectUsers);
         model.addAttribute("newTimeEntry", newTimeEntry);
