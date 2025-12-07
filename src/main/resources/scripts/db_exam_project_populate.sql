@@ -105,7 +105,7 @@ INSERT INTO project_users (project_id, user_id, role)
 VALUES
     -- Website Redesign (OWNER is Anna)
     (1, 2, 'EDIT'), -- Bjørn
-    (1, 4, 'EDIT'), -- Dan
+    (1, 4, 'READ_ONLY'), -- Dan
 
     -- Mobilapp Udvikling (OWNER is Bjørn)
     (2, 3, 'EDIT'), -- Carina
