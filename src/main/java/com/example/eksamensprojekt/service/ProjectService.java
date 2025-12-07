@@ -11,6 +11,7 @@ import org.springframework.dao.DataAccessException;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 @Service
 public class ProjectService {
@@ -99,7 +100,18 @@ public class ProjectService {
 
     public List<Project> getAssignedProjectsByUserId(int userId) {
         try {
-            return projectRepository.getAssignedProjectsByUserId(userId);
+            List<Project> projects = projectRepository.getAssignedProjectsByUserId(userId);
+
+            // Build a set of all assigned project IDs for fast lookup
+            Set<Integer> projectIds = projects.stream()
+                    .map(Project::getProjectId)
+                    .collect(Collectors.toSet());
+
+            // Filter out projects whose parent is also assigned
+            return projects.stream()
+                    .filter(p -> p.getParentProjectId() == null || !projectIds.contains(p.getParentProjectId()))
+                    .toList();
+
         } catch (DataAccessException e) {
             throw new DatabaseOperationException("Failed to get projects assigned to user with id=" + userId, e);
         }
