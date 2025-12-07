@@ -24,8 +24,10 @@
         <ul>
             <li>
                 <div role="group">
-                    <a role="button" class="secondary" th:href="@{/tasks/{taskId}/time_entries(taskId=${task.taskId})}">Timeregistrering</a>
-                    <a role="button" class="secondary" th:href="@{/tasks/{taskId}/edit(taskId=${task.taskId})}">Rediger</a>
+                    <a role="button" class="secondary"
+                       th:href="@{/tasks/{taskId}/time_entries(taskId=${task.taskId})}">Timeregistrering</a>
+                    <a th:if="${userRole.role != 'READ_ONLY'}" role="button" class="secondary"
+                       th:href="@{/tasks/{taskId}/edit(taskId=${task.taskId})}">Rediger</a>
                     <a role="button" th:href="@{/tasks/{parentId}/subtask/create(parentId=${task.taskId})}">+ Underopgave</a>
                 </div>
             </li>
