@@ -9,10 +9,10 @@
     <nav>
         <ul>
             <li th:if="${project.parentProjectId == null}">
-                <a role="button" class="outline" th:href="@{/projects}">🡐</a>
+                <a th:href="@{/projects}"><h1>🡠</h1></a>
             </li>
             <li th:unless="${project.parentProjectId == null}">
-                <a role="button" class="outline" th:href="@{/projects/{projectId}(projectId=${project.parentProjectId})}">🡐</a>
+                <a th:href="@{/projects/{projectId}(projectId=${project.parentProjectId})}"><h1>🡠</h1></a>
             </li>
             <li>
                 <a th:href="@{/projects/{projectId}(projectId=${project.projectId})}"><h1 th:text="${project.title}">Project title</h1></a>
@@ -22,9 +22,9 @@
         <ul>
             <li>
                 <div role="group">
-                    <a role="button" class="contrast"
+                    <a role="button" class="contrast outline"
                        th:href="@{/projects/{projectId}/hour_distribution(projectId=${project.projectId})}">Timefordeling</a>
-                    <a role="button" class="contrast"
+                    <a role="button" class="contrast outline"
                        th:href="@{/projects/{projectId}/team(projectId=${project.projectId})}">Team</a>
                     <a role="button" class="secondary"
                        th:href="@{/projects/{projectId}/edit(projectId=${project.projectId})}">Rediger projekt</a>
