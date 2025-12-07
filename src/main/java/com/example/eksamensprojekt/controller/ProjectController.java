@@ -33,7 +33,6 @@ public class ProjectController {
 
     @GetMapping
     public String projects(HttpSession session, Model model) {
-        if (!SessionUtil.isLoggedIn(session)) return "redirect:/login";
         int currentUserId = SessionUtil.getCurrentUserId(session);
 
         List<Project> projects = projectService.getProjectsByOwnerId(currentUserId);
@@ -47,8 +46,6 @@ public class ProjectController {
 
     @GetMapping("/{projectId}")
     public String showProject(@PathVariable("projectId") int projectId, HttpSession session, Model model) {
-        if (!SessionUtil.isLoggedIn(session)) return "redirect:/login";
-
         int currentUserId = SessionUtil.getCurrentUserId(session);
 
         // Check if the user has access to the project
@@ -70,7 +67,6 @@ public class ProjectController {
     public String showHourDistribution(@PathVariable("projectId") int projectId,
                                        HttpSession session,
                                        Model model) {
-        if (!SessionUtil.isLoggedIn(session)) return "redirect:/login";
         int currentUserId = SessionUtil.getCurrentUserId(session);
 
         // Check if the user has access to the project
@@ -89,9 +85,6 @@ public class ProjectController {
 
     @GetMapping("/create")
     public String showCreateProjectForm(HttpSession session, Model model) {
-        //If a user is not logged in, show a login screen
-        if (!SessionUtil.isLoggedIn(session)) return "redirect:/login";
-
         Project newProject = new Project();
         newProject.setOwnerId(SessionUtil.getCurrentUserId(session));
         newProject.setStartDate(LocalDate.now());
@@ -102,13 +95,9 @@ public class ProjectController {
     }
 
     @PostMapping("/create")
-    public String createProject(HttpSession session,
-                                @Valid @ModelAttribute Project newProject,
+    public String createProject(@Valid @ModelAttribute Project newProject,
                                 BindingResult bindingResult,
                                 Model model) {
-
-        if (!SessionUtil.isLoggedIn(session)) return "redirect:/login";
-
         boolean fieldsHaveErrors = bindingResult.hasErrors();
 
         //if validation failed, return to form
@@ -123,10 +112,7 @@ public class ProjectController {
     }
 
     @GetMapping("/{parentId}/create")
-    public String showCreateSubProjectForm(@PathVariable("parentId") int parentId, HttpSession session, Model model) {
-        //If a user is not logged in, show a login screen
-        if (!SessionUtil.isLoggedIn(session)) return "redirect:/login";
-
+    public String showCreateSubProjectForm(@PathVariable("parentId") int parentId, Model model) {
         Project subProject = new Project();
         subProject.setOwnerId(projectService.getProject(parentId).getOwnerId());
         subProject.setParentProjectId(parentId);
@@ -141,7 +127,6 @@ public class ProjectController {
     public String showEditProjectForm(@PathVariable("projectId") int projectId,
                                       HttpSession session,
                                       Model model) {
-        if (!SessionUtil.isLoggedIn(session)) return "redirect:/login";
         int currentUserId = SessionUtil.getCurrentUserId(session);
         if (!projectService.hasAccessToProject(projectId, currentUserId)) {
             return "redirect:/projects";
@@ -169,10 +154,6 @@ public class ProjectController {
                                 BindingResult bindingResult,
                                 HttpSession session,
                                 RedirectAttributes redirectAttributes) {
-
-        if (!SessionUtil.isLoggedIn(session)) {
-            return "redirect:/login";
-        }
         int currentUserId = SessionUtil.getCurrentUserId(session);
 
         project.setProjectId(projectId);
@@ -210,8 +191,6 @@ public class ProjectController {
 
     @PostMapping("/{projectId}/delete")
     public String deleteProject(@PathVariable("projectId") int projectId, HttpSession session) {
-        if (!SessionUtil.isLoggedIn(session)) return "redirect:/login";
-
         Project project = projectService.getProject(projectId);
         if (SessionUtil.getCurrentUserId(session) != project.getOwnerId()) {
             return "redirect:/";
@@ -231,7 +210,6 @@ public class ProjectController {
     public String showTeam(@PathVariable("projectId") int projectId,
                            HttpSession session,
                            Model model) {
-        if (!SessionUtil.isLoggedIn(session)) return "redirect:/login";
         int currentUserId = SessionUtil.getCurrentUserId(session);
         if (!projectService.hasAccessToProject(projectId, currentUserId)) {
             return "redirect:/projects";
@@ -261,7 +239,6 @@ public class ProjectController {
                                 @RequestParam("role") String role,
                                 HttpSession session,
                                 RedirectAttributes redirectAttributes) {
-        if (!SessionUtil.isLoggedIn(session)) return "redirect:/login";
         int currentUserId = SessionUtil.getCurrentUserId(session);
         if (!projectService.hasAccessToProject(projectId, currentUserId)) {
             return "redirect:/projects";
@@ -287,7 +264,6 @@ public class ProjectController {
                                        @PathVariable("userId") int userId,
                                        @RequestParam("role") String role,
                                        HttpSession session) {
-        if (!SessionUtil.isLoggedIn(session)) return "redirect:/login";
         int currentUserId = SessionUtil.getCurrentUserId(session);
 
         // Access check
@@ -311,8 +287,6 @@ public class ProjectController {
     public String removeTeamMember(@PathVariable("projectId") int projectId,
                                    @PathVariable("userId") int userId,
                                    HttpSession session) {
-
-        if (!SessionUtil.isLoggedIn(session)) return "redirect:/login";
         int currentUserId = SessionUtil.getCurrentUserId(session);
 
         // Access check

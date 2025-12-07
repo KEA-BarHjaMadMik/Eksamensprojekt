@@ -33,7 +33,6 @@ public class TaskController {
 
     @GetMapping("/{taskId}")
     public String showTask(@PathVariable("taskId") int taskId, Model model, HttpSession session) {
-        if (!SessionUtil.isLoggedIn(session)) return "redirect:/login";
 
         // Check if the user has access to the task
         int currentUserId = SessionUtil.getCurrentUserId(session);
@@ -56,8 +55,6 @@ public class TaskController {
     public String showCreateTaskForm(@PathVariable int projectId,
                                      HttpSession session,
                                      Model model) {
-        if (!SessionUtil.isLoggedIn(session)) return "redirect:/login";
-
         // Verify ownership / access
         if (!projectService.hasAccessToProject(projectId, SessionUtil.getCurrentUserId(session))) return "redirect:/";
 
@@ -76,8 +73,6 @@ public class TaskController {
     public String showCreateSubtaskForm(@PathVariable int parentTaskId,
                                         HttpSession session,
                                         Model model) {
-        if (!SessionUtil.isLoggedIn(session)) return "redirect:/login";
-
         //Get parent task
         Task parentTask = taskService.getTask(parentTaskId);
         if (parentTask == null) return "redirect:/";
@@ -102,9 +97,6 @@ public class TaskController {
                              BindingResult bindingResult,
                              HttpSession session,
                              Model model) {
-
-        if (!SessionUtil.isLoggedIn(session)) return "redirect:/login";
-
         // Verify ownership / access
         if (!projectService.hasAccessToProject(task.getProjectId(),
                 SessionUtil.getCurrentUserId(session))) return "redirect:/";
@@ -136,8 +128,6 @@ public class TaskController {
     public String showEditTaskForm(@PathVariable int taskId,
                                    Model model,
                                    HttpSession session) {
-        if (!SessionUtil.isLoggedIn(session)) return "redirect:/login";
-
         Task task = taskService.getTask(taskId);
 
         // Check if the user has access to the task
@@ -168,8 +158,6 @@ public class TaskController {
                            BindingResult bindingResult,
                            HttpSession session,
                            Model model) {
-        if (!SessionUtil.isLoggedIn(session)) return "redirect:/login";
-
         // Check if the user has access to the task
         int currentUserId = SessionUtil.getCurrentUserId(session);
         int projectId = task.getProjectId();
@@ -202,8 +190,6 @@ public class TaskController {
 
     @PostMapping("/{taskId}/delete")
     public String deleteTask(@PathVariable("taskId") int taskId, HttpSession session){
-        if (!SessionUtil.isLoggedIn(session)) return "redirect:/login";
-
         Task task = taskService.getTask(taskId);
         int parentId = task.getParentTaskId();
         int projectId = task.getProjectId();
@@ -226,7 +212,6 @@ public class TaskController {
     public String showTimeEntries(@PathVariable("taskId") int taskId,
                                   HttpSession session,
                                   Model model) {
-        if (!SessionUtil.isLoggedIn(session)) return "redirect:/login";
         int currentUserId = SessionUtil.getCurrentUserId(session);
         Task task = taskService.getTask(taskId);
         int projectId = task.getProjectId();
@@ -258,7 +243,6 @@ public class TaskController {
                                BindingResult bindingResult,
                                HttpSession session,
                                Model model) {
-        if (!SessionUtil.isLoggedIn(session)) return "redirect:/login";
         int currentUserId = SessionUtil.getCurrentUserId(session);
         Task task = taskService.getTask(taskId);
         int projectId = task.getProjectId();
