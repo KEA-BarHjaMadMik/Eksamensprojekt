@@ -86,7 +86,7 @@ public class TaskController {
         task.setEndDate(LocalDate.now());
 
         model.addAttribute("task", task);
-        model.addAttribute("parentTask", parentTask); /// for subtask form, show parent task context
+        model.addAttribute("parentTask", parentTask);
 
         return "task_form";
     }
