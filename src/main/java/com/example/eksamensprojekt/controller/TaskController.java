@@ -178,8 +178,8 @@ public class TaskController {
         }
 
         // Verify role is not READ_ONLY
-        String currentUserProjectRole = projectService.getUserRole(projectId, currentUserId).getRole();
-        if ("READ_ONLY".equals(currentUserProjectRole)) {
+        String userRole = projectService.getUserRole(projectId, currentUserId).getRole();
+        if ("READ_ONLY".equals(userRole)) {
             return "redirect:/tasks/" + task.getTaskId();
         }
 
@@ -208,7 +208,7 @@ public class TaskController {
         int parentId = task.getParentTaskId();
         int projectId = task.getProjectId();
 
-        if (projectService.hasAccessToProject(projectId, SessionUtil.getCurrentUserId(session))){
+        if (!projectService.hasAccessToProject(projectId, SessionUtil.getCurrentUserId(session))){
             return "redirect:/";
         }
 
