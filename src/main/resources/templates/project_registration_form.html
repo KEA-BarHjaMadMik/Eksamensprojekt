@@ -39,15 +39,6 @@
                 <label for="enddate">Slut dato:</label>
                 <input id="enddate" type="date" th:field="*{endDate}" required/>
             </div>
-            <div th:if="${newProject.parentProjectId != null}">
-                <label for="copyTeam">
-                    <input id="copyTeam"
-                           type="checkbox"
-                           name="copyTeam" value="true"
-                           checked/>
-                    Tilknyt teammedlemmer fra det overordnede projekt.
-                </label>
-            </div>
         </fieldset>
 
         <button type="submit">Opret projekt</button>
