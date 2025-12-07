@@ -191,16 +191,33 @@ public class ProjectController {
 
     @PostMapping("/{projectId}/delete")
     public String deleteProject(@PathVariable("projectId") int projectId, HttpSession session) {
-        Project project = projectService.getProject(projectId);
-        if (SessionUtil.getCurrentUserId(session) != project.getOwnerId()) {
-            return "redirect:/";
+        int currentUserId = SessionUtil.getCurrentUserId(session);
+        // Check access
+        if (!projectService.hasAccessToProject(projectId, currentUserId)) {
+            return "redirect:/projects";
         }
-        if (project.getParentProjectId() != null) {
-            int parentProjectId = project.getParentProjectId();
-            projectService.deleteProject(projectId);
+
+        // Only owner can delete
+        ProjectRole userRole = projectService.getUserRole(projectId, currentUserId);
+        if (userRole == null || !"OWNER".equals(userRole.getRole())) {
+            return "redirect:/projects";
+        }
+
+        // check whether it's a subproject before deletion, for proper redirection
+        Project project = projectService.getProject(projectId);
+        if (project == null) {
+            return "redirect:/projects";
+        }
+        Integer parentProjectId = project.getParentProjectId();
+
+        // proceed with delete
+        projectService.deleteProject(projectId);
+
+        // redirect to parent, if subproject
+        if (parentProjectId != null) {
             return "redirect:/projects/" + parentProjectId;
         }
-        projectService.deleteProject(projectId);
+        // else return to projects
         return "redirect:/projects";
     }
 
