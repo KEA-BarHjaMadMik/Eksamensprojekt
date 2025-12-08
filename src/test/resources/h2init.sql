@@ -34,6 +34,10 @@ CREATE TABLE project
     CONSTRAINT fk_project_parent_project_id FOREIGN KEY (parent_project_id)
         REFERENCES project (project_id)
         ON DELETE CASCADE
+        ON UPDATE CASCADE,
+    CONSTRAINT fk_project_owner_id FOREIGN KEY (owner_id)
+        REFERENCES user_account (user_id)
+        ON DELETE CASCADE
         ON UPDATE CASCADE
 );
 
