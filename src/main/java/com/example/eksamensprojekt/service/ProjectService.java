@@ -69,27 +69,6 @@ public class ProjectService {
         }
     }
 
-    private void copyTeamFromParent(Project project) {
-        Integer parentId = project.getParentProjectId();
-
-        if(parentId != null) {
-            Map<User, ProjectRole> usersWithRoles = getProjectUsersWithDirectRoles(parentId);
-
-            for (var entry : usersWithRoles.entrySet()) {
-                User user = entry.getKey();
-
-                // Skip owner (Automatically added on project creation)
-                if (user.getUserId() == project.getOwnerId()) continue;
-
-                addUserToProject( // Internal call: no new transaction, executes inside createProject transaction
-                        project.getProjectId(),
-                        user.getEmail(),
-                        entry.getValue().getRole()
-                );
-            }
-        }
-    }
-
     public List<Project> getProjectsByOwnerId(int userId) {
         try {
             return projectRepository.getProjectsByOwnerId(userId);
@@ -329,15 +308,6 @@ public class ProjectService {
             projectRepository.addUserToProject(projectId, userId, role);
         } catch (DataAccessException e) {
             throw new DatabaseOperationException("Failed to add user to project", e);
-        }
-    }
-
-    private void addUserToSubProjects(Project project, int userId, String role) {
-        for(Project sub: project.getSubProjects()) {
-            if (!projectRepository.isUserAssignedToProject(sub.getProjectId(), userId)) {
-                projectRepository.addUserToProject(sub.getProjectId(), userId, role);
-            }
-            addUserToSubProjects(sub, userId, role);
         }
     }
 
