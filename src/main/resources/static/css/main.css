@@ -1,3 +1,20 @@
+:root {
+    /* Firefox */
+    @supports (width: -moz-available) {
+        --stretch: -moz-available;
+    }
+
+    /* Safari */
+    @supports (width: -webkit-fill-available) {
+        --stretch: -webkit-fill-available;
+    }
+
+    /* Chromium */
+    @supports (width: stretch) {
+        --stretch: stretch;
+    }
+}
+
 .error {
     color: #d93025;
     margin-top: 0.5rem;
@@ -30,7 +47,7 @@
 }
 
 details > summary[role="button"] {
-    width: stretch; /* stretch full width */
+    width: var(--stretch); /* stretch full width */
     padding: 0.5rem 1rem; /* adjust padding */
 }
 
