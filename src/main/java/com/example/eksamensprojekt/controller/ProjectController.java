@@ -33,7 +33,6 @@ public class ProjectController {
 
     @GetMapping
     public String projects(HttpSession session, Model model) {
-        if (!SessionUtil.isLoggedIn(session)) return "redirect:/login";
         int currentUserId = SessionUtil.getCurrentUserId(session);
 
         List<Project> projects = projectService.getProjectsByOwnerId(currentUserId);
@@ -47,8 +46,6 @@ public class ProjectController {
 
     @GetMapping("/{projectId}")
     public String showProject(@PathVariable("projectId") int projectId, HttpSession session, Model model) {
-        if (!SessionUtil.isLoggedIn(session)) return "redirect:/login";
-
         int currentUserId = SessionUtil.getCurrentUserId(session);
 
         // Check if the user has access to the project
@@ -58,7 +55,7 @@ public class ProjectController {
 
         Project project = projectService.getProjectWithTree(projectId);
         ProjectRole projectRole = projectService.getUserRole(projectId, currentUserId);
-        String userRole = projectRole != null ? projectRole.getRole() : "OWNER";
+        String userRole = projectRole != null ? projectRole.getRole() : "";
 
         model.addAttribute("project", project);
         model.addAttribute("userRole", userRole);
@@ -70,7 +67,6 @@ public class ProjectController {
     public String showHourDistribution(@PathVariable("projectId") int projectId,
                                        HttpSession session,
                                        Model model) {
-        if (!SessionUtil.isLoggedIn(session)) return "redirect:/login";
         int currentUserId = SessionUtil.getCurrentUserId(session);
 
         // Check if the user has access to the project
@@ -89,9 +85,6 @@ public class ProjectController {
 
     @GetMapping("/create")
     public String showCreateProjectForm(HttpSession session, Model model) {
-        //If a user is not logged in, show a login screen
-        if (!SessionUtil.isLoggedIn(session)) return "redirect:/login";
-
         Project newProject = new Project();
         newProject.setOwnerId(SessionUtil.getCurrentUserId(session));
         newProject.setStartDate(LocalDate.now());
@@ -102,13 +95,9 @@ public class ProjectController {
     }
 
     @PostMapping("/create")
-    public String createProject(HttpSession session,
-                                @Valid @ModelAttribute Project newProject,
+    public String createProject(@Valid @ModelAttribute Project newProject,
                                 BindingResult bindingResult,
                                 Model model) {
-
-        if (!SessionUtil.isLoggedIn(session)) return "redirect:/login";
-
         boolean fieldsHaveErrors = bindingResult.hasErrors();
 
         //if validation failed, return to form
@@ -123,10 +112,7 @@ public class ProjectController {
     }
 
     @GetMapping("/{parentId}/create")
-    public String showCreateSubProjectForm(@PathVariable("parentId") int parentId, HttpSession session, Model model) {
-        //If a user is not logged in, show a login screen
-        if (!SessionUtil.isLoggedIn(session)) return "redirect:/login";
-
+    public String showCreateSubProjectForm(@PathVariable("parentId") int parentId, Model model) {
         Project subProject = new Project();
         subProject.setOwnerId(projectService.getProject(parentId).getOwnerId());
         subProject.setParentProjectId(parentId);
@@ -141,7 +127,6 @@ public class ProjectController {
     public String showEditProjectForm(@PathVariable("projectId") int projectId,
                                       HttpSession session,
                                       Model model) {
-        if (!SessionUtil.isLoggedIn(session)) return "redirect:/login";
         int currentUserId = SessionUtil.getCurrentUserId(session);
         if (!projectService.hasAccessToProject(projectId, currentUserId)) {
             return "redirect:/projects";
@@ -159,7 +144,7 @@ public class ProjectController {
         }
 
         model.addAttribute("project", project);
-        model.addAttribute("userRole", userRole != null ? userRole.getRole() : "OWNER");
+        model.addAttribute("userRole", userRole != null ? userRole.getRole() : "");
         return "project_edit_form";
     }
 
@@ -169,8 +154,6 @@ public class ProjectController {
                                 BindingResult bindingResult,
                                 HttpSession session,
                                 RedirectAttributes redirectAttributes) {
-
-        if (!SessionUtil.isLoggedIn(session)) { return "redirect:/login"; }
         int currentUserId = SessionUtil.getCurrentUserId(session);
 
         project.setProjectId(projectId);
@@ -187,7 +170,9 @@ public class ProjectController {
         boolean isOwner = existingProject.getOwnerId() == currentUserId;
         boolean hasFullAccess = userRole != null && userRole.getRole().equals("FULL_ACCESS");
 
-        if (!isOwner && !hasFullAccess) { return "redirect:/projects/" + projectId;}
+        if (!isOwner && !hasFullAccess) {
+            return "redirect:/projects/" + projectId;
+        }
 
         // Keep owner ID and parent project ID unchanged
         project.setOwnerId(existingProject.getOwnerId());
@@ -206,18 +191,33 @@ public class ProjectController {
 
     @PostMapping("/{projectId}/delete")
     public String deleteProject(@PathVariable("projectId") int projectId, HttpSession session) {
-        if (!SessionUtil.isLoggedIn(session)) return "redirect:/login";
-
-        Project project = projectService.getProject(projectId);
-        if (SessionUtil.getCurrentUserId(session) != project.getOwnerId()) {
-            return "redirect:/";
+        int currentUserId = SessionUtil.getCurrentUserId(session);
+        // Check access
+        if (!projectService.hasAccessToProject(projectId, currentUserId)) {
+            return "redirect:/projects";
         }
-        if (project.getParentProjectId() != null){
-            int parentProjectId = project.getParentProjectId();
-            projectService.deleteProject(projectId);
+
+        // Only owner can delete
+        ProjectRole userRole = projectService.getUserRole(projectId, currentUserId);
+        if (userRole == null || !"OWNER".equals(userRole.getRole())) {
+            return "redirect:/projects";
+        }
+
+        // check whether it's a subproject before deletion, for proper redirection
+        Project project = projectService.getProject(projectId);
+        if (project == null) {
+            return "redirect:/projects";
+        }
+        Integer parentProjectId = project.getParentProjectId();
+
+        // proceed with delete
+        projectService.deleteProject(projectId);
+
+        // redirect to parent, if subproject
+        if (parentProjectId != null) {
             return "redirect:/projects/" + parentProjectId;
         }
-        projectService.deleteProject(projectId);
+        // else return to projects
         return "redirect:/projects";
     }
 
@@ -227,23 +227,28 @@ public class ProjectController {
     public String showTeam(@PathVariable("projectId") int projectId,
                            HttpSession session,
                            Model model) {
-        if (!SessionUtil.isLoggedIn(session)) return "redirect:/login";
         int currentUserId = SessionUtil.getCurrentUserId(session);
         if (!projectService.hasAccessToProject(projectId, currentUserId)) {
             return "redirect:/projects";
         }
 
+        ProjectRole projectRole = projectService.getUserRole(projectId, currentUserId);
+        String userRole = projectRole != null ? projectRole.getRole() : "";
+
         Project project = projectService.getProject(projectId);
 
-        Map<User, ProjectRole> projectUsersWithRoles = projectService.getProjectUsersWithRoles(projectId);
+        Map<User, ProjectRole> projectUsersWithDirectRoles = projectService.getProjectUsersWithDirectRoles(projectId);
+        Map<User, ProjectRole> projectUsersWithInheritedRoles = projectService.getProjectUsersWithInheritedRoles(projectId);
 
         List<ProjectRole> projectRoles = projectService.getAllProjectRoles();
 
         //Get all users for the datalist
         List<User> allUsers = userService.getAllUsers();
 
+        model.addAttribute("userRole", userRole);
         model.addAttribute("project", project);
-        model.addAttribute("team", projectUsersWithRoles);
+        model.addAttribute("directProjectUsers", projectUsersWithDirectRoles);
+        model.addAttribute("inheritedProjectUsers", projectUsersWithInheritedRoles);
         model.addAttribute("projectRoles", projectRoles);
         model.addAttribute("allUsers", allUsers);
         return "project_team";
@@ -255,7 +260,6 @@ public class ProjectController {
                                 @RequestParam("role") String role,
                                 HttpSession session,
                                 RedirectAttributes redirectAttributes) {
-        if (!SessionUtil.isLoggedIn(session)) return "redirect:/login";
         int currentUserId = SessionUtil.getCurrentUserId(session);
         if (!projectService.hasAccessToProject(projectId, currentUserId)) {
             return "redirect:/projects";
@@ -265,7 +269,7 @@ public class ProjectController {
         if (!userService.emailExists(email)) {
             redirectAttributes.addFlashAttribute("addErrorMessage", "Bruger med e-mail, " + email + ", ikke fundet");
         } else if (projectService
-                .getProjectUsers(projectId)
+                .getDirectProjectUsers(projectId)
                 .stream()
                 .anyMatch(u -> u.getEmail().equalsIgnoreCase(email))) {
             redirectAttributes.addFlashAttribute("addErrorMessage", "Bruger med e-mail, " + email + ", er allerede tilknyttet projektet");
@@ -281,7 +285,6 @@ public class ProjectController {
                                        @PathVariable("userId") int userId,
                                        @RequestParam("role") String role,
                                        HttpSession session) {
-        if (!SessionUtil.isLoggedIn(session)) return "redirect:/login";
         int currentUserId = SessionUtil.getCurrentUserId(session);
 
         // Access check
@@ -305,8 +308,6 @@ public class ProjectController {
     public String removeTeamMember(@PathVariable("projectId") int projectId,
                                    @PathVariable("userId") int userId,
                                    HttpSession session) {
-
-        if (!SessionUtil.isLoggedIn(session)) return "redirect:/login";
         int currentUserId = SessionUtil.getCurrentUserId(session);
 
         // Access check

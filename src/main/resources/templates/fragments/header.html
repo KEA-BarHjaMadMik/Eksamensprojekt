@@ -6,11 +6,10 @@
 </head>
 <body>
 <div th:fragment="header" th:remove="tag">
-    <header class="container-fluid">
+    <header class="container-fluid site-header">
         <nav>
             <ul>
-                <li><a th:href="@{/}"><h1>ProProjects</h1></a></li>
-                <li><a th:href="@{/projects}">Projekter</a></li>
+                <li><a th:href="@{/}"><h1><b>ProProjects</b></h1></a></li>
             </ul>
 
             <ul th:unless="${isLoggedIn}">
@@ -22,8 +21,9 @@
             <ul th:if="${isLoggedIn}">
                 <li>
                     <div role="group">
-                        <a role="button" th:href="@{/user_admin}" th:text="${userEmail}">User</a>
-                        <a role="button" class="secondary" th:href="@{/logout}">Log ud</a>
+                        <a role="button" class="contrast outline" th:href="@{/projects}">Projekter</a>
+                        <a role="button" class="secondary" th:href="@{/user_admin}" th:text="${userEmail}">User</a>
+                        <a role="button" th:href="@{/logout}">Log ud</a>
                     </div>
                 </li>
             </ul>

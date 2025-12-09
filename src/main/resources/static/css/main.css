@@ -4,6 +4,12 @@
     font-size: 0.9rem;
 }
 
+.site-header {
+    border-bottom: 2px solid #ccc; /* thickness, style, color */
+    padding-top: 0;
+    padding-bottom: 0;
+}
+
 .grid {
     display: grid;
     gap: var(--pico-spacing);

@@ -33,7 +33,6 @@ public class TaskController {
 
     @GetMapping("/{taskId}")
     public String showTask(@PathVariable("taskId") int taskId, Model model, HttpSession session) {
-        if (!SessionUtil.isLoggedIn(session)) return "redirect:/login";
 
         // Check if the user has access to the task
         int currentUserId = SessionUtil.getCurrentUserId(session);
@@ -44,7 +43,7 @@ public class TaskController {
 
         // Add task and role to the model
         Task task = taskService.getTaskWithTree(taskId);
-        ProjectRole userRole = projectService.getUserRole(projectId, currentUserId);
+        String userRole = projectService.getUserRole(projectId, currentUserId).getRole();
 
         model.addAttribute("task", task);
         model.addAttribute("userRole", userRole);
@@ -56,8 +55,6 @@ public class TaskController {
     public String showCreateTaskForm(@PathVariable int projectId,
                                      HttpSession session,
                                      Model model) {
-        if (!SessionUtil.isLoggedIn(session)) return "redirect:/login";
-
         // Verify ownership / access
         if (!projectService.hasAccessToProject(projectId, SessionUtil.getCurrentUserId(session))) return "redirect:/";
 
@@ -76,8 +73,6 @@ public class TaskController {
     public String showCreateSubtaskForm(@PathVariable int parentTaskId,
                                         HttpSession session,
                                         Model model) {
-        if (!SessionUtil.isLoggedIn(session)) return "redirect:/login";
-
         //Get parent task
         Task parentTask = taskService.getTask(parentTaskId);
         if (parentTask == null) return "redirect:/";
@@ -92,7 +87,7 @@ public class TaskController {
         task.setEndDate(LocalDate.now());
 
         model.addAttribute("task", task);
-        model.addAttribute("parentTask", parentTask); /// for subtask form, show parent task context
+        model.addAttribute("parentTask", parentTask);
 
         return "task_form";
     }
@@ -102,9 +97,6 @@ public class TaskController {
                              BindingResult bindingResult,
                              HttpSession session,
                              Model model) {
-
-        if (!SessionUtil.isLoggedIn(session)) return "redirect:/login";
-
         // Verify ownership / access
         if (!projectService.hasAccessToProject(task.getProjectId(),
                 SessionUtil.getCurrentUserId(session))) return "redirect:/";
@@ -136,8 +128,6 @@ public class TaskController {
     public String showEditTaskForm(@PathVariable int taskId,
                                    Model model,
                                    HttpSession session) {
-        if (!SessionUtil.isLoggedIn(session)) return "redirect:/login";
-
         Task task = taskService.getTask(taskId);
 
         // Check if the user has access to the task
@@ -173,8 +163,6 @@ public class TaskController {
                            BindingResult bindingResult,
                            HttpSession session,
                            Model model) {
-        if (!SessionUtil.isLoggedIn(session)) return "redirect:/login";
-
         // Check if the user has access to the task
         int currentUserId = SessionUtil.getCurrentUserId(session);
         int projectId = task.getProjectId();
@@ -182,9 +170,9 @@ public class TaskController {
             return "redirect:/projects";
         }
 
-        // Verify the role is not READ_ONLY
-        String currentUserProjectRole = projectService.getUserRole(projectId, currentUserId).getRole();
-        if ("READ_ONLY".equals(currentUserProjectRole)) {
+        // Verify role is not READ_ONLY
+        String userRole = projectService.getUserRole(projectId, currentUserId).getRole();
+        if ("READ_ONLY".equals(userRole)) {
             return "redirect:/tasks/" + task.getTaskId();
         }
 
@@ -207,16 +195,13 @@ public class TaskController {
 
     @PostMapping("/{taskId}/delete")
     public String deleteTask(@PathVariable("taskId") int taskId, HttpSession session){
-        if (!SessionUtil.isLoggedIn(session)) return "redirect:/login";
-
         Task task = taskService.getTask(taskId);
         int parentId = task.getParentTaskId();
         int projectId = task.getProjectId();
 
-        if (projectService.hasAccessToProject(projectId, SessionUtil.getCurrentUserId(session))){
+        if (!projectService.hasAccessToProject(projectId, SessionUtil.getCurrentUserId(session))){
             return "redirect:/";
         }
-
             taskService.deleteTask(taskId);
         if (parentId != 0) {
             return "redirect:/tasks/" + parentId;
@@ -318,7 +303,6 @@ public class TaskController {
     public String showTimeEntries(@PathVariable("taskId") int taskId,
                                   HttpSession session,
                                   Model model) {
-        if (!SessionUtil.isLoggedIn(session)) return "redirect:/login";
         int currentUserId = SessionUtil.getCurrentUserId(session);
         Task task = taskService.getTask(taskId);
         int projectId = task.getProjectId();
@@ -327,6 +311,8 @@ public class TaskController {
             return "redirect:/projects";
         }
 
+        String userRole = projectService.getUserRole(projectId,currentUserId).getRole();
+
         List<TimeEntry> timeEntries = taskService.getTimeEntriesByTaskId(taskId);
         List<User> projectUsers = userService.getUsersByProjectId(projectId);
 
@@ -334,6 +320,7 @@ public class TaskController {
         newTimeEntry.setUserId(SessionUtil.getCurrentUserId(session));
 
         model.addAttribute("task", task);
+        model.addAttribute("userRole", userRole);
         model.addAttribute("timeEntries", timeEntries);
         model.addAttribute("projectUsers", projectUsers);
         model.addAttribute("newTimeEntry", newTimeEntry);
@@ -347,7 +334,6 @@ public class TaskController {
                                BindingResult bindingResult,
                                HttpSession session,
                                Model model) {
-        if (!SessionUtil.isLoggedIn(session)) return "redirect:/login";
         int currentUserId = SessionUtil.getCurrentUserId(session);
         Task task = taskService.getTask(taskId);
         int projectId = task.getProjectId();

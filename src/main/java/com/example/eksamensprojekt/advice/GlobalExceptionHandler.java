@@ -1,9 +1,6 @@
 package com.example.eksamensprojekt.advice;
 
-import com.example.eksamensprojekt.exceptions.DatabaseOperationException;
-import com.example.eksamensprojekt.exceptions.ProjectNotFoundException;
-import com.example.eksamensprojekt.exceptions.TaskNotFoundException;
-import com.example.eksamensprojekt.exceptions.UserNotFoundException;
+import com.example.eksamensprojekt.exceptions.*;
 import org.springframework.http.HttpStatus;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.ControllerAdvice;
@@ -29,7 +26,7 @@ public class GlobalExceptionHandler {
     }
 
     @ExceptionHandler(ProjectNotFoundException.class)
-    public String handleProjectNotFound(UserNotFoundException ex, Model model) {
+    public String handleProjectNotFound(ProjectNotFoundException ex, Model model) {
         model.addAttribute("status", HttpStatus.NOT_FOUND.value());
         model.addAttribute("error", "Not Found");
         model.addAttribute("message", ex.getMessage());
@@ -37,10 +34,16 @@ public class GlobalExceptionHandler {
     }
 
     @ExceptionHandler(TaskNotFoundException.class)
-    public String handleTaskNotFound(UserNotFoundException ex, Model model) {
+    public String handleTaskNotFound(TaskNotFoundException ex, Model model) {
         model.addAttribute("status", HttpStatus.NOT_FOUND.value());
         model.addAttribute("error", "Not Found");
         model.addAttribute("message", ex.getMessage());
         return "error/404";
+    }
+
+
+    @ExceptionHandler(NotLoggedInException.class)
+    public String handleNotLoggedIn() {
+        return "redirect:/login";
     }
 }

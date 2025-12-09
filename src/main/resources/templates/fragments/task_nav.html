@@ -9,10 +9,10 @@
     <nav>
         <ul>
             <li th:if="${task.parentTaskId == null}">
-                <a role="button" class="outline" th:href="@{/projects/{projectId}(projectId=${task.projectId})}">🡐</a>
+                <a th:href="@{/projects/{projectId}(projectId=${task.projectId})}"><h1>🡠</h1></a>
             </li>
             <li th:unless="${task.parentTaskId == null}">
-                <a role="button" class="outline" th:href="@{/tasks/{taskId}(taskId=${task.parentTaskId})}">🡐</a>
+                <a th:href="@{/tasks/{taskId}(taskId=${task.parentTaskId})}"><h1>🡠</h1></a>
             </li>
             <li>
                 <a th:href="@{/tasks/{taskId}(taskId=${task.taskId})}">
@@ -24,9 +24,14 @@
         <ul>
             <li>
                 <div role="group">
-                    <a role="button" class="secondary" th:href="@{/tasks/{taskId}/time_entries(taskId=${task.taskId})}">Timeregistrering</a>
-                    <a role="button" class="secondary" th:href="@{/tasks/{taskId}/edit(taskId=${task.taskId})}">Rediger</a>
-                    <a role="button" th:href="@{/tasks/{parentId}/subtask/create(parentId=${task.taskId})}">+ Underopgave</a>
+                    <a role="button" class="contrast outline"
+                       th:href="@{/tasks/{taskId}/time_entries(taskId=${task.taskId})}">Timeregistrering</a>
+                    <a th:if="${userRole == 'OWNER' || userRole == 'FULL_ACCESS' || userRole == 'EDIT'}"
+                       role="button" class="secondary"
+                       th:href="@{/tasks/{taskId}/edit(taskId=${task.taskId})}">Rediger</a>
+                    <a th:if="${userRole == 'OWNER' || userRole == 'FULL_ACCESS'}"
+                       role="button"
+                       th:href="@{/tasks/{parentId}/subtask/create(parentId=${task.taskId})}">+ Underopgave</a>
                 </div>
             </li>
         </ul>

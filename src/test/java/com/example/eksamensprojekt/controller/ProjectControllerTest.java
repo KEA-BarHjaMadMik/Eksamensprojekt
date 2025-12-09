@@ -93,10 +93,11 @@ public class ProjectControllerTest {
                 .andExpect(redirectedUrl("/projects/1"));
 
         // Verify service was called with correct data
-        ArgumentCaptor<Project> captor = ArgumentCaptor.forClass(Project.class);
-        verify(projectService).createProject(captor.capture());
+        ArgumentCaptor<Project> projectCaptor = ArgumentCaptor.forClass(Project.class);
 
-        Project captured = captor.getValue();
+        verify(projectService).createProject(projectCaptor.capture());
+
+        Project captured = projectCaptor.getValue();
         assertThat(captured.getTitle()).isEqualTo("Test Project");
         assertThat(captured.getDescription()).isEqualTo("Test Description");
     }
@@ -106,11 +107,11 @@ public class ProjectControllerTest {
         // Arrange mock service call
         when(projectService.createProject(any(Project.class))).thenReturn(6);
 
-        //act & Assert
+        // Act & Assert
         mockMvc.perform(post("/projects/create")
                         .session(session)
                         .param("ownerId", "1")
-                        .param("parentProjectId", "1")
+                        .param("parentProjectId", "1") // project has parent id
                         .param("title", "Test Subproject")
                         .param("description", "Test Description")
                         .param("startDate", "2025-01-01")
@@ -118,10 +119,12 @@ public class ProjectControllerTest {
                 .andExpect(status().is3xxRedirection())
                 .andExpect(redirectedUrl("/projects/6"));
 
-        ArgumentCaptor<Project> captor = ArgumentCaptor.forClass(Project.class);
-        verify(projectService).createProject(captor.capture());
+        // Verify service was called with correct arguments
+        ArgumentCaptor<Project> projectCaptor = ArgumentCaptor.forClass(Project.class);
 
-        Project captured = captor.getValue();
+        verify(projectService).createProject(projectCaptor.capture());
+
+        Project captured = projectCaptor.getValue();
         assertThat(captured.getParentProjectId()).isEqualTo(1);
         assertThat(captured.getTitle()).isEqualTo("Test Subproject");
     }
