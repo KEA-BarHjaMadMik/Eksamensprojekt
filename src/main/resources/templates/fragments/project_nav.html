@@ -15,7 +15,7 @@
                 <a th:href="@{/projects/{projectId}(projectId=${project.parentProjectId})}"><h1>🡠</h1></a>
             </li>
             <li>
-                <a th:href="@{/projects/{projectId}(projectId=${project.projectId})}"><h1 th:text="${project.title}">Project title</h1></a>
+                <a th:href="@{/projects/{projectId}(projectId=${project.projectId})}"><h1 th:text="${'Projekt: ' + project.title}">Project title</h1></a>
             </li>
         </ul>
 

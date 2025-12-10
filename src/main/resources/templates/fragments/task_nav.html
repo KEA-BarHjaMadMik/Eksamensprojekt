@@ -16,7 +16,7 @@
             </li>
             <li>
                 <a th:href="@{/tasks/{taskId}(taskId=${task.taskId})}">
-                    <h1 th:text="${task.title}">Task title</h1>
+                    <h1 th:text="${'Opgave: ' + task.title}">Task title</h1>
                 </a>
             </li>
         </ul>
