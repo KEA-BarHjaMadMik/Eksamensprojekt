@@ -46,7 +46,9 @@ VALUES ('anna@example.dk', '$2a$10$2fiuXXXrshmlXie3QHLl0Oaa0tM1Suq9AJr3iYIZ5.CNF
         'Testleder', FALSE),
        ('dan@example.dk', '$2a$10$2fiuXXXrshmlXie3QHLl0Oaa0tM1Suq9AJr3iYIZ5.CNFtZ55VmNS', 'Dan Sørensen', 'Designer',
         TRUE),
-       ('eva@example.dk', '$2a$10$2fiuXXXrshmlXie3QHLl0Oaa0tM1Suq9AJr3iYIZ5.CNFtZ55VmNS', 'Eva Kristensen', NULL, TRUE);
+       ('eva@example.dk', '$2a$10$2fiuXXXrshmlXie3QHLl0Oaa0tM1Suq9AJr3iYIZ5.CNFtZ55VmNS', 'Eva Kristensen', NULL, TRUE),
+       ('test@example.dk', '$2a$10$2fiuXXXrshmlXie3QHLl0Oaa0tM1Suq9AJr3iYIZ5.CNFtZ55VmNS', 'testbruger', 'Projektleder',
+        FALSE);
 
 -- ===============================
 -- Projects
@@ -104,17 +106,18 @@ FROM project;
 INSERT INTO project_users (project_id, user_id, role)
 VALUES
     -- Website Redesign (OWNER is Anna)
-    (1, 2, 'EDIT'), -- Bjørn
+    (1, 2, 'EDIT'),      -- Bjørn
     (1, 4, 'READ_ONLY'), -- Dan
 
     -- Mobilapp Udvikling (OWNER is Bjørn)
-    (2, 3, 'EDIT'), -- Carina
-    (2, 5, 'EDIT'), -- Eva
+    (2, 3, 'EDIT'),      -- Carina
+    (2, 5, 'EDIT'),      -- Eva
 
     -- Forside Redesign (subproject of Website Redesign) (OWNER is Anna)
-    (3, 4, 'EDIT'); -- Dan
+    (3, 4, 'EDIT');
+-- Dan
 
-    -- Login Modul (subproject of Mobilapp Udvikling) (OWNER is Bjørn)
+-- Login Modul (subproject of Mobilapp Udvikling) (OWNER is Bjørn)
 
 -- ===============================
 -- Task Users
