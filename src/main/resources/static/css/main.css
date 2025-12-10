@@ -52,5 +52,5 @@ details > summary[role="button"] {
 }
 
 details > table {
-    width: stretch; /* stretch full width */
+    width: var(--stretch); /* stretch full width */
 }
