@@ -125,21 +125,3 @@ CREATE TABLE task_users
         REFERENCES user_account (user_id)
         ON DELETE CASCADE
 );
-
--- ===============================
--- Seed data
--- ===============================
-
--- Task Statuses
-INSERT INTO task_status (status_id, status_name)
-VALUES (1, 'Planlægning'),
-       (2, 'Klar'),
-       (3, 'I gang'),
-       (4, 'Færdig');
-
--- Project Roles
-INSERT INTO project_role (role, role_name)
-VALUES ('OWNER', 'Ejer'),
-       ('FULL_ACCESS', 'Komplet'),
-       ('EDIT', 'Rediger'),
-       ('READ_ONLY', 'Se kun');
