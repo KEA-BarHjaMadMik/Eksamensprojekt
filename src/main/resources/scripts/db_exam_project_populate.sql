@@ -1,20 +1,20 @@
 USE exam_project_db;
 
 -- ==========================================
--- DELETE ALL EXISTING ROWS
+-- TRUNCATE ALL TABLES
 -- ==========================================
+SET FOREIGN_KEY_CHECKS = 0;
 
--- delete from children first
-DELETE FROM time_entry;     -- child of user_account & task
-DELETE FROM task_users;     -- child of task & user_account
-DELETE FROM project_users;  -- child of project & user_account
+TRUNCATE TABLE time_entry;
+TRUNCATE TABLE task_users;
+TRUNCATE TABLE project_users;
+TRUNCATE TABLE task;
+TRUNCATE TABLE project;
+TRUNCATE TABLE user_account;
+TRUNCATE TABLE project_role;
+TRUNCATE TABLE task_status;
 
--- then parents
-DELETE FROM task;           -- child of project
-DELETE FROM project;        -- child of user_account (owner)
-DELETE FROM user_account;
-DELETE FROM project_role;
-DELETE FROM task_status;
+SET FOREIGN_KEY_CHECKS = 1;
 
 -- ===============================
 -- Task Statuses
