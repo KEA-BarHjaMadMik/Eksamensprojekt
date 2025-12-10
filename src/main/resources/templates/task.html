@@ -14,6 +14,14 @@
 <main class="container-fluid">
     <th:block th:replace="~{fragments/task_nav :: taskNav(${task})}">...</th:block>
 
+    <article th:if="${moveSuccessMessage}" style="border-left: 4px solid #28a745;">
+        ✓ <span th:text="${moveSuccessMessage}"></span>
+    </article>
+
+    <article th:if="${moveErrorMessage}" style="border-left: 4px solid #dc3545;">
+        ⚠ <span th:text="${moveErrorMessage}"></span>
+    </article>
+
     <section>
         <p><strong>Status:</strong> <span th:text="${task.status.statusName}">Status</span></p>
         <p><strong>Startdato:</strong> <span th:text="${#temporals.format(task.startDate)}">Start</span></p>

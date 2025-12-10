@@ -184,6 +184,10 @@ public class TaskController {
             return "task_edit_form";
         }
 
+        // set status
+        TaskStatus status = new TaskStatus(statusId, null); // status name matching id is loaded on task retrieval from DB
+        task.setStatus(status);
+
         // Check if a parent task has changed and validate no circular reference
         Task existingTask = taskService.getTask(task.getTaskId());
         Integer newParentTaskId = task.getParentTaskId();
@@ -204,10 +208,6 @@ public class TaskController {
                 return "task_edit_form";
             }
         }
-
-        // set status
-        TaskStatus status = new TaskStatus(statusId, null); // status name matching id is loaded on task retrieval from DB
-        task.setStatus(status);
 
         // update
         taskService.updateTask(task);

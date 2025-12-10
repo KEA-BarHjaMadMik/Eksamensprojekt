@@ -33,6 +33,11 @@
         </ul>
     </nav>
 
+    <div th:if="${error}" style="color: red; padding: 1rem; margin-bottom: 1rem; border:
+  1px solid red; border-radius: 4px;">
+        <p th:text="${error}"></p>
+    </div>
+
     <form method="post" th:action="@{/tasks/edit}" th:object="${task}">
 
         <input type="hidden" th:field="*{taskId}"/>
