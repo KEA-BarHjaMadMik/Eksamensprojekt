@@ -26,12 +26,23 @@
                 <div role="group">
                     <a role="button" class="contrast outline"
                        th:href="@{/tasks/{taskId}/time_entries(taskId=${task.taskId})}">Timeregistrering</a>
-                    <a th:if="${userRole == 'OWNER' || userRole == 'FULL_ACCESS' || userRole == 'EDIT'}"
-                       role="button" class="secondary"
-                       th:href="@{/tasks/{taskId}/edit(taskId=${task.taskId})}">Rediger</a>
+
                     <a th:if="${userRole == 'OWNER' || userRole == 'FULL_ACCESS'}"
                        role="button"
                        th:href="@{/tasks/{parentId}/subtask/create(parentId=${task.taskId})}">+ Underopgave</a>
+
+                    <a th:if="${userRole == 'OWNER' || userRole == 'FULL_ACCESS' || userRole == 'EDIT'}"
+                       role="button" class="secondary"
+                       th:href="@{/tasks/{taskId}/edit(taskId=${task.taskId})}">Rediger</a>
+
+                    <a th:if="${userRole == 'OWNER' || userRole == 'FULL_ACCESS'}"
+                       role="button" class="contrast"
+                       th:href="@{/tasks/{taskId}/move(taskId=${task.taskId})}">Flyt til projekt</a>
+
+                    <a th:if="${userRole == 'OWNER' || userRole == 'FULL_ACCESS'}"
+                       role="button"
+                       th:href="@{/tasks/{parentId}/subtask/create(parentId=${task.taskId})}">+ Underopgave</a>
+
                 </div>
             </li>
         </ul>

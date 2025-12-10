@@ -26,7 +26,7 @@ public class UserController {
 
     @GetMapping("/login")
     public String showLoginForm(HttpSession session) {
-        // if already logged in, return to front page, else proceed to form
+        // if already logged in, return to the front page, else proceed to form
         return SessionUtil.isLoggedIn(session) ? "redirect:/" : "login";
     }
 
@@ -64,7 +64,7 @@ public class UserController {
 
     @GetMapping("/register_user")
     public String showRegistrationForm(HttpSession session, Model model) {
-        // if already logged in, return to front page, else proceed to form
+        // if already logged in, return to the front page, else proceed to form
         if (SessionUtil.isLoggedIn(session)) {
             return "redirect:/";
         }
@@ -107,12 +107,12 @@ public class UserController {
 
     @GetMapping("/user_admin")
     public String showUserAdminPage(HttpSession session, Model model) {
-        // Ensure user is logged in
+        // Ensure the user is logged in
         if (!SessionUtil.isLoggedIn(session)) {
             return "redirect:/login";
         }
 
-        // Retrieve userId from session
+        // Retrieve userId from the session
         int userId = SessionUtil.getCurrentUserId(session);
 
         // Fetch full user object
@@ -168,7 +168,7 @@ public class UserController {
 
     @GetMapping("/change_password")
     public String showChangePasswordForm(HttpSession session) {
-        // Ensure user is logged in
+        // Ensure the user is logged in
         if (!SessionUtil.isLoggedIn(session)) {
             return "redirect:/login";
         }
@@ -183,7 +183,7 @@ public class UserController {
                                  HttpSession session,
                                  Model model) {
 
-        // Retrieve userId from session
+        // Retrieve userId from the session
         int userId = SessionUtil.getCurrentUserId(session);
         // Retrieve user email
         String email = userService.getUserByUserId(userId).getEmail();
@@ -224,15 +224,15 @@ public class UserController {
 
     @PostMapping("/delete")
     public String deleteUser(HttpSession session, Model model){
-        // Ensure user is logged in
+        // Ensure the user is logged in
         if (!SessionUtil.isLoggedIn(session)) {
             return "redirect:/login";
         }
 
-        // Retrieve userId from session
+        // Retrieve userId from the session
         int userId = SessionUtil.getCurrentUserId(session);
 
-        // Proceed with deleting user
+        // Proceed with deleting the user
         if(userService.deleteUser(userId)) {
             session.invalidate();
             return "redirect:/";

@@ -138,7 +138,7 @@ public class Project {
     }
 
     public long getDays() {
-        return ChronoUnit.DAYS.between(startDate, endDate) + 1; // add 1 to include start date
+        return ChronoUnit.DAYS.between(startDate, endDate) + 1; // add 1 to include the start date
     }
 
     public long getBusinessDays() {

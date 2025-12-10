@@ -127,7 +127,7 @@ public class Task {
         if (subTasks == null || subTasks.isEmpty()) {
             return actualHours;
         } else {
-            // actual hours are based on time entries. Therefore, actual hours of parent task must be included in sum.
+            // actual hours are based on time entries. Therefore, actual hours of the parent task must be included in the sum.
             return actualHours + subTasks.stream().mapToDouble(Task::getActualHours).sum();
         }
     }
@@ -157,7 +157,7 @@ public class Task {
     }
 
     public long getDays() {
-        return ChronoUnit.DAYS.between(startDate, endDate) + 1; // add 1 to include start date
+        return ChronoUnit.DAYS.between(startDate, endDate) + 1; // add 1 to include the start date
     }
 
     public long getBusinessDays() {

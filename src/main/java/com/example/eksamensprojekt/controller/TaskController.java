@@ -16,6 +16,7 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import java.time.LocalDate;
 import java.util.List;
 
+@SuppressWarnings("JvmTaintAnalysis")
 @Controller
 @RequestMapping("tasks")
 public class TaskController {
@@ -32,7 +33,7 @@ public class TaskController {
     // =========== TASK CRUD===========
 
     @GetMapping("/{taskId}")
-    public String showTask(@PathVariable("taskId") int taskId, Model model, HttpSession session) {
+    public String showTask(@PathVariable int taskId, Model model, HttpSession session) {
 
         // Check if the user has access to the task
         int currentUserId = SessionUtil.getCurrentUserId(session);
@@ -170,7 +171,7 @@ public class TaskController {
             return "redirect:/projects";
         }
 
-        // Verify role is not READ_ONLY
+        // Verify the role is not READ_ONLY
         String userRole = projectService.getUserRole(projectId, currentUserId).getRole();
         if ("READ_ONLY".equals(userRole)) {
             return "redirect:/tasks/" + task.getTaskId();
@@ -181,6 +182,27 @@ public class TaskController {
             List<TaskStatus> taskStatusList = taskService.getAllTaskStatuses();
             model.addAttribute("taskStatusList", taskStatusList);
             return "task_edit_form";
+        }
+
+        // Check if a parent task has changed and validate no circular reference
+        Task existingTask = taskService.getTask(task.getTaskId());
+        Integer newParentTaskId = task.getParentTaskId();
+        Integer oldParentTaskId = existingTask.getParentTaskId();
+
+        // Objects.equals handles null values safely,
+        // so if objects are the same value(No parent change) it skips the circular reference check
+        if (!java.util.Objects.equals(newParentTaskId, oldParentTaskId)) {
+            //If true, then there is a circular reference, so return to the form with an error message
+            if (taskService.wouldCreateCircularReference(task.getTaskId(), newParentTaskId)) {
+                model.addAttribute("error", "kan ikke flytte opgaven: Skaber cirkulær reference");
+
+                List<TaskStatus> taskStatusList = taskService.getAllTaskStatuses();
+                List<Task> availableParentTasks = taskService.getAllTasksInProject(projectId);
+                model.addAttribute("taskStatusList", taskStatusList);
+                model.addAttribute("availableParentTasks", availableParentTasks);
+                model.addAttribute("currentTaskId", task.getTaskId());
+                return "task_edit_form";
+            }
         }
 
         // set status
@@ -194,7 +216,7 @@ public class TaskController {
     }
 
     @PostMapping("/{taskId}/delete")
-    public String deleteTask(@PathVariable("taskId") int taskId, HttpSession session){
+    public String deleteTask(@PathVariable int taskId, HttpSession session){
         Task task = taskService.getTask(taskId);
         int parentId = task.getParentTaskId();
         int projectId = task.getProjectId();
@@ -300,7 +322,7 @@ public class TaskController {
     // ===========TIME ENTRY MANAGEMENT===========
 
     @GetMapping("/{taskId}/time_entries")
-    public String showTimeEntries(@PathVariable("taskId") int taskId,
+    public String showTimeEntries(@PathVariable int taskId,
                                   HttpSession session,
                                   Model model) {
         int currentUserId = SessionUtil.getCurrentUserId(session);
@@ -329,7 +351,7 @@ public class TaskController {
     }
 
     @PostMapping("/{taskId}/time_entries/add")
-    public String addTimeEntry(@PathVariable("taskId") int taskId,
+    public String addTimeEntry(@PathVariable int taskId,
                                @Valid @ModelAttribute("newTimeEntry") TimeEntry newTimeEntry,
                                BindingResult bindingResult,
                                HttpSession session,

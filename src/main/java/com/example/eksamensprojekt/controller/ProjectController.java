@@ -18,6 +18,7 @@ import java.time.LocalDate;
 import java.util.List;
 import java.util.Map;
 
+@SuppressWarnings("JvmTaintAnalysis")
 @Controller
 @RequestMapping("projects")
 public class ProjectController {
@@ -45,7 +46,7 @@ public class ProjectController {
     }
 
     @GetMapping("/{projectId}")
-    public String showProject(@PathVariable("projectId") int projectId, HttpSession session, Model model) {
+    public String showProject(@PathVariable int projectId, HttpSession session, Model model) {
         int currentUserId = SessionUtil.getCurrentUserId(session);
 
         // Check if the user has access to the project
@@ -64,7 +65,7 @@ public class ProjectController {
     }
 
     @GetMapping("/{projectId}/hour_distribution")
-    public String showHourDistribution(@PathVariable("projectId") int projectId,
+    public String showHourDistribution(@PathVariable int projectId,
                                        HttpSession session,
                                        Model model) {
         int currentUserId = SessionUtil.getCurrentUserId(session);
@@ -112,7 +113,7 @@ public class ProjectController {
     }
 
     @GetMapping("/{parentId}/create")
-    public String showCreateSubProjectForm(@PathVariable("parentId") int parentId, Model model) {
+    public String showCreateSubProjectForm(@PathVariable int parentId, Model model) {
         Project subProject = new Project();
         subProject.setOwnerId(projectService.getProject(parentId).getOwnerId());
         subProject.setParentProjectId(parentId);
@@ -124,7 +125,7 @@ public class ProjectController {
     }
 
     @GetMapping("/{projectId}/edit")
-    public String showEditProjectForm(@PathVariable("projectId") int projectId,
+    public String showEditProjectForm(@PathVariable int projectId,
                                       HttpSession session,
                                       Model model) {
         int currentUserId = SessionUtil.getCurrentUserId(session);
@@ -149,7 +150,7 @@ public class ProjectController {
     }
 
     @PostMapping("/{projectId}/edit")
-    public String updateProject(@PathVariable("projectId") int projectId,
+    public String updateProject(@PathVariable int projectId,
                                 @Valid @ModelAttribute("project") Project project,
                                 BindingResult bindingResult,
                                 HttpSession session,
@@ -190,14 +191,14 @@ public class ProjectController {
     }
 
     @PostMapping("/{projectId}/delete")
-    public String deleteProject(@PathVariable("projectId") int projectId, HttpSession session) {
+    public String deleteProject(@PathVariable int projectId, HttpSession session) {
         int currentUserId = SessionUtil.getCurrentUserId(session);
         // Check access
         if (!projectService.hasAccessToProject(projectId, currentUserId)) {
             return "redirect:/projects";
         }
 
-        // Only owner can delete
+        // Only the owner can delete
         ProjectRole userRole = projectService.getUserRole(projectId, currentUserId);
         if (userRole == null || !"OWNER".equals(userRole.getRole())) {
             return "redirect:/projects";
@@ -224,7 +225,7 @@ public class ProjectController {
     // ===========TEAM MANAGEMENT===========
 
     @GetMapping("/{projectId}/team")
-    public String showTeam(@PathVariable("projectId") int projectId,
+    public String showTeam(@PathVariable int projectId,
                            HttpSession session,
                            Model model) {
         int currentUserId = SessionUtil.getCurrentUserId(session);
@@ -255,7 +256,7 @@ public class ProjectController {
     }
 
     @PostMapping("/{projectId}/team/add")
-    public String addTeamMember(@PathVariable("projectId") int projectId,
+    public String addTeamMember(@PathVariable int projectId,
                                 @RequestParam("email") String email,
                                 @RequestParam("role") String role,
                                 HttpSession session,
@@ -281,8 +282,8 @@ public class ProjectController {
     }
 
     @PostMapping("/{projectId}/team/{userId}/update_role")
-    public String updateTeamMemberRole(@PathVariable("projectId") int projectId,
-                                       @PathVariable("userId") int userId,
+    public String updateTeamMemberRole(@PathVariable int projectId,
+                                       @PathVariable int userId,
                                        @RequestParam("role") String role,
                                        HttpSession session) {
         int currentUserId = SessionUtil.getCurrentUserId(session);
@@ -305,8 +306,8 @@ public class ProjectController {
     }
 
     @PostMapping("/{projectId}/team/{userId}/remove")
-    public String removeTeamMember(@PathVariable("projectId") int projectId,
-                                   @PathVariable("userId") int userId,
+    public String removeTeamMember(@PathVariable int projectId,
+                                   @PathVariable int userId,
                                    HttpSession session) {
         int currentUserId = SessionUtil.getCurrentUserId(session);
 

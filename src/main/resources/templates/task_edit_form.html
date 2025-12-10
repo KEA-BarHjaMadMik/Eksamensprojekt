@@ -37,7 +37,19 @@
 
         <input type="hidden" th:field="*{taskId}"/>
         <input type="hidden" th:field="*{projectId}"/>
-        <input type="hidden" th:field="*{parentTaskId}"/>
+        <div>
+            <label for="parentTask">Overordnet opgave (valgfri):</label>
+            <select id="parentTask" th:field="*{parentTaskId}">
+                <option value="">-- Ingen (topniveau opgave) --</option>
+                <option th:each="t : ${availableParentTasks}"
+                        th:if="${t.taskId != currentTaskId}"
+                        th:value="${t.taskId}"
+                        th:text="${t.title}"
+                        th:selected="${t.taskId == task.parentTaskId}">
+                </option>
+            </select>
+            <small>Vælg en opgave for at gøre denne til en underopgave</small>
+        </div>
 
         <div>
             <label for="title">Titel:</label>

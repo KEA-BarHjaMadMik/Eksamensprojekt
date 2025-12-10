@@ -1,10 +1,55 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
-    <title>Title</title>
+    <title>Flyt opgave</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="color-scheme" content="light dark">
+    <link th:href="@{/css/pico.pink.min.css}" rel="stylesheet">
+    <link th:href="@{/css/main.css}" rel="stylesheet">
 </head>
 <body>
+<div th:replace="~{fragments/header :: header}">...</div>
 
+<main class="container-fluid">
+    <nav>
+        <ul>
+            <li><h1>Flyt opgave til andet projekt</h1></li>
+        </ul>
+    </nav>
+
+    <!-- Show error message if exists -->
+    <div th:if="${moveErrorMessage}" style="color: red;">
+        <p th:text="${moveErrorMessage}"></p>
+    </div>
+
+    <article>
+        <p><strong>Opgave:</strong> <span th:text="${task.title}"></span></p>
+        <p th:if="${subtaskCount > 0}">
+            <strong>⚠️ Advarsel:</strong> Denne opgave har <span th:text="${subtaskCount}"></span> underopgave(r).
+            Alle underopgaver vil også blive flyttet.
+        </p>
+    </article>
+
+    <form method="post" th:action="@{/tasks/{taskId}/move(taskId=${task.taskId})}">
+        <div>
+            <label for="targetProject">Vælg målprojekt:</label>
+            <select id="targetProject" name="targetProjectId" required>
+                <option value="">-- Vælg projekt --</option>
+                <option th:each="project : ${moveTargets}"
+                        th:value="${project.projectId}"
+                        th:text="${project.title}">
+                </option>
+            </select>
+        </div>
+
+        <div role="group">
+            <button type="submit">Flyt opgave</button>
+            <a role="button" class="secondary" th:href="@{/tasks/{taskId}(taskId=${task.taskId})}">Annuller</a>
+        </div>
+    </form>
+</main>
+
+<div th:replace="~{fragments/footer :: footer}">...</div>
 </body>
 </html>
