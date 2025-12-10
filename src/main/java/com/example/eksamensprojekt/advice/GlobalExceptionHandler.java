@@ -18,7 +18,7 @@ public class GlobalExceptionHandler {
     }
 
     @ExceptionHandler(UserNotFoundException.class)
-    public String handleUSerNotFound(UserNotFoundException ex, Model model) {
+    public String handleUserNotFound(UserNotFoundException ex, Model model) {
         model.addAttribute("status", HttpStatus.NOT_FOUND.value());
         model.addAttribute("error", "Not Found");
         model.addAttribute("message", ex.getMessage());
