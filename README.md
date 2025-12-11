@@ -11,7 +11,7 @@ Dette værktøj er udviklet for at hjælpe Alpha Solutions med at effektivisere 
 
 ## Teknologier
 * Backend: Java 21, Spring Boot 3.5.7
-* Frontend: Thymeleaf, HTML, CSS
+* Frontend: Thymeleaf, HTML, CSS, JavaScript (Chart.js)
 * Database: MySQL 8.0
 * Build Tool: Maven
 * CI/CD: GitHub Actions
