@@ -236,8 +236,6 @@ public class TaskController {
     public String showMoveTaskForm(@PathVariable int taskId,
                                    Model model,
                                    HttpSession session){
-        if (!SessionUtil.isLoggedIn(session)) return "redirect:/projects";
-
         Task task = taskService.getTask(taskId);
         int currentUserId = SessionUtil.getCurrentUserId(session);
 
@@ -268,8 +266,6 @@ public class TaskController {
                            @RequestParam int targetProjectId,
                            HttpSession session,
                            RedirectAttributes redirectAttributes){
-        if (!SessionUtil.isLoggedIn(session)) return "redirect:/login";
-
         Task task = taskService.getTask(taskId);
         int currentUserId = SessionUtil.getCurrentUserId(session);
 
