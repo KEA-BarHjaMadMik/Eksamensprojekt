@@ -11,10 +11,10 @@ Dette værktøj er udviklet for at hjælpe Alpha Solutions med at effektivisere 
 
 ## Teknologier
 * Backend: Java 21, Spring Boot 3.5.7
-* Frontend: Thymeleaf, HTML, CSS, JavaScript (Chart.js)
+* Frontend: Thymeleaf, HTML5, CSS3, JavaScript (Chart.js 4.5.1)
 * Database: MySQL 8.0
-* Build Tool: Maven
-* CI/CD: GitHub Actions
+* Build Tool: Maven 4.0.0
+* CI/CD: GitHub Actions (2025 workflow)
 * Hosting: Azure Web App + Azure MySQL
 * IDE: IntelliJ IDEA 2025.2
 
@@ -62,6 +62,11 @@ Testdækningen er opdelt i to primære niveauer for at sikre både applikationsl
 
 * **CI/CD:** Pipeline er opsat via GitHub Actions, som kører tests ved hvert push og pull request.
 * **Hosting:** Automatisk deployment til Azure App Service ved push til main-branchen.
+* **Database:** Azure Database for MySQL.
+* **Kørende applikation:** [https://exam-project.azurewebsites.net/](https://exam-project.azurewebsites.net/)
+
+## Team
+- GitHub navne: @HeroMouse, @BardieJoensen, @MBroholm
 
 ## Contributing
 [Se CONTRIBUTING.md](docs/CONTRIBUTING.md)
