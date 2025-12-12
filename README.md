@@ -20,20 +20,6 @@ Dette værktøj er udviklet for at hjælpe Alpha Solutions med at effektivisere 
 
 ## Installation & Setup
 
-1. Klon repository:
-
-   ```git clone https://github.com/KEA-BarHjaMadMik/Eksamensprojekt.git```
-
-2. Importér projektet i IntelliJ IDEA.
-3. Konfigurer database:
-   * Opret MySQL database.
-      * [TO-DO]
-   * Tilføj url og credentials som miljø-variabler:
-      * DEV_DATABASE_URL
-      * DEV_USERNAME
-      * DEV_PASSWORD
-
-
 ### Forudsætninger
 *   Java 21 JDK installeret.
 *   MySQL Server kørende lokalt.
