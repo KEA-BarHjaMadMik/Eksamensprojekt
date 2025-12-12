@@ -66,7 +66,7 @@ Testdækningen er opdelt i to primære niveauer for at sikre både applikationsl
 * **Kørende applikation:** [https://exam-project.azurewebsites.net/](https://exam-project.azurewebsites.net/)
 
 ## Team
-- GitHub navne: @HeroMouse, @BardieJoensen, @MBroholm
+- GitHub navne: [@HeroMouse](https://github.com/HeroMouse), [@BardieJoensen](https://github.com/BardieJoensen), [@MBroholm](https://github.com/MBroholm)
 
 ## Contributing
 [Se CONTRIBUTING.md](docs/CONTRIBUTING.md)
