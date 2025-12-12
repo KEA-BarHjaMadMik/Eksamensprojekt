@@ -10,7 +10,7 @@ Dette værktøj er udviklet for at hjælpe Alpha Solutions med at effektivisere 
 *   **Rapportering:** Visuelt overblik over deadlines, opgaver, og distribution af timeestimater.
 
 ## Teknologier
-* Backend: Java 21, Spring Boot 3.5.7, Spring JDBC (JdbcTemplate)
+* Backend: Java 21, Spring Boot 3.5.7, Spring JDBC (JdbcTemplate). jBCrypt 0.4 (password hashing)
 * Frontend: Thymeleaf 3.1.3, HTML5, CSS3, JavaScript (Chart.js 4.5.1)
 * Database: MySQL 8.0
 * Build Tool: Maven 4.0.0
@@ -40,6 +40,7 @@ Dette værktøj er udviklet for at hjælpe Alpha Solutions med at effektivisere 
     *   `DEV_DATABASE_URL`: `jdbc:mysql://localhost:3306/alpha_solutions_db`
     *   `DEV_USERNAME`: `din_bruger` (f.eks. root)
     *   `DEV_PASSWORD`: `dit_password`
+
 ## Kørsel
 Kør EksamensprojektApplication.java i IntelliJ IDEA.
 
