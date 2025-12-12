@@ -10,7 +10,7 @@ Dette værktøj er udviklet for at hjælpe Alpha Solutions med at effektivisere 
 *   **Rapportering:** Visuelt overblik over deadlines, opgaver, og distribution af timeestimater.
 
 ## Teknologier
-* Backend: Java 21, Spring Boot 3.5.7
+* Backend: Java 21, Spring Boot 3.5.7, Spring JDBC (JdbcTemplate)
 * Frontend: Thymeleaf 3.1.3, HTML5, CSS3, JavaScript (Chart.js 4.5.1)
 * Database: MySQL 8.0
 * Build Tool: Maven 4.0.0
