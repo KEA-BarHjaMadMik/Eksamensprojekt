@@ -39,8 +39,6 @@ public class TaskService {
         }
     }
 
-    //getTask is just for authorization checks
-    //and getting parent task info
     public Task getTask(int taskId) {
         try {
             Task task = taskRepository.getTask(taskId);
