@@ -22,7 +22,7 @@ class UserRepositoryTest {
     private UserRepository userRepository;
 
     @Test
-    void shouldGetUserByProjectId() {
+    void shouldGetUsersByProjectId() {
         int projectId = 1;
 
         List<User> userList = userRepository.getUsersByProjectId(projectId);
