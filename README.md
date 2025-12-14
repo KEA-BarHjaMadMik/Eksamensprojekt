@@ -11,7 +11,7 @@ Dette værktøj er udviklet for at hjælpe Alpha Solutions med at effektivisere 
 
 ## Teknologier
 * Backend: Java 21, Spring Boot 3.5.7, Spring JDBC (JdbcTemplate). jBCrypt 0.4 (password hashing)
-* Frontend: Thymeleaf 3.1.3, HTML5, CSS3, JavaScript (Chart.js 4.5.1)
+* Frontend: Thymeleaf 3.1.3, HTML5, CSS3(med Pico CSS 2.1.1), JavaScript (Chart.js 4.5.1)
 * Database: MySQL 8.0
 * Build Tool: Maven 4.0.0
 * CI/CD: GitHub Actions (2025 workflow)
@@ -40,9 +40,12 @@ Dette værktøj er udviklet for at hjælpe Alpha Solutions med at effektivisere 
     *   `DEV_DATABASE_URL`: `jdbc:mysql://localhost:3306/alpha_solutions_db`
     *   `DEV_USERNAME`: `din_bruger` (f.eks. root)
     *   `DEV_PASSWORD`: `dit_password`
+    * **spring.profiles.active=dev** (skal sættes, så applikationen bruger den lokale udviklingsprofil)
+
 
 ## Kørsel
 Kør EksamensprojektApplication.java i IntelliJ IDEA.
+**Bemærk:** Sørg for at `spring.profiles.active` er sat til `dev`, ellers vil applikationen forsøge at starte med produktionsprofilen.
 
 ## Test
 Testdækningen er opdelt i to primære niveauer for at sikre både applikationslogik og data-integritet:
