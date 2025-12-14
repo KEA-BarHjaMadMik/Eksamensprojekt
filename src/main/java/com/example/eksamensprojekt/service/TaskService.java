@@ -79,7 +79,6 @@ public class TaskService {
     }
 
     public void createTask(Task task) {
-        //It works but should probably add validation and exception handling
         try {
             taskRepository.createTask(task);
         } catch (DataAccessException e) {
