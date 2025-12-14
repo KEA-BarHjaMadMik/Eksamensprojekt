@@ -26,35 +26,7 @@ public class ProjectService {
         this.userService = userService;
     }
 
-    public boolean hasAccessToProject(int projectId, int userId) {
-        try {
-            return hasAccessRecursive(projectId, userId);
-        } catch (DataAccessException e) {
-            throw new DatabaseOperationException("Failed to verify project access", e);
-        }
-    }
-
-    private boolean hasAccessRecursive(int projectId, int userId) {
-        Project project = projectRepository.getProject(projectId);
-        if (project == null) {
-            return false;
-        }
-
-        // Direct access?
-        if (project.getOwnerId() == userId ||
-                projectRepository.isUserAssignedToProject(projectId, userId)) {
-            return true;
-        }
-
-        // No parent?
-        if (project.getParentProjectId() == null) {
-            return false;
-        }
-
-        // Check parent access recursively
-        return hasAccessRecursive(project.getParentProjectId(), userId);
-    }
-
+    // ===========PROJECT ===========
     public int createProject(Project project) {
         try {
             // Create the project
@@ -131,6 +103,139 @@ public class ProjectService {
             return project;
         } catch (DataAccessException e) {
             throw new DatabaseOperationException("Failed to retrieve project with id=" + projectId, e);
+        }
+    }
+
+    private void loadProjectTree(Project project, Set<Integer> visitedProjects) {
+
+        // Prevent endless recursion by tracking visited project Ids.
+        // visitedProjects.add(...) returns false if the ID was already added,
+        // meaning we've already processed this project, so we stop recursing.
+        if (!visitedProjects.add(project.getProjectId())) {
+            return;
+        }
+
+        try {
+            // Load direct subprojects
+            List<Project> subProjects = projectRepository.getDirectSubProjects(project.getProjectId());
+            project.setSubProjects(subProjects);
+
+            // For each subproject, load its subprojects and tasks using recursion
+            // Base case implicit: when subProjects is empty loop will not run
+            for (Project sub : subProjects) {
+                loadProjectTree(sub, visitedProjects);
+            }
+        } catch (DataAccessException e) {
+            throw new DatabaseOperationException("Failed to retrieve subprojects with parent id=" + project.getProjectId(), e);
+        }
+
+        // Load project tasks with subtasks
+        List<Task> tasks = taskService.getProjectTasksWithSubtasks(project.getProjectId());
+        project.setTasks(tasks);
+    }
+
+    public boolean updateProject(Project updatedProject) {
+        try {
+            int rowsAffected = projectRepository.updateProject(updatedProject);
+            if (rowsAffected == 0) throw new ProjectNotFoundException(updatedProject.getProjectId());
+            return true; // project updated
+        } catch (DataAccessException e) {
+            throw new DatabaseOperationException("Failed to update project", e);
+        }
+    }
+
+    public void deleteProject(int projectId) {
+        try {
+            int rowsAffected = projectRepository.deleteProject(projectId);
+            if (rowsAffected == 0) throw new ProjectNotFoundException(projectId);
+            //project deleted if at least 1 row is affected
+        } catch (DataAccessException e) {
+            throw new DatabaseOperationException("Failed to delete project", e);
+        }
+    }
+
+    public List<Project> getValidMoveTargets(int currentProjectId) {
+        try {
+            //Empty list
+            List<Project> targets = new ArrayList<>();
+            //Get current project
+            Project currentProject = projectRepository.getProject(currentProjectId);
+            //Add parent project if it exsits
+            Integer parentProjectId = currentProject.getParentProjectId();
+            if (parentProjectId != null) {
+                Project parent = projectRepository.getProject(parentProjectId);
+                if (parent != null) {
+                    targets.add(parent);
+                }
+                //add sibling projects
+                List<Project> siblings = projectRepository.getDirectSubProjects(parentProjectId);
+                for (Project sibling : siblings) {
+                    if (sibling.getProjectId() != currentProjectId) {
+                        targets.add(sibling);
+                    }
+                }
+            }
+            //add direct children (subprojects of current project)
+            List<Project> children = projectRepository.getDirectSubProjects(currentProjectId);
+            targets.addAll(children);
+            return targets;
+        } catch (DataAccessException e) {
+            throw new DatabaseOperationException("Failed to retrieve valid move targets for project with id=" + currentProjectId, e);
+        }
+    }
+
+    // ===========ACCESS AND ROLES===========
+    public boolean hasAccessToProject(int projectId, int userId) {
+        try {
+            return hasAccessRecursive(projectId, userId);
+        } catch (DataAccessException e) {
+            throw new DatabaseOperationException("Failed to verify project access", e);
+        }
+    }
+
+    private boolean hasAccessRecursive(int projectId, int userId) {
+        Project project = projectRepository.getProject(projectId);
+        if (project == null) {
+            return false;
+        }
+
+        // Direct access?
+        if (project.getOwnerId() == userId ||
+                projectRepository.isUserAssignedToProject(projectId, userId)) {
+            return true;
+        }
+
+        // No parent?
+        if (project.getParentProjectId() == null) {
+            return false;
+        }
+
+        // Check parent access recursively
+        return hasAccessRecursive(project.getParentProjectId(), userId);
+    }
+
+    public void addUserToProject(int projectId, String email, String role) {
+        try {
+            int userId = userService.getUserByEmail(email).getUserId();
+            projectRepository.addUserToProject(projectId, userId, role);
+        } catch (DataAccessException e) {
+            throw new DatabaseOperationException("Failed to add user to project", e);
+        }
+    }
+
+    public void updateUserRole(int projectId, int userId, String role) {
+        try {
+            projectRepository.updateUserRole(projectId, userId, role);
+        } catch (DataAccessException e) {
+            throw new DatabaseOperationException("Failed to update user's project role", e);
+        }
+    }
+
+    public void removeUserFromProject(int projectId, int userId) {
+        try {
+            projectRepository.removeUserFromProject(projectId, userId);
+        } catch (DataAccessException e) {
+            throw new DatabaseOperationException("Failed to remove user from project", e);
         }
     }
 
@@ -261,109 +366,6 @@ public class ProjectService {
             return projectRepository.getAllProjectRoles();
         } catch (DataAccessException e) {
             throw new DatabaseOperationException("Failed to retrieve projectRoles", e);
-        }
-    }
-
-    private void loadProjectTree(Project project, Set<Integer> visitedProjects) {
-
-        // Prevent endless recursion by tracking visited project Ids.
-        // visitedProjects.add(...) returns false if the ID was already added,
-        // meaning we've already processed this project, so we stop recursing.
-        if (!visitedProjects.add(project.getProjectId())) {
-            return;
-        }
-
-        try {
-            // Load direct subprojects
-            List<Project> subProjects = projectRepository.getDirectSubProjects(project.getProjectId());
-            project.setSubProjects(subProjects);
-
-            // For each subproject, load its subprojects and tasks using recursion
-            // Base case implicit: when subProjects is empty loop will not run
-            for (Project sub : subProjects) {
-                loadProjectTree(sub, visitedProjects);
-            }
-        } catch (DataAccessException e) {
-            throw new DatabaseOperationException("Failed to retrieve subprojects with parent id=" + project.getProjectId(), e);
-        }
-
-        // Load project tasks with subtasks
-        List<Task> tasks = taskService.getProjectTasksWithSubtasks(project.getProjectId());
-        project.setTasks(tasks);
-    }
-
-    public void deleteProject(int projectId) {
-        try {
-            int rowsAffected = projectRepository.deleteProject(projectId);
-            if (rowsAffected == 0) throw new ProjectNotFoundException(projectId);
-            //project deleted if at least 1 row is affected
-        } catch (DataAccessException e) {
-            throw new DatabaseOperationException("Failed to delete project", e);
-        }
-    }
-
-    public void addUserToProject(int projectId, String email, String role) {
-        try {
-            int userId = userService.getUserByEmail(email).getUserId();
-            projectRepository.addUserToProject(projectId, userId, role);
-        } catch (DataAccessException e) {
-            throw new DatabaseOperationException("Failed to add user to project", e);
-        }
-    }
-
-    public void updateUserRole(int projectId, int userId, String role) {
-        try {
-            projectRepository.updateUserRole(projectId, userId, role);
-        } catch (DataAccessException e) {
-            throw new DatabaseOperationException("Failed to update user's project role", e);
-        }
-    }
-
-    public void removeUserFromProject(int projectId, int userId) {
-        try {
-            projectRepository.removeUserFromProject(projectId, userId);
-        } catch (DataAccessException e) {
-            throw new DatabaseOperationException("Failed to remove user from project", e);
-        }
-    }
-
-    public boolean updateProject(Project updatedProject) {
-        try {
-            int rowsAffected = projectRepository.updateProject(updatedProject);
-            if (rowsAffected == 0) throw new ProjectNotFoundException(updatedProject.getProjectId());
-            return true; // project updated
-        } catch (DataAccessException e) {
-            throw new DatabaseOperationException("Failed to update project", e);
-        }
-    }
-
-    public List<Project> getValidMoveTargets(int currentProjectId) {
-        try {
-            //Empty list
-            List<Project> targets = new ArrayList<>();
-            //Get current project
-            Project currentProject = projectRepository.getProject(currentProjectId);
-            //Add parent project if it exsits
-            Integer parentProjectId = currentProject.getParentProjectId();
-            if(parentProjectId != null) {
-                Project parent = projectRepository.getProject(parentProjectId);
-                if (parent != null) {
-                    targets.add(parent);
-                }
-                //add sibling projects
-                List<Project> siblings = projectRepository.getDirectSubProjects(parentProjectId);
-                for (Project sibling : siblings) {
-                    if (sibling.getProjectId() != currentProjectId) {
-                        targets.add(sibling);
-                    }
-                }
-            }
-            //add direct children (subprojects of current project)
-            List<Project> children = projectRepository.getDirectSubProjects(currentProjectId);
-                targets.addAll(children);
-            return targets;
-        } catch (DataAccessException e) {
-            throw new DatabaseOperationException("Failed to retrieve valid move targets for project with id=" + currentProjectId, e);
         }
     }
 }
