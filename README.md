@@ -37,7 +37,7 @@ Dette værktøj er udviklet for at hjælpe Alpha Solutions med at effektivisere 
 
 3.  **Miljøvariabler:**
     For at køre projektet lokalt skal følgende miljøvariabler opsættes (f.eks. i IntelliJ Run Configuration eller Environment Variables):
-    *   `DEV_DATABASE_URL`: `jdbc:mysql://localhost:3306/alpha_solutions_db`
+    *   `DEV_DATABASE_URL`: `jdbc:mysql://localhost:3306/exam_project_db`
     *   `DEV_USERNAME`: `din_bruger` (f.eks. root)
     *   `DEV_PASSWORD`: `dit_password`
     * **spring.profiles.active=dev** (skal sættes, så applikationen bruger den lokale udviklingsprofil)
