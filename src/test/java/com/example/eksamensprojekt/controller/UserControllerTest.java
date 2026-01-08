@@ -301,11 +301,81 @@ class UserControllerTest {
     }
 
     @Test
-    void changePassword() {
+    void changePassword_ShouldRedirectToUserAdmin_WhenSuccessful() throws Exception {
+        // arrange
+        session.setAttribute("userId", 1);
+
+        User currentUser = new User();
+        currentUser.setUserId(1);
+        currentUser.setEmail("test@mail.dk");
+
+        when(userService.getUserByUserId(1)).thenReturn(currentUser);
+        when(userService.authenticate("test@mail.dk", "currentPw")).thenReturn(currentUser);
+        when(userService.changePassword(1, "newPassword")).thenReturn(true);
+
+        // act + assert
+        mockMvc.perform(post("/change_password")
+                        .session(session)
+                        .param("password", "currentPw")
+                        .param("newPassword", "newPassword")
+                        .param("confirmNewPassword", "newPassword"))
+                .andExpect(status().is3xxRedirection())
+                .andExpect(redirectedUrl("/user_admin"));
+
+        verify(userService).changePassword(1, "newPassword");
     }
 
     @Test
-    void deleteUser() {
+    void changePassword_ShouldReturnForm_WhenPasswordsDoNotMatch() throws Exception {
+        // arrange
+        session.setAttribute("userId", 1);
+
+        User currentUser = new User();
+        currentUser.setUserId(1);
+        currentUser.setEmail("test@mail.dk");
+
+        when(userService.getUserByUserId(1)).thenReturn(currentUser);
+        when(userService.authenticate("test@mail.dk", "currentPw")).thenReturn(currentUser);
+
+        // act + assert
+        mockMvc.perform(post("/change_password")
+                        .session(session)
+                        .param("password", "currentPw")
+                        .param("newPassword", "newPassword")
+                        .param("confirmNewPassword", "differentPassword"))
+                .andExpect(status().isOk())
+                .andExpect(view().name("change_password"))
+                .andExpect(model().attribute("passwordMismatch", true));
+
+        verify(userService, never()).changePassword(anyInt(), anyString());
+    }
+
+    @Test
+    void deleteUser_ShouldInvalidateSessionAndRedirectHome_WhenSuccessful() throws Exception {
+        // arrange
+        session.setAttribute("userId", 1);
+        when(userService.deleteUser(1)).thenReturn(true);
+
+        // act
+        mockMvc.perform(post("/delete").session(session))
+                .andExpect(status().is3xxRedirection())
+                .andExpect(redirectedUrl("/"));
+
+        // assert (session should be invalidated)
+        assertThrows(IllegalStateException.class, () -> session.getAttribute("userId"));
+    }
+
+    @Test
+    void deleteUser_ShouldReturnUserAdmin_WhenDeleteFails() throws Exception {
+        // arrange
+        session.setAttribute("userId", 1);
+        when(userService.deleteUser(1)).thenReturn(false);
+
+        // act + assert
+        mockMvc.perform(post("/delete").session(session))
+                .andExpect(status().isOk())
+                .andExpect(view().name("user_admin"))
+                .andExpect(model().attribute("deleteFailure", true));
     }
 
 }
