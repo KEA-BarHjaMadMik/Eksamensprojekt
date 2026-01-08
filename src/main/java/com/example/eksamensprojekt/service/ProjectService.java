@@ -10,6 +10,7 @@ import com.example.eksamensprojekt.repository.ProjectRepository;
 import org.springframework.dao.DataAccessException;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -94,11 +95,28 @@ public class ProjectService {
                 throw new ProjectNotFoundException(projectId);
             }
 
-            // Load project tree setting subprojects and subtasks
-            // To prevent infinite recursion, a set is added to track visited projects
-            Set<Integer> visitedProjects = new HashSet<>();
+            // Load all projects in the tree and build the structure in-memory
+            // to avoid N+1 problem.
+            List<Project> allProjectsInTree = new ArrayList<>();
+            allProjectsInTree.add(project);
+            collectAllSubProjects(project, allProjectsInTree, new HashSet<>());
 
-            loadProjectTree(project, visitedProjects);
+            // Get all project IDs to batch load tasks
+            List<Integer> projectIds = allProjectsInTree.stream()
+                    .map(Project::getProjectId)
+                    .collect(Collectors.toList());
+
+            // Batch load all tasks for these projects
+            List<Task> allTasks = taskService.getTasksForProjects(projectIds);
+
+            // Organize tasks by project ID
+            Map<Integer, List<Task>> tasksByProject = allTasks.stream()
+                    .collect(Collectors.groupingBy(Task::getProjectId));
+
+            // Assign tasks to projects
+            for (Project p : allProjectsInTree) {
+                p.setTasks(tasksByProject.getOrDefault(p.getProjectId(), new ArrayList<>()));
+            }
 
             return project;
         } catch (DataAccessException e) {
@@ -106,32 +124,15 @@ public class ProjectService {
         }
     }
 
-    private void loadProjectTree(Project project, Set<Integer> visitedProjects) {
+    private void collectAllSubProjects(Project parent, List<Project> allProjects, Set<Integer> visited) {
+        if (!visited.add(parent.getProjectId())) return;
 
-        // Prevent endless recursion by tracking visited project Ids.
-        // visitedProjects.add(...) returns false if the ID was already added,
-        // meaning we've already processed this project, so we stop recursing.
-        if (!visitedProjects.add(project.getProjectId())) {
-            return;
+        List<Project> subs = projectRepository.getDirectSubProjects(parent.getProjectId());
+        parent.setSubProjects(subs);
+        for (Project sub : subs) {
+            allProjects.add(sub);
+            collectAllSubProjects(sub, allProjects, visited);
         }
-
-        try {
-            // Load direct subprojects
-            List<Project> subProjects = projectRepository.getDirectSubProjects(project.getProjectId());
-            project.setSubProjects(subProjects);
-
-            // For each subproject, load its subprojects and tasks using recursion
-            // Base case implicit: when subProjects is empty loop will not run
-            for (Project sub : subProjects) {
-                loadProjectTree(sub, visitedProjects);
-            }
-        } catch (DataAccessException e) {
-            throw new DatabaseOperationException("Failed to retrieve subprojects with parent id=" + project.getProjectId(), e);
-        }
-
-        // Load project tasks with subtasks
-        List<Task> tasks = taskService.getProjectTasksWithSubtasks(project.getProjectId());
-        project.setTasks(tasks);
     }
 
     public boolean updateProject(Project updatedProject) {
@@ -182,6 +183,19 @@ public class ProjectService {
         } catch (DataAccessException e) {
             throw new DatabaseOperationException("Failed to retrieve valid move targets for project with id=" + currentProjectId, e);
         }
+    }
+
+    public Project prepareSubProject(int parentId) {
+        Project parent = getProject(parentId);
+        if (parent == null) throw new ProjectNotFoundException(parentId);
+
+        Project subProject = new Project();
+        subProject.setOwnerId(parent.getOwnerId());
+        subProject.setParentProjectId(parentId);
+        subProject.setStartDate(LocalDate.now());
+        subProject.setEndDate(LocalDate.now());
+
+        return subProject;
     }
 
     // ===========ACCESS AND ROLES===========

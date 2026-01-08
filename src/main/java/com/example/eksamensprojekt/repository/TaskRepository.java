@@ -12,6 +12,7 @@ import java.sql.PreparedStatement;
 import java.sql.Types;
 import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 @Repository
@@ -59,6 +60,13 @@ public class TaskRepository {
     public void updateTaskProjectId(int taskId, int newProjectId) {
         String sql = "UPDATE task SET project_id = ? WHERE task_id = ?";
         jdbcTemplate.update(sql, newProjectId, taskId);
+    }
+
+    public List<Task> getTasksByProjectIds(List<Integer> projectIds) {
+        if (projectIds == null || projectIds.isEmpty()) return new ArrayList<>();
+        String inSql = String.join(",", Collections.nCopies(projectIds.size(), "?"));
+        String sql = BASE_TASK_SQL + " WHERE t.project_id IN (" + inSql + ")";
+        return jdbcTemplate.query(sql, getTaskRowMapper(), projectIds.toArray());
     }
 
     public Task getTask(int taskId) {

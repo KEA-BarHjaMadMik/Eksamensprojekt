@@ -9,9 +9,8 @@ import com.example.eksamensprojekt.repository.TaskRepository;
 import org.springframework.dao.DataAccessException;
 import org.springframework.stereotype.Service;
 
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.time.LocalDate;
+import java.util.*;
 
 @Service
 public class TaskService {
@@ -92,6 +91,50 @@ public class TaskService {
         } catch (DataAccessException e) {
             throw new DatabaseOperationException("Database error during task update", e);
         }
+    }
+
+    public Task prepareTask(int projectId) {
+        Task task = new Task();
+        task.setProjectId(projectId);
+        task.setStartDate(LocalDate.now());
+        task.setEndDate(LocalDate.now());
+        return task;
+    }
+
+    public Task prepareSubtask(int parentTaskId) {
+        Task parentTask = getTask(parentTaskId);
+        if (parentTask == null) throw new com.example.eksamensprojekt.exceptions.TaskNotFoundException(parentTaskId);
+
+        Task task = new Task();
+        task.setProjectId(parentTask.getProjectId());
+        task.setParentTaskId(parentTaskId);
+        task.setStartDate(LocalDate.now());
+        task.setEndDate(LocalDate.now());
+        return task;
+    }
+
+    public List<Task> getTasksForProjects(List<Integer> projectIds) {
+        if (projectIds == null || projectIds.isEmpty()) return new ArrayList<>();
+        List<Task> allTasks = taskRepository.getTasksByProjectIds(projectIds);
+
+        // Build task tree for each root task
+        Map<Integer, Task> taskMap = new HashMap<>();
+        for (Task t : allTasks) {
+            taskMap.put(t.getTaskId(), t);
+        }
+
+        List<Task> rootTasks = new ArrayList<>();
+        for (Task t : allTasks) {
+            if (t.getParentTaskId() == null || !taskMap.containsKey(t.getParentTaskId())) {
+                rootTasks.add(t);
+            } else {
+                Task parent = taskMap.get(t.getParentTaskId());
+                if (parent != null) {
+                    parent.getSubTasks().add(t);
+                }
+            }
+        }
+        return rootTasks;
     }
 
     private void loadTaskTree(Task task, Set<Integer> visitedTasks) {

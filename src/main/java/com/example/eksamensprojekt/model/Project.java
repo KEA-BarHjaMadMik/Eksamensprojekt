@@ -137,45 +137,7 @@ public class Project {
                 + subProjects.stream().mapToDouble(Project::getActualHours).sum();
     }
 
-    public long getDays() {
-        return ChronoUnit.DAYS.between(startDate, endDate) + 1; // add 1 to include the start date
-    }
-
     public long getBusinessDays() {
         return DateUtil.businessDaysBetween(startDate, endDate);
-    }
-
-    public double getAvgDailyEstimatedHours() {
-        return getEstimatedHours() / getBusinessDays();
-    }
-
-    // Returns a map of LocalDate -> estimated hours for the entire project,
-    // including all tasks and subprojects, excluding weekends.
-    public Map<LocalDate, Double> getDistributedHours() {
-        Map<LocalDate, Double> map = new TreeMap<>();
-
-        LocalDate current = startDate;
-        while (!current.isAfter(endDate)) {
-            map.put(current, 0.0);
-            current = current.plusDays(1);
-        }
-
-        distributeHours(map);
-        return map;
-    }
-
-    // Private helper that recursively distributes estimated hours across
-    // tasks and subprojects, summing into the provided map.
-    private void distributeHours(Map<LocalDate, Double> map) {
-        // Include hours from tasks
-        for (Task task : tasks) {
-            Map<LocalDate, Double> taskHours = task.getDistributedTaskHours();
-            taskHours.forEach((date, hours) -> map.merge(date, hours, Double::sum));
-        }
-
-        // Include hours from subprojects recursively
-        for (Project sub : subProjects) {
-            sub.distributeHours(map);
-        }
     }
 }

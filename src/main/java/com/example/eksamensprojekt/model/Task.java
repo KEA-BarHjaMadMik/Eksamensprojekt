@@ -157,47 +157,11 @@ public class Task {
     }
 
     public long getDays() {
-        return ChronoUnit.DAYS.between(startDate, endDate) + 1; // add 1 to include the start date
+        return DateUtil.daysBetween(startDate, endDate);
     }
 
     public long getBusinessDays() {
-        return DateUtil.businessDaysBetween(startDate,endDate);
-    }
-
-    public double getAvgEstimatedHoursPerBusinessDay() {
-        long businessDays = getBusinessDays();
-        return businessDays == 0 ? 0 : getEstimatedHours() / businessDays;
-    }
-
-    // Returns a map of LocalDate -> estimated hours for the task,
-    // including all subtasks, excluding weekends.
-    public Map<LocalDate, Double> getDistributedTaskHours () {
-        Map<LocalDate, Double> map = new TreeMap<>();
-        distributeTaskHours(map);
-        return map;
-    }
-
-    // Private helper that recursively distributes estimated hours across
-    // tasks and subtasks, summing into the provided map.
-    private void distributeTaskHours (Map<LocalDate, Double> map) {
-
-        if(subTasks == null || subTasks.isEmpty()) {
-            double dailyHrs = getAvgEstimatedHoursPerBusinessDay();
-
-            LocalDate current = startDate;
-
-            while (!current.isAfter(endDate)) {
-                DayOfWeek dow = current.getDayOfWeek();
-                if (dow != DayOfWeek.SATURDAY && dow != DayOfWeek.SUNDAY) {
-                    map.merge(current, dailyHrs, Double::sum);
-                }
-                current = current.plusDays(1);
-            }
-        } else {
-            for (Task sub : subTasks) {
-                sub.distributeTaskHours(map);
-            }
-        }
+        return DateUtil.businessDaysBetween(startDate, endDate);
     }
 }
 

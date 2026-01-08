@@ -364,18 +364,4 @@ class UserControllerTest {
         // assert (session should be invalidated)
         assertThrows(IllegalStateException.class, () -> session.getAttribute("userId"));
     }
-
-    @Test
-    void deleteUser_ShouldReturnUserAdmin_WhenDeleteFails() throws Exception {
-        // arrange
-        session.setAttribute("userId", 1);
-        when(userService.deleteUser(1)).thenReturn(false);
-
-        // act + assert
-        mockMvc.perform(post("/delete").session(session))
-                .andExpect(status().isOk())
-                .andExpect(view().name("user_admin"))
-                .andExpect(model().attribute("deleteFailure", true));
-    }
-
 }

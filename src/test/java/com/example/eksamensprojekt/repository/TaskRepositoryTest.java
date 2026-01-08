@@ -172,4 +172,16 @@ public class TaskRepositoryTest {
         int taskDeleted = taskRepository.deleteTask(taskToBeDeleted);
         assertThat(taskDeleted).isEqualTo(0);
     }
+
+    @Test
+    void shouldGetTasksByProjectIds() {
+        List<Integer> projectIds = List.of(1, 2);
+        List<Task> tasks = taskRepository.getTasksByProjectIds(projectIds);
+
+        assertThat(tasks).isNotNull();
+        assertThat(tasks).isNotEmpty();
+        // Check that some tasks have status names and actual hours (which comes from joins in BASE_TASK_SQL)
+        assertThat(tasks.get(0).getStatus().getStatusName()).isNotNull();
+        assertThat(tasks.get(0).getActualHours()).isGreaterThanOrEqualTo(0);
+    }
 }

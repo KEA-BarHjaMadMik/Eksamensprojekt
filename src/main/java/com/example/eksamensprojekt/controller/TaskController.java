@@ -1,6 +1,8 @@
 package com.example.eksamensprojekt.controller;
 
+import com.example.eksamensprojekt.exceptions.AccessDeniedException;
 import com.example.eksamensprojekt.model.*;
+import com.example.eksamensprojekt.model.TaskDTO;
 import com.example.eksamensprojekt.service.ProjectService;
 import com.example.eksamensprojekt.service.TaskService;
 import com.example.eksamensprojekt.service.UserService;
@@ -33,13 +35,12 @@ public class TaskController {
     // =========== TASK CRUD===========
 
     @GetMapping("/{taskId}")
-    public String showTask(@PathVariable int taskId, Model model, HttpSession session) {
+    public String showTask(@PathVariable int taskId, Model model, @SessionAttribute("userId") int currentUserId) {
 
         // Check if the user has access to the task
-        int currentUserId = SessionUtil.getCurrentUserId(session);
         int projectId = taskService.getTask(taskId).getProjectId();
         if (!projectService.hasAccessToProject(projectId, currentUserId)) {
-            return "redirect:/projects";
+            throw new AccessDeniedException("You do not have access to this task.");
         }
 
         // Add task and role to the model
@@ -54,65 +55,64 @@ public class TaskController {
 
     @GetMapping("/{projectId}/create")
     public String showCreateTaskForm(@PathVariable int projectId,
-                                     HttpSession session,
+                                     @SessionAttribute("userId") int currentUserId,
                                      Model model) {
         // Verify ownership / access
-        if (!projectService.hasAccessToProject(projectId, SessionUtil.getCurrentUserId(session))) return "redirect:/";
+        if (!projectService.hasAccessToProject(projectId, currentUserId)) {
+            throw new AccessDeniedException("You do not have access to this project.");
+        }
 
         //create a blank task
-        Task task = new Task();
-        task.setProjectId(projectId);
-        task.setStartDate(LocalDate.now());
-        task.setEndDate(LocalDate.now());
+        Task task = taskService.prepareTask(projectId);
 
-        model.addAttribute("task", task);
+        model.addAttribute("task", TaskDTO.fromEntity(task));
 
         return "task_form";
     }
 
     @GetMapping("/{parentTaskId}/subtask/create")
     public String showCreateSubtaskForm(@PathVariable int parentTaskId,
-                                        HttpSession session,
+                                        @SessionAttribute("userId") int currentUserId,
                                         Model model) {
         //Get parent task
         Task parentTask = taskService.getTask(parentTaskId);
-        if (parentTask == null) return "redirect:/";
+        if (parentTask == null) throw new com.example.eksamensprojekt.exceptions.TaskNotFoundException(parentTaskId);
 
         if (!projectService.hasAccessToProject(parentTask.getProjectId(),
-                SessionUtil.getCurrentUserId(session))) return "redirect:/";
+                currentUserId)) {
+            throw new AccessDeniedException("You do not have access to this project.");
+        }
 
-        Task task = new Task();
-        task.setProjectId(parentTask.getProjectId());
-        task.setParentTaskId(parentTaskId);
-        task.setStartDate(LocalDate.now());
-        task.setEndDate(LocalDate.now());
+        Task task = taskService.prepareSubtask(parentTaskId);
 
-        model.addAttribute("task", task);
+        model.addAttribute("task", TaskDTO.fromEntity(task));
         model.addAttribute("parentTask", parentTask);
 
         return "task_form";
     }
 
     @PostMapping("/create")
-    public String createTask(@Valid @ModelAttribute Task task,
+    public String createTask(@Valid @ModelAttribute("task") TaskDTO taskDTO,
                              BindingResult bindingResult,
-                             HttpSession session,
+                             @SessionAttribute("userId") int currentUserId,
                              Model model) {
         // Verify ownership / access
-        if (!projectService.hasAccessToProject(task.getProjectId(),
-                SessionUtil.getCurrentUserId(session))) return "redirect:/";
-
+        if (!projectService.hasAccessToProject(taskDTO.getProjectId(),
+                currentUserId)) {
+            throw new AccessDeniedException("You do not have access to this project.");
+        }
         //if validation fails, return to form
         if (bindingResult.hasErrors()) {
             //if it's a subtask, add the parent task to the model as well
-            if (task.isSubtask()) {
-                Task parentTask = taskService.getTask(task.getParentTaskId());
+            if (taskDTO.getParentTaskId() != null) {
+                Task parentTask = taskService.getTask(taskDTO.getParentTaskId());
                 model.addAttribute("parentTask", parentTask);
             }
             return "task_form";
         }
 
         //If all went successful, redirect to the result
+        Task task = taskDTO.toEntity();
         taskService.createTask(task);
 
         //redirect depending on if it's a parent task or subtask
@@ -128,25 +128,24 @@ public class TaskController {
     @GetMapping("/{taskId}/edit")
     public String showEditTaskForm(@PathVariable int taskId,
                                    Model model,
-                                   HttpSession session) {
+                                   @SessionAttribute("userId") int currentUserId) {
         Task task = taskService.getTask(taskId);
 
         // Check if the user has access to the task
-        int currentUserId = SessionUtil.getCurrentUserId(session);
         int projectId = task.getProjectId();
         if (!projectService.hasAccessToProject(projectId, currentUserId)) {
-            return "redirect:/projects";
+            throw new AccessDeniedException("You do not have access to this task.");
         }
 
         // Verify the role is not READ_ONLY
         String userRole = projectService.getUserRole(projectId, currentUserId).getRole();
         if ("READ_ONLY".equals(userRole)) {
-            return "redirect:/tasks/" + taskId;
+            throw new AccessDeniedException("You do not have permission to edit this task.");
         }
 
         List<TaskStatus> taskStatusList = taskService.getAllTaskStatuses();
 
-        model.addAttribute("task", task);
+        model.addAttribute("task", TaskDTO.fromEntity(task));
         model.addAttribute("userRole", userRole);
         model.addAttribute("taskStatusList", taskStatusList);
 
@@ -159,22 +158,21 @@ public class TaskController {
     }
 
     @PostMapping("/edit")
-    public String editTask(@Valid @ModelAttribute Task task,
+    public String editTask(@Valid @ModelAttribute("task") TaskDTO taskDTO,
                            @RequestParam int statusId,
                            BindingResult bindingResult,
-                           HttpSession session,
+                           @SessionAttribute("userId") int currentUserId,
                            Model model) {
         // Check if the user has access to the task
-        int currentUserId = SessionUtil.getCurrentUserId(session);
-        int projectId = task.getProjectId();
+        int projectId = taskDTO.getProjectId();
         if (!projectService.hasAccessToProject(projectId, currentUserId)) {
-            return "redirect:/projects";
+            throw new AccessDeniedException("You do not have access to this task.");
         }
 
         // Verify the role is not READ_ONLY
         String userRole = projectService.getUserRole(projectId, currentUserId).getRole();
         if ("READ_ONLY".equals(userRole)) {
-            return "redirect:/tasks/" + task.getTaskId();
+            throw new AccessDeniedException("You do not have permission to edit this task.");
         }
 
         // Bean validation errors
@@ -186,42 +184,42 @@ public class TaskController {
 
         // set status
         TaskStatus status = new TaskStatus(statusId, null); // status name matching id is loaded on task retrieval from DB
-        task.setStatus(status);
+        taskDTO.setStatus(status);
 
         // Check if a parent task has changed and validate no circular reference
-        Task existingTask = taskService.getTask(task.getTaskId());
-        Integer newParentTaskId = task.getParentTaskId();
+        Task existingTask = taskService.getTask(taskDTO.getTaskId());
+        Integer newParentTaskId = taskDTO.getParentTaskId();
         Integer oldParentTaskId = existingTask.getParentTaskId();
 
         // Objects.equals handles null values safely,
         // so if objects are the same value(No parent change) it skips the circular reference check
         if (!java.util.Objects.equals(newParentTaskId, oldParentTaskId)) {
             //If true, then there is a circular reference, so return to the form with an error message
-            if (taskService.wouldCreateCircularReference(task.getTaskId(), newParentTaskId)) {
+            if (taskService.wouldCreateCircularReference(taskDTO.getTaskId(), newParentTaskId)) {
                 model.addAttribute("error", "kan ikke flytte opgaven: Skaber cirkulær reference");
 
                 List<TaskStatus> taskStatusList = taskService.getAllTaskStatuses();
                 List<Task> availableParentTasks = taskService.getAllTasksInProject(projectId);
                 model.addAttribute("taskStatusList", taskStatusList);
                 model.addAttribute("availableParentTasks", availableParentTasks);
-                model.addAttribute("currentTaskId", task.getTaskId());
+                model.addAttribute("currentTaskId", taskDTO.getTaskId());
                 return "task_edit_form";
             }
         }
 
         // update
-        taskService.updateTask(task);
+        taskService.updateTask(taskDTO.toEntity());
 
-        return "redirect:/tasks/" + task.getTaskId();
+        return "redirect:/tasks/" + taskDTO.getTaskId();
     }
 
     @PostMapping("/{taskId}/delete")
-    public String deleteTask(@PathVariable int taskId, HttpSession session){
+    public String deleteTask(@PathVariable int taskId, @SessionAttribute("userId") int currentUserId){
         Task task = taskService.getTask(taskId);
         int parentId = task.getParentTaskId();
         int projectId = task.getProjectId();
 
-        if (!projectService.hasAccessToProject(projectId, SessionUtil.getCurrentUserId(session))){
+        if (!projectService.hasAccessToProject(projectId, currentUserId)){
             return "redirect:/";
         }
             taskService.deleteTask(taskId);
@@ -235,11 +233,10 @@ public class TaskController {
     @GetMapping("/{taskId}/move")
     public String showMoveTaskForm(@PathVariable int taskId,
                                    Model model,
-                                   HttpSession session){
+                                   @SessionAttribute("userId") int currentUserId){
         Task task = taskService.getTask(taskId);
-        int currentUserId = SessionUtil.getCurrentUserId(session);
 
-        if (!projectService.hasAccessToProject(task.getProjectId(), SessionUtil.getCurrentUserId(session))) {
+        if (!projectService.hasAccessToProject(task.getProjectId(), currentUserId)) {
             return "redirect:/projects";
         }
 
@@ -264,10 +261,9 @@ public class TaskController {
     @PostMapping("/{taskId}/move")
     public String moveTask(@PathVariable int taskId,
                            @RequestParam int targetProjectId,
-                           HttpSession session,
+                           @SessionAttribute("userId") int currentUserId,
                            RedirectAttributes redirectAttributes){
         Task task = taskService.getTask(taskId);
-        int currentUserId = SessionUtil.getCurrentUserId(session);
 
         if (!projectService.hasAccessToProject(task.getProjectId(), currentUserId)) {
             return "redirect:/projects";
@@ -319,9 +315,8 @@ public class TaskController {
 
     @GetMapping("/{taskId}/time_entries")
     public String showTimeEntries(@PathVariable int taskId,
-                                  HttpSession session,
+                                  @SessionAttribute("userId") int currentUserId,
                                   Model model) {
-        int currentUserId = SessionUtil.getCurrentUserId(session);
         Task task = taskService.getTask(taskId);
         int projectId = task.getProjectId();
         // Access check
@@ -335,7 +330,7 @@ public class TaskController {
         List<User> projectUsers = userService.getUsersByProjectId(projectId);
 
         TimeEntry newTimeEntry = new TimeEntry();
-        newTimeEntry.setUserId(SessionUtil.getCurrentUserId(session));
+        newTimeEntry.setUserId(currentUserId);
 
         model.addAttribute("task", task);
         model.addAttribute("userRole", userRole);
@@ -350,9 +345,8 @@ public class TaskController {
     public String addTimeEntry(@PathVariable int taskId,
                                @Valid @ModelAttribute("newTimeEntry") TimeEntry newTimeEntry,
                                BindingResult bindingResult,
-                               HttpSession session,
+                               @SessionAttribute("userId") int currentUserId,
                                Model model) {
-        int currentUserId = SessionUtil.getCurrentUserId(session);
         Task task = taskService.getTask(taskId);
         int projectId = task.getProjectId();
         // Access check

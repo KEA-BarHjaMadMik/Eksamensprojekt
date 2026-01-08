@@ -5,6 +5,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.bind.annotation.ResponseStatus;
 
 @ControllerAdvice
 public class GlobalExceptionHandler {
@@ -41,6 +42,14 @@ public class GlobalExceptionHandler {
         return "error/404";
     }
 
+    @ExceptionHandler(AccessDeniedException.class)
+    @ResponseStatus(HttpStatus.FORBIDDEN)
+    public String handleAccessDenied(AccessDeniedException ex, Model model) {
+        model.addAttribute("status", HttpStatus.FORBIDDEN.value());
+        model.addAttribute("error", "Access Denied");
+        model.addAttribute("message", ex.getMessage());
+        return "error/500"; // Or a specific 403 page if you have one
+    }
 
     @ExceptionHandler(NotLoggedInException.class)
     public String handleNotLoggedIn() {

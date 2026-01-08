@@ -32,6 +32,9 @@ public class ProjectControllerTest {
     @MockitoBean
     private UserService userService;
 
+    @MockitoBean
+    private com.example.eksamensprojekt.service.HourDistributionService hourDistributionService;
+
     private MockHttpSession session;
 
     @BeforeEach
@@ -51,7 +54,7 @@ public class ProjectControllerTest {
         when(projectService.getAssignedProjectsByUserId(1)).thenReturn(assignedProjects);
 
         // Act & Assert
-        mockMvc.perform(get("/projects").session(session))
+        mockMvc.perform(get("/projects").sessionAttr("userId", 1))
                 .andExpect(status().isOk())
                 .andExpect(view().name("projects"))
                 .andExpect(model().attributeExists("projects"))
@@ -64,11 +67,8 @@ public class ProjectControllerTest {
 
     @Test
     void shouldRedirectToLoginWhenNotLoggedIn() throws Exception {
-        // Arrange empty session
-        MockHttpSession emptySession = new MockHttpSession();
-
         // Act & Assert
-        mockMvc.perform(get("/projects").session(emptySession))
+        mockMvc.perform(get("/projects"))
                 .andExpect(status().is3xxRedirection())
                 .andExpect(redirectedUrl("/login"));
 
@@ -83,7 +83,7 @@ public class ProjectControllerTest {
 
         // Act & Assert
         mockMvc.perform(post("/projects/create")
-                        .session(session)
+                        .sessionAttr("userId", 1)
                         .param("ownerId", "1")
                         .param("title", "Test Project")
                         .param("description", "Test Description")
@@ -105,11 +105,13 @@ public class ProjectControllerTest {
     @Test
     void shouldCreateSubProjectSuccessfully() throws Exception {
         // Arrange mock service call
+        when(projectService.hasAccessToProject(1, 1)).thenReturn(true);
+        when(projectService.prepareSubProject(1)).thenReturn(new Project());
         when(projectService.createProject(any(Project.class))).thenReturn(6);
 
         // Act & Assert
         mockMvc.perform(post("/projects/create")
-                        .session(session)
+                        .sessionAttr("userId", 1)
                         .param("ownerId", "1")
                         .param("parentProjectId", "1") // project has parent id
                         .param("title", "Test Subproject")
@@ -135,9 +137,8 @@ public class ProjectControllerTest {
         when(projectService.hasAccessToProject(1, 1)).thenReturn(false);
 
         // Act & Assert
-        mockMvc.perform(get("/projects/1").session(session))
-                .andExpect(status().is3xxRedirection())
-                .andExpect(redirectedUrl("/projects"));
+        mockMvc.perform(get("/projects/1").sessionAttr("userId", 1))
+                .andExpect(status().isForbidden());
 
         // Verify getProjectWithTree was NOT called
         verify(projectService).hasAccessToProject(1, 1);

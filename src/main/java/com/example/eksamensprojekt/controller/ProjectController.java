@@ -1,12 +1,14 @@
 package com.example.eksamensprojekt.controller;
 
+import com.example.eksamensprojekt.exceptions.AccessDeniedException;
 import com.example.eksamensprojekt.model.Project;
+import com.example.eksamensprojekt.model.ProjectDTO;
 import com.example.eksamensprojekt.model.ProjectRole;
 import com.example.eksamensprojekt.model.User;
+import com.example.eksamensprojekt.service.HourDistributionService;
 import com.example.eksamensprojekt.service.ProjectService;
 import com.example.eksamensprojekt.service.UserService;
 import com.example.eksamensprojekt.utils.SessionUtil;
-import jakarta.servlet.http.HttpSession;
 import jakarta.validation.Valid;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -24,18 +26,20 @@ import java.util.Map;
 public class ProjectController {
     private final ProjectService projectService;
     private final UserService userService;
+    private final HourDistributionService hourDistributionService;
 
-    public ProjectController(ProjectService projectService, UserService userService) {
+    public ProjectController(ProjectService projectService,
+                             UserService userService,
+                             HourDistributionService hourDistributionService) {
         this.projectService = projectService;
         this.userService = userService;
+        this.hourDistributionService = hourDistributionService;
     }
 
     // =========== PROJECT CRUD ===========
 
     @GetMapping
-    public String projects(HttpSession session, Model model) {
-        int currentUserId = SessionUtil.getCurrentUserId(session);
-
+    public String projects(@SessionAttribute("userId") int currentUserId, Model model) {
         List<Project> projects = projectService.getProjectsByOwnerId(currentUserId);
         List<Project> assignedProjects = projectService.getAssignedProjectsByUserId(currentUserId);
 
@@ -46,12 +50,10 @@ public class ProjectController {
     }
 
     @GetMapping("/{projectId}")
-    public String showProject(@PathVariable int projectId, HttpSession session, Model model) {
-        int currentUserId = SessionUtil.getCurrentUserId(session);
-
+    public String showProject(@PathVariable int projectId, @SessionAttribute("userId") int currentUserId, Model model) {
         // Check if the user has access to the project
         if (!projectService.hasAccessToProject(projectId, currentUserId)) {
-            return "redirect:/projects";
+            throw new AccessDeniedException("You do not have access to this project.");
         }
 
         Project project = projectService.getProjectWithTree(projectId);
@@ -66,17 +68,15 @@ public class ProjectController {
 
     @GetMapping("/{projectId}/hour_distribution")
     public String showHourDistribution(@PathVariable int projectId,
-                                       HttpSession session,
+                                       @SessionAttribute("userId") int currentUserId,
                                        Model model) {
-        int currentUserId = SessionUtil.getCurrentUserId(session);
-
         // Check if the user has access to the project
         if (!projectService.hasAccessToProject(projectId, currentUserId)) {
-            return "redirect:/projects";
+            throw new AccessDeniedException("You do not have access to this project.");
         }
 
         Project project = projectService.getProjectWithTree(projectId);
-        Map<LocalDate, Double> hourDistributionMap = project.getDistributedHours();
+        Map<LocalDate, Double> hourDistributionMap = hourDistributionService.getProjectHourDistribution(project);
 
         model.addAttribute("project", project);
         model.addAttribute("hourDistributionMap", hourDistributionMap);
@@ -85,54 +85,51 @@ public class ProjectController {
     }
 
     @GetMapping("/create")
-    public String showCreateProjectForm(HttpSession session, Model model) {
+    public String showCreateProjectForm(@SessionAttribute("userId") int currentUserId, Model model) {
         Project newProject = new Project();
-        newProject.setOwnerId(SessionUtil.getCurrentUserId(session));
+        newProject.setOwnerId(currentUserId);
         newProject.setStartDate(LocalDate.now());
         newProject.setEndDate(LocalDate.now());
 
-        model.addAttribute("newProject", newProject);
+        model.addAttribute("newProject", ProjectDTO.fromEntity(newProject));
         return "project_registration_form";
     }
 
     @PostMapping("/create")
-    public String createProject(@Valid @ModelAttribute Project newProject,
+    public String createProject(@Valid @ModelAttribute("newProject") ProjectDTO projectDTO,
                                 BindingResult bindingResult,
                                 Model model) {
         boolean fieldsHaveErrors = bindingResult.hasErrors();
 
         //if validation failed, return to form
         if (fieldsHaveErrors) {
-            model.addAttribute("newProject", newProject);
+            model.addAttribute("newProject", projectDTO);
             return "project_registration_form";
         }
 
-        int projectId = projectService.createProject(newProject);
+        int projectId = projectService.createProject(projectDTO.toEntity());
 
         return "redirect:/projects/" + projectId;
     }
 
     @GetMapping("/{parentId}/create")
-    public String showCreateSubProjectForm(@PathVariable int parentId, Model model) {
-        Project subProject = new Project();
-        subProject.setOwnerId(projectService.getProject(parentId).getOwnerId());
-        subProject.setParentProjectId(parentId);
-        subProject.setStartDate(LocalDate.now());
-        subProject.setEndDate(LocalDate.now());
+    public String showCreateSubProjectForm(@PathVariable int parentId, @SessionAttribute("userId") int currentUserId, Model model) {
+        if (!projectService.hasAccessToProject(parentId, currentUserId)) {
+            throw new AccessDeniedException("You do not have access to this project.");
+        }
+        Project subProject = projectService.prepareSubProject(parentId);
 
-        model.addAttribute("newProject", subProject);
+        model.addAttribute("newProject", ProjectDTO.fromEntity(subProject));
         return "project_registration_form";
     }
 
     @GetMapping("/{projectId}/edit")
     public String showEditProjectForm(@PathVariable int projectId,
-                                      HttpSession session,
+                                      @SessionAttribute("userId") int currentUserId,
                                       Model model) {
-        int currentUserId = SessionUtil.getCurrentUserId(session);
         if (!projectService.hasAccessToProject(projectId, currentUserId)) {
-            return "redirect:/projects";
+            throw new AccessDeniedException("You do not have access to this project.");
         }
-
         Project project = projectService.getProject(projectId);
         ProjectRole userRole = projectService.getUserRole(projectId, currentUserId);
 
@@ -141,27 +138,26 @@ public class ProjectController {
 
         // Only owner and full access can edit
         if (!isOwner && !hasFullAccess) {
-            return "redirect:/projects/" + projectId;
+            throw new AccessDeniedException("You do not have permission to edit this project.");
         }
 
-        model.addAttribute("project", project);
+        model.addAttribute("project", ProjectDTO.fromEntity(project));
         model.addAttribute("userRole", userRole != null ? userRole.getRole() : "");
         return "project_edit_form";
     }
 
     @PostMapping("/{projectId}/edit")
     public String updateProject(@PathVariable int projectId,
-                                @Valid @ModelAttribute("project") Project project,
+                                @Valid @ModelAttribute("project") ProjectDTO projectDTO,
                                 BindingResult bindingResult,
-                                HttpSession session,
+                                @SessionAttribute("userId") int currentUserId,
                                 RedirectAttributes redirectAttributes) {
-        int currentUserId = SessionUtil.getCurrentUserId(session);
 
-        project.setProjectId(projectId);
+        projectDTO.setProjectId(projectId);
 
         // Check access
         if (!projectService.hasAccessToProject(projectId, currentUserId)) {
-            return "redirect:/projects";
+            throw new AccessDeniedException("You do not have access to this project.");
         }
 
         Project existingProject = projectService.getProject(projectId);
@@ -172,18 +168,18 @@ public class ProjectController {
         boolean hasFullAccess = userRole != null && userRole.getRole().equals("FULL_ACCESS");
 
         if (!isOwner && !hasFullAccess) {
-            return "redirect:/projects/" + projectId;
+            throw new AccessDeniedException("You do not have permission to edit this project.");
         }
 
         // Keep owner ID and parent project ID unchanged
-        project.setOwnerId(existingProject.getOwnerId());
-        project.setParentProjectId(existingProject.getParentProjectId());
+        projectDTO.setOwnerId(existingProject.getOwnerId());
+        projectDTO.setParentProjectId(existingProject.getParentProjectId());
 
         if (bindingResult.hasErrors()) {
             return "project_edit_form";
         }
 
-        if (projectService.updateProject(project)) {
+        if (projectService.updateProject(projectDTO.toEntity())) {
             redirectAttributes.addFlashAttribute("updateSuccess", true);
         }
 
@@ -191,23 +187,22 @@ public class ProjectController {
     }
 
     @PostMapping("/{projectId}/delete")
-    public String deleteProject(@PathVariable int projectId, HttpSession session) {
-        int currentUserId = SessionUtil.getCurrentUserId(session);
+    public String deleteProject(@PathVariable int projectId, @SessionAttribute("userId") int currentUserId) {
         // Check access
         if (!projectService.hasAccessToProject(projectId, currentUserId)) {
-            return "redirect:/projects";
+            throw new AccessDeniedException("You do not have access to this project.");
         }
 
         // Only the owner can delete
         ProjectRole userRole = projectService.getUserRole(projectId, currentUserId);
         if (userRole == null || !"OWNER".equals(userRole.getRole())) {
-            return "redirect:/projects";
+            throw new AccessDeniedException("Only the project owner can delete the project.");
         }
 
         // check whether it's a subproject before deletion, for proper redirection
         Project project = projectService.getProject(projectId);
         if (project == null) {
-            return "redirect:/projects";
+            throw new com.example.eksamensprojekt.exceptions.ProjectNotFoundException(projectId);
         }
         Integer parentProjectId = project.getParentProjectId();
 
@@ -226,9 +221,8 @@ public class ProjectController {
 
     @GetMapping("/{projectId}/team")
     public String showTeam(@PathVariable int projectId,
-                           HttpSession session,
+                           @SessionAttribute("userId") int currentUserId,
                            Model model) {
-        int currentUserId = SessionUtil.getCurrentUserId(session);
         if (!projectService.hasAccessToProject(projectId, currentUserId)) {
             return "redirect:/projects";
         }
@@ -259,9 +253,8 @@ public class ProjectController {
     public String addTeamMember(@PathVariable int projectId,
                                 @RequestParam("email") String email,
                                 @RequestParam("role") String role,
-                                HttpSession session,
+                                @SessionAttribute("userId") int currentUserId,
                                 RedirectAttributes redirectAttributes) {
-        int currentUserId = SessionUtil.getCurrentUserId(session);
         if (!projectService.hasAccessToProject(projectId, currentUserId)) {
             return "redirect:/projects";
         }
@@ -285,8 +278,7 @@ public class ProjectController {
     public String updateTeamMemberRole(@PathVariable int projectId,
                                        @PathVariable int userId,
                                        @RequestParam("role") String role,
-                                       HttpSession session) {
-        int currentUserId = SessionUtil.getCurrentUserId(session);
+                                       @SessionAttribute("userId") int currentUserId) {
 
         // Access check
         if (!projectService.hasAccessToProject(projectId, currentUserId)) {
@@ -308,8 +300,7 @@ public class ProjectController {
     @PostMapping("/{projectId}/team/{userId}/remove")
     public String removeTeamMember(@PathVariable int projectId,
                                    @PathVariable int userId,
-                                   HttpSession session) {
-        int currentUserId = SessionUtil.getCurrentUserId(session);
+                                   @SessionAttribute("userId") int currentUserId) {
 
         // Access check
         if (!projectService.hasAccessToProject(projectId, currentUserId)) {
